@@ -9,6 +9,12 @@
 #define SETTINGS_H_
 
 
+
+
+#define MAX_PROGRAMAS 5//Numero máximo de programas
+
+
+
 #define MAX_ERROR_WEB 20 //Numero de errores Máx para intentar realizar la comprobación Web
 
 
@@ -24,7 +30,7 @@ char * PBB (char * p1);
 char * P2B(const __FlashStringHelper * __fmt,...);
 */
 
-#include "Logger.h"
+#include <Logger.h>
 #include "errors.h"
 
 

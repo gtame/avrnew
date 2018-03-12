@@ -16,11 +16,14 @@
 #include "WProgram.h"
 #endif
 #include "Programas.h"
+
+#include "gtkeeper.h"
+
 #include <ScreenBase.h>
 #include <ScreenManager.h>
 #include "EstadisticasMenu.h"
 
-#include "..\gtkeeper.h"
+
 
 class EstadisticasDetalleScreen:ScreenBase {
 public:

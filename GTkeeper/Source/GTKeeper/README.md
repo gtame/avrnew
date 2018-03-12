@@ -1,4 +1,4 @@
-## **EEPROM Library V2.0** for Arduino
+# **EEPROM Library V2.0** for Arduino
 
 **Written by:** _Christopher Andrews_.  
 

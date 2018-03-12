@@ -19,7 +19,7 @@
 
 
 
-#include "..\gtkeeper.h";
+#include "..\gtkeeper.h"
 #include <ScreenBase.h>
 #include <ScreenManager.h>
 #include "ProgramasMenu.h"

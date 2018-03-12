@@ -57,9 +57,13 @@
 #define  PORT_ABONO2_PIN 40
 //Pin Motor
 
-//Pin sensores
+//Pin sectores
 #define PORT_SECTOR1_PIN 5
 //#define PORT_SECTOR2_PIN 6
 //#define PORT_SECTOR3_PIN 10
+
+
+//Pin sensores
+
 
 #endif /* PINOUT_H_ */

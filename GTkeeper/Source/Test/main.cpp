@@ -1,123 +1,36 @@
-
-
-#include "maintest.h"
-#include <SPI.h>
-#include <SD.h>
-#include <Wire.h>
-#include <Wire.h>
+#include <ArduinoUnit.h>
+#include "main.h"
+#include <gtkeeper.h>
 #include <Time.h>
 #include <DS1307RTC.h>
 
- 
-/*
 
-#ifdef TEST
+Stream *sserial=&Serial;
 
+//Clase para comunicar con el SIM900 (ACCESO A DATOS)
+SIM900 Sim900(&Serial1);
 
-int veces=0;
-
-// connect motor controller pins to Arduino digital pins
-// motor one
-int enA = 10;
-int in1 = 9;
-int in2 = 8;
-// motor two
-int enB = 5;
-int in3 = 7;
-int in4 = 6;
-void setupTest()
+test(correct)
 {
-  // set all the motor control pins to outputs
-  pinMode(enA, OUTPUT);
-  pinMode(enB, OUTPUT);
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-  pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT);
+	int x=1;
+	assertEqual(x,1);
 }
-void demoOne()
-{
-  // this function will run the motors in both directions at a fixed speed
-  // turn on motor A
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, LOW);
-  // set speed to 200 out of possible range 0~255
-  analogWrite(enA, 200);
-  // turn on motor B
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, LOW);
-  // set speed to 200 out of possible range 0~255
-  analogWrite(enB, 200);
-  delay(2000);
-  // now change motor directions
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, HIGH);
-  delay(2000);
-  // now turn off motors
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, LOW);
-}
-void demoTwo()
-{
-  // this function will run the motors across the range of possible speeds
-  // note that maximum speed is determined by the motor itself and the operating voltage
-  // the PWM values sent by analogWrite() are fractions of the maximum speed possible
-  // by your hardware
-  // turn on motors
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, HIGH);
-  // accelerate from zero to maximum speed
-  for (int i = 0; i <256; i++)
-  {
-    analogWrite(enA, i);
-    analogWrite(enB, i);
-    delay(20);
-  }
-  // decelerate from maximum speed to zero
-  for (int i = 255; i >= 0; --i)
-  {
-    analogWrite(enA, i);
-    analogWrite(enB, i);
-    delay(20);
-  }
-  // now turn off motors
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, LOW);
-}
-void loop()
-{
-	Serial.print("prueba?=");
-	Serial.print(veces);
-	Serial.println();
 
-  demoOne();
-  delay(500);
-  demoTwo();
-  delay(500);
-
-  veces++;
-}
-#endif
-*/
-#ifdef TEST
-
-struct definedtest
+test(incorrect)
 {
-	char text[25];
-	void (*Test)();
-};
-definedtest tests[25];
-uint8_t contador=0;
-char buffercommand[25];
-char buffer_test[MAIN_BUFFER_SIZE];
+	int x=1;
+	assertNotEqual(x,1);
+}
+
+test(otro)
+{
+	int x=1;
+	assertNotEqual(x,1);
+}
+
+
+
+
 
 
 
@@ -234,82 +147,8 @@ void RtcCheck()
 	  }
   }
 
-
-  
- 
-
-
-
 }
 
-
-
-
-
-void SDCheck()
-{
-
-
-  File dataFile;
-//
-  //// Iniciar la SD
-  //SD.begin(cspin);
-  //
-  //// Comprobar si existe un fichero (devuelve true si existe, falso en caso contrario)
-  //SD.exists(filename);
-  //
-  //// Borrar un fichero
-  //SD.remove(filename);
-  //
-  //// Abrir un fichero
-  //// Mode: FILE_READ para sólo lectura
-  ////        FILE_WRITE para lectura y escritura
-  //SD.open(filepath, mode);
-  //
-  //// Crear un directorio
-  //SD.mkdir(directory);
-  
-  // Eliminar un directorio
- // SD.rmdir(dirname);
-
-
-
-  
-    // Abrir archivo y escribir valor
-  File  logFile = SD.open("datalog.txt", FILE_WRITE);
-    
-    if (logFile) {
-	    int value = 22;
-	    logFile.print("Time(ms)=");
-	    logFile.print(millis());
-	    logFile.print(", value=");
-	    logFile.println(value);
-	    
-	    logFile.close();
-	    LOG_DEBUG("Grabado log..");
-    }
-    else {
-	    LOG_DEBUG("Error al abrir el archivo");
-    }
-  
-  // Abrir fichero y mostrar el resultado
-  dataFile = SD.open("datalog.txt");
-  if (dataFile)
-  {
-	  int dataLine;
-	  while (dataFile.available())
-	  {
-		  dataLine = dataFile.read();
-	  }
-	  dataFile.close();
-  }
-  else
-  {
-	  LOG_DEBUG("Error al abrir el archivo");
-  }
-
-  
-}
 
 
 void ListarSIM()
@@ -435,11 +274,63 @@ void ShowInfoSalidas()
 {
 	gtKeeper.ShowInfoSalidas();
 }
+ 
 
-void setupTest()
+
+
+void AddTest(char * menu,void (*Test)())
+{
+	strncpy(tests[contador].text,menu,25);
+	tests[contador].Test=Test;
+	contador++;
+}
+
+void ExecuteTest(uint8_t test)
+{
+	if (test-1<contador)
+		tests[test-1].Test();
+	else
+		LOG_DEBUG_ARGS("Comando no encontrado %s!!!!",buffercommand);
+
+}
+
+void PrintMenu()
+{
+LOG_DEBUG_B("===========TEST MENU ================");
+for(uint8_t i=0;i<contador;i++)
+	 LOG_DEBUG_ARGS_B("%i - %s",i+1,tests[i].text);
+}
+
+
+
+
+int main() {
+
+	//Necesario para la inicializacion de arduino
+	init();
+
+	//Setup
+	setup();
+
+
+	delay(100);
+	//Loop
+	while (true)
+	loop();
+
+}
+
+void setup()
 {
 
-	Serial.println("Inicializando");
+	//Inicializamos puerto serie
+	Serial.begin(9600);
+	while(!Serial)
+
+	Serial1.begin(9600);
+	while(!Serial1)
+
+	LOG_DEBUG("Inicializando");
 	
 	const uint8_t NUM_INTENTOS=25;
 	bool blnOk =false;
@@ -475,18 +366,10 @@ void setupTest()
 	AddTest("RTC Test",RtcCheck);
 
 
-	pinMode(SD_CHIP_SELECT_PIN,OUTPUT);
-	LOG_DEBUG_ARGS("Iniciando SD ...%i",SD_CHIP_SELECT_PIN);
-	if (!SD.begin(SPI_QUARTER_SPEED,SD_CHIP_SELECT_PIN))
-	{
-		LOG_DEBUG("Error al iniciar SD");
-		return;
-	}
-	LOG_DEBUG("Iniciado SD correctamente");
+	
 
 	 
 
-	
 	return;
 	//Entorno de TEST
 	gtKeeper.Initializate();
@@ -497,7 +380,7 @@ void setupTest()
 	uint8_t num_veces=0;
 	 while(!Sim900.ActivaModulo() &&  num_veces<NUM_INTENTOS)
 	 {
-		 setLed(LED_ERROR_MODULE_PIN);
+		 gtKeeper.setLed(LED_ERROR_MODULE_PIN);
 
 		 num_veces++;
 
@@ -508,7 +391,7 @@ void setupTest()
 	 num_veces=0;
 	 while (!(blnOk=gtKeeper.CheckSIM())  &&  num_veces<NUM_INTENTOS)
 	 {
-		 setLed(LED_ERROR_SIM_PIN);
+		 gtKeeper.setLed(LED_ERROR_SIM_PIN);
 		 delay(500);
 		 num_veces++;
 	 }
@@ -522,7 +405,7 @@ void setupTest()
 		 //Cargamos la configuracion desde la SIM si estamos presionando el boton XXX
 		 while (!gtKeeper.CargaConfigDesdeSim()  &&  num_veces<NUM_INTENTOS)
 		 {
-			 setLed(LED_ERROR_SIM_PIN);
+			 gtKeeper.setLed(LED_ERROR_SIM_PIN);
 			 delay(500);
 			 num_veces++;
 		 }
@@ -536,7 +419,7 @@ void setupTest()
 	 num_veces=0;
 	 while (!(blnOk=gtKeeper.EstaRegistradoGSM()) &&  num_veces<NUM_INTENTOS)
 	 {
-		 setLed(LED_ERROR_NETWORK_PIN);
+		 gtKeeper.setLed(LED_ERROR_NETWORK_PIN);
 		 delay(500);
 		 num_veces++;
 	 }
@@ -555,7 +438,7 @@ void setupTest()
 	 num_veces=0;
 	 while(!gtKeeper.FijarHoraGSM() &&  num_veces<NUM_INTENTOS)
 	 {
-		 setLed(LED_ERROR_MODULE_PIN);
+		 gtKeeper.setLed(LED_ERROR_MODULE_PIN);
 		 delay(500);
 		 num_veces++;
 	 }
@@ -580,35 +463,18 @@ void setupTest()
 	gtKeeper.EndInitializate();
 }
 
-
-
-void AddTest(char * menu,void (*Test)())
-{
-	strncpy(tests[contador].text,menu,25);
-	tests[contador].Test=Test;
-	contador++;
-}
-
-void ExecuteTest(uint8_t test)
-{
-	if (test-1<contador)
-		tests[test-1].Test();
-	else
-		LOG_DEBUG_ARGS("Comando no encontrado %s!!!!",buffercommand);
-
-}
-
-void PrintMenu()
-{
-LOG_DEBUG_B("===========TEST MENU ================");
-for(uint8_t i=0;i<contador;i++)
-	 LOG_DEBUG_ARGS_B("%i - %s",i+1,tests[i].text);
-}
-
-
-
 void loop() //----( LOOP: RUNS CONSTANTLY )----
 {
+	//Nos aseguramos que los test automaticos se ejecutan
+	int i=0;
+	while (i<10)
+	{
+		//Test automaticos
+		Test::run();
+		i++;
+	}
+	
+
 	uint8_t index=0;
 	bool blnContinue=true;
 
@@ -679,4 +545,7 @@ void loop() //----( LOOP: RUNS CONSTANTLY )----
 	LOG_DEBUG("\n\n==FIN TEST=====\n\n");
 
 }
-#endif
+ 
+
+
+ 
