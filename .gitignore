@@ -1,0 +1,39 @@
+.metadata/
+Debug/
+Release/
+*/Libraries/**/Debug
+*/Libraries/**/Release
+*/**/Debug
+*/**/Release
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.dbk
+
+/output
+*.hex

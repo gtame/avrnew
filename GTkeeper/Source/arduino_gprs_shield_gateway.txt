@@ -1,0 +1,64 @@
+USB2RS232 - GPRSHIELD
+==================
+1-Conexiones - Pinout
+	USB		GRPS SHIELD
+	=======		============
+	RXD		PIN_0
+	TXD		PIN_1
+	GND		GND
+
+
+
+
+Arduino --- gateway RS232
+=========================
+
+1-Quitar microchip de arduino
+
+2-Conexiones - Pinout
+	ARDUINO		GRPS SHIELD
+	=======		============
+	PIN_0		PIN_1
+	PIN_1		PIN_0
+	GND		GND
+
+3-Alimentar con fuente externa
+
+4-Conectar USB a arduino
+
+5-Abrimos putty apuntando al puerto COM que esta la GPRSShield 9600 N 
+
+5-Conectamos fuente alimentacion externa a GPRS Shield y enchufamos del switch de la placa
+
+6-Pulsamos boton de reset de GRPS Shield. Los leds se encienden y parpadaean, deberiamos recibir datos:
+
+Ejemplo...
+	RDY
+
+	+CFUN: 1
+
+	+CPIN: READY
+
+	Call Ready
+	
+	*PSNWID: "214","03", "Orange", 0, "Orange", 0
+	
+	DST: 0
+
+
+
+
+Conectar 8 Module Relay
+=======================
+
+PIN_OUT
+JD-VCC = 12V = VCC en los que trabajan los reles
+VCC= 5V
+GND= GND
+
+IN1... IN8 . Actuadores para los reles.
+
+
+
+
+

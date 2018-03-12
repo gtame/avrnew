@@ -1,0 +1,58 @@
+Ejemplo de peticion test.
+Abrir telnet octavustriatlon.com 80
+Pegar el siguiente codigo, Prestar atencion que al final debe ir un salto de linea.
+El boundary vale cualquier numero.
+Content-Length debe calcularse con la longitud del cuerpo del mensaje incluidos los boundaries.
+para cada variable hay que intercalar los boundaries, en el ejemplo de abajo aparece el fichro "config futaba" y la variable "someParam"
+
+PETICION
+========
+
+POST /custom/qdq.php?SN=123123123 HTTP/1.1
+Host: octavustriatlon.com
+Content-Type: multipart/form-data; boundary=---------------------------114782935826962
+Content-Length: 353
+
+-----------------------------114782935826962
+Content-Disposition: form-data; name="submitted"; filename="config futaba"
+Content-Type: application/octet-stream
+
+d2d2dddddddddddddddd@>dddudddd
+-----------------------------114782935826962
+Content-Disposition: form-data; name="someParam"
+
+someValue
+-----------------------------114782935826962--
+
+PETICION SIMPLE
+===============
+POST /custom/qdq.php HTTP/1.1
+Host: octavustriatlon.com
+Content-Type: multipart/form-data; boundary=---------------------------114782935826962
+Content-Length: 199
+
+-----------------------------114782935826962
+Content-Disposition: form-data; name="submitted"; filename="file.txt"
+Content-Type: text/plain
+
+Hola
+-----------------------------114782935826962--
+
+
+
+RESPUESTA
+=========
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2017 18:39:39 GMT
+Server: Apache
+Vary: Accept-Encoding
+Cache-Control: max-age=1209600
+Expires: Thu, 23 Nov 2017 18:39:39 GMT
+X-Powered-By: Loading
+Content-Length: 232
+Content-Type: text/html
+
+<html>----</html>
+
+

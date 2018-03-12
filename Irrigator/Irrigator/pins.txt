@@ -1,0 +1,26 @@
+PINES DIGITALES
+===============
+0-RX
+1-TX
+2-INTERRUPT BUTTON
+3-Serial RX
+4-Serial TX
+5-VCC_DIVIDER_PIN
+6-VCC SEnsor Agua
+7- LED_BATTERY_HIGH  
+8- LED_BATTERY_MEDIUM
+9- LED_BATTERY_LOW
+10- Led working
+11- Error module
+12- Error sim
+13- Error network
+
+
+PINES ANALOGICOS
+===============
+A0-READ_VCC_PIN
+A1-READ_WATER_SENSOR1
+A2-READ_WATER_SENSOR2
+A3-PIN ON/OFF GSM  
+A4-Free
+A5-Free

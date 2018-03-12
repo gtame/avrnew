@@ -1,0 +1,37 @@
+at+vts=1;+vts=1;+vts=1;+vts=1;+vts=8;+vts=4;+vts=5ATDT7782251603528033#;
+
+AT+VTD=100
+AT+VTS=1;VTS=1;VTS=1;VTS=1;AT+VTS=1;AT+VTS=1
+
+
+AT+CLDTMF=10,"1"
+
+
+AT+DDET=1
+AT+CLDTMF=10,"5"
+AT+CLDTMF=20,"1"
+
+
+AT+CLVL=80
+AT+CRSL=80
+AT+CMIC=0,10
+AT+CALS=19
+
+
+
+--Automaicamente coger llaamada pasado dos tonos
+ATS0=3
+--DESCOLGAMOS LA lamada
+ATA
+--Activamos DT
+AT+DDET=1
+--OK
+AT+CLDTMF=5,"F,F",100,1
+AT+CLDTMF=5,"F",500,1
+--Plsacon de tecla
+AT+CLDTMF=1,"F",50,1
+
+
+http://cassiopeia.hk/arduino-dtmf/
+http://www.raviyp.com/embedded/191-sim900-dtmf-commands
+http://simcom.ee/documents/?dir=SIM900

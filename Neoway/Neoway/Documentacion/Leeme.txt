@@ -1,0 +1,10 @@
+
+
+Filezilla FTPServer
+==================
+Crear cuenta de usuario Edit->USers
+asignar usuario , password, al usuario hay que añadirle shared folders, y darle los permisos pertinentes.
+
+Edit->Settings -> Welcome message dejar con un caracter, por ej un punto (.). Vacio no lo admite.
+Y el mensaje de bienvenida si es largo solo puede saturar el buffer o dar problemas al interpretar comandos.
+

@@ -1,0 +1,1 @@
+PARA subir archivo al ftp desde filezilla, Transferencia->Tipo de transferencia->Binario sino luego no lo lee bien el fichero

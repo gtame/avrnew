@@ -1,0 +1,340 @@
+ (routes 
+  (resolution mm 100000)
+  (parser
+  )
+  (parser
+  )
+  (structure_out
+   (layer TOP (type signal)
+   )
+   (layer I1 (type signal)
+   )
+   (layer I2 (type signal)
+   )
+   (layer I3 (type signal)
+   )
+   (layer I4 (type signal)
+   )
+   (layer I5 (type signal)
+   )
+   (layer I6 (type signal)
+   )
+   (layer I7 (type signal)
+   )
+   (layer I8 (type signal)
+   )
+   (layer I9 (type signal)
+   )
+   (layer I10 (type signal)
+   )
+   (layer I11 (type signal)
+   )
+   (layer I12 (type signal)
+   )
+   (layer I13 (type signal)
+   )
+   (layer I14 (type signal)
+   )
+   (layer BOT (type signal)
+   )
+  )
+  (library_out
+  (padstack $VIA_POWER
+   (shape (circ TOP 76200 0 0))
+   (shape (circ I1 76200 0 0))
+   (shape (circ I2 76200 0 0))
+   (shape (circ I3 76200 0 0))
+   (shape (circ I4 76200 0 0))
+   (shape (circ I5 76200 0 0))
+   (shape (circ I6 76200 0 0))
+   (shape (circ I7 76200 0 0))
+   (shape (circ I8 76200 0 0))
+   (shape (circ I9 76200 0 0))
+   (shape (circ I10 76200 0 0))
+   (shape (circ I11 76200 0 0))
+   (shape (circ I12 76200 0 0))
+   (shape (circ I13 76200 0 0))
+   (shape (circ I14 76200 0 0))
+   (shape (circ BOT 76200 0 0))
+  )
+  (padstack $VIA_SIGNAL
+   (shape (circ TOP 76200 0 0))
+   (shape (circ I1 76200 0 0))
+   (shape (circ I2 76200 0 0))
+   (shape (circ I3 76200 0 0))
+   (shape (circ I4 76200 0 0))
+   (shape (circ I5 76200 0 0))
+   (shape (circ I6 76200 0 0))
+   (shape (circ I7 76200 0 0))
+   (shape (circ I8 76200 0 0))
+   (shape (circ I9 76200 0 0))
+   (shape (circ I10 76200 0 0))
+   (shape (circ I11 76200 0 0))
+   (shape (circ I12 76200 0 0))
+   (shape (circ I13 76200 0 0))
+   (shape (circ I14 76200 0 0))
+   (shape (circ BOT 76200 0 0))
+  )
+  (padstack PS5
+   (shape (rect TOP -63500 -127000 63500 127000))
+   (shape (rect I1 -63500 -127000 63500 127000))
+   (shape (rect I2 -63500 -127000 63500 127000))
+   (shape (rect I3 -63500 -127000 63500 127000))
+   (shape (rect I4 -63500 -127000 63500 127000))
+   (shape (rect I5 -63500 -127000 63500 127000))
+   (shape (rect I6 -63500 -127000 63500 127000))
+   (shape (rect I7 -63500 -127000 63500 127000))
+   (shape (rect I8 -63500 -127000 63500 127000))
+   (shape (rect I9 -63500 -127000 63500 127000))
+   (shape (rect I10 -63500 -127000 63500 127000))
+   (shape (rect I11 -63500 -127000 63500 127000))
+   (shape (rect I12 -63500 -127000 63500 127000))
+   (shape (rect I13 -63500 -127000 63500 127000))
+   (shape (rect I14 -63500 -127000 63500 127000))
+   (shape (rect BOT -63500 -127000 63500 127000))
+  )
+  )
+  (network_out
+   (Net #00000 
+   (rule
+   )
+   (wire (path TOP 25400  -8878000 2155000 -9398000 2155000 -9398000 3683000)
+    (connect (terminal pin RD4-1) (terminal pin D4-0))
+   )
+   )
+   (Net #00015 
+   (rule
+   )
+   (wire (path TOP 25400  -7366000 1206500 -7366000 2984500 -6886000 2984500
+     -6886000 3286000)
+    (connect (terminal via) (terminal pin RD3-1))
+   )
+   (wire (path BOT 25400  -8510000 1280000 -8510000 952500 -7366000 952500
+     -7366000 1206500)
+    (connect (terminal pin D3-0) (terminal via))
+   )
+   (via $VIA_SIGNAL -7366000 1206500)
+   )
+   (Net #00017 
+   (rule
+   )
+   (wire (path BOT 25400  -8763000 3683000 -8763000 2794000 -10541000 2794000)
+    (connect (terminal pin D2-0) (terminal pin RD2-1))
+   )
+   )
+   (Net #00019 
+   (rule
+   )
+   (wire (path BOT 25400  -7890000 1170000 -7890000 1333500 -5905500 1333500
+     -5905500 1800000 -5594000 1800000)
+    (connect (terminal pin D1-0) (terminal pin RD1-1))
+   )
+   )
+   (Net #00025 
+   (rule
+   )
+   )
+   (Net #00028 
+   (rule
+   )
+   (wire (path BOT 25400  -10541000 3302000 -10982000 3302000 -11045500 3365500
+     -11045500 4720500 -11236000 4911000)
+    (connect (terminal pin R4-1) (terminal pin Q2-2))
+    (type protect)
+   )
+   )
+   (Net #00029 
+   (rule
+   )
+   )
+   (Net #00061 
+   (rule
+   )
+   (wire (path BOT 25400  -9070000 1370000 -9070000 889000 -5461000 889000
+     -5461000 2397000 -6878000 2397000)
+    (connect (terminal pin D7-0) (terminal pin RD7-1))
+   )
+   )
+   (Net #00063 
+   (rule
+   )
+   )
+   (Net #00065 
+   (rule
+   )
+   )
+   (Net 10 
+   (rule
+   )
+   )
+   (Net 11 
+   (rule
+   )
+   )
+   (Net 12 
+   (rule
+   )
+   )
+   (Net 13 
+   (rule
+   )
+   )
+   (Net 6 
+   (rule
+   )
+   )
+   (Net 8 
+   (rule
+   )
+   )
+   (Net 9 
+   (rule
+   )
+   )
+   (Net A0 
+   (rule
+   )
+   (wire (path BOT 25400  -11557000 3048000 -11557000 3302000)
+    (connect (terminal pin R5-1) (terminal pin R4-0))
+   )
+   )
+   (Net A1 
+   (rule
+   )
+   )
+   (Net A3 
+   (rule
+   )
+   )
+   (Net A4 
+   (rule
+   )
+   )
+   (Net A5 
+   (rule
+   )
+   )
+   (Net GND 
+   (rule
+   )
+   (wire (path BOT 25400  -8509000 4000500 -6211000 4000500 -6211000 4687000)
+    (connect (terminal wire) (terminal pin J1-1))
+   )
+   (wire (path BOT 25400  -8816000 1370000 -8877300 1370000 -8877300 1524000
+     -9461500 1524000 -9461500 1270000 -9779000 1270000)
+    (connect (terminal pin D7-1) (terminal pin LS1-0))
+   )
+   (wire (path BOT 25400  -8256000 1280000 -8256000 1016000 -7636000 1016000
+     -7636000 1170000)
+    (connect (terminal pin D3-1) (terminal pin D1-1))
+   )
+   (wire (path BOT 25400  -8509000 1524000 -8256000 1524000 -8256000 1280000)
+    (connect (terminal wire) (terminal pin D3-1))
+   )
+   (wire (path BOT 25400  -9842500 3175000 -9842500 3111500 -9652000 3111500
+     -9652000 3302000 -9779000 3302000 -9779000 3429000)
+    (connect (terminal wire) (terminal wire))
+   )
+   (wire (path BOT 25400  -9779000 3429000 -9144000 3429000 -9144000 3683000)
+    (connect (terminal wire) (terminal pin D4-1))
+   )
+   (wire (path BOT 25400  -8826500 1524000 -8826500 1370000 -8816000 1370000)
+    (connect (terminal wire) (terminal pin D7-1))
+   )
+   (wire (path BOT 25400  -8509000 3683000 -8509000 1524000)
+    (connect (terminal pin D2-1) (terminal wire))
+   )
+   (wire (path BOT 25400  -9144000 3683000 -9144000 4000500 -8509000 4000500)
+    (connect (terminal pin D4-1) (terminal wire))
+   )
+   (wire (path BOT 25400  -8826500 1524000 -8509000 1524000)
+    (connect (terminal wire) (terminal wire))
+   )
+   (wire (path BOT 25400  -9779000 3683000 -9779000 3429000)
+    (connect (terminal pin D5-1) (terminal wire))
+   )
+   (wire (path BOT 25400  -9842500 3175000 -10033000 3175000)
+    (connect (terminal wire) (terminal wire))
+    (type protect)
+   )
+   (wire (path BOT 25400  -10033000 3175000 -10414000 3175000 -10350500 3238500
+     -10350500 3492500 -10541000 3683000)
+    (connect (terminal wire) (terminal pin D6-1))
+    (type protect)
+   )
+   (wire (path BOT 25400  -9886000 3937000 -9886000 4863000)
+    (connect (terminal wire) (terminal pin C1-0))
+    (type protect)
+   )
+   (wire (path BOT 25400  -9886000 3937000 -9886000 3238500 -9822500 3175000
+     -9842500 3175000)
+    (connect (terminal wire) (terminal wire))
+    (type protect)
+   )
+   (wire (path BOT 25400  -8509000 4000500 -8509000 3873500)
+    (connect (terminal wire) (terminal wire))
+    (type protect)
+   )
+   (wire (path BOT 25400  -8509000 3873500 -8509000 3683000)
+    (connect (terminal wire) (terminal pin D2-1))
+    (type protect)
+   )
+   )
+   (Net VCC/VDD 
+   (rule
+   )
+   (wire (path BOT 25400  -10140000 4863000 -10140000 5143500 -8318500 5143500
+     -8318500 4940000 -8064000 4940000)
+    (connect (terminal pin C1-1) (terminal pin R1-1))
+   )
+   )
+   (Net {NC-1} 
+   (via PS5 -11557000 1524000 (net {NC-1} )
+    (type protect))
+   )
+   (Net {NC-2} 
+   (via PS5 -11303000 1524000 (net {NC-2} )
+    (type protect))
+   )
+   (Net {NC-3} 
+   (via PS5 -11049000 1524000 (net {NC-3} )
+    (type protect))
+   )
+   (Net {NC-4} 
+   (via PS5 -10795000 1524000 (net {NC-4} )
+    (type protect))
+   )
+   (Net {NC-5} 
+   (via PS5 -10541000 1524000 (net {NC-5} )
+    (type protect))
+   )
+   (Net {NC-6} 
+   (via PS5 -10287000 1524000 (net {NC-6} )
+    (type protect))
+   )
+   (Net {NC-7} 
+   (via PS5 -11557000 1143000 (net {NC-7} )
+    (type protect))
+   )
+   (Net {NC-8} 
+   (via PS5 -11303000 1143000 (net {NC-8} )
+    (type protect))
+   )
+   (Net {NC-9} 
+   (via PS5 -11049000 1143000 (net {NC-9} )
+    (type protect))
+   )
+   (Net {NC-10} 
+   (via PS5 -10795000 1143000 (net {NC-10} )
+    (type protect))
+   )
+   (Net {NC-11} 
+   (via PS5 -10541000 1143000 (net {NC-11} )
+    (type protect))
+   )
+   (Net {NC-12} 
+   (via PS5 -10287000 1143000 (net {NC-12} )
+    (type protect))
+   )
+  )
+ )

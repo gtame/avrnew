@@ -1,0 +1,51 @@
+AT
+ATI
+ATE0
+ATE1
+AT+CSQ
+AT+CREG?
+AT+COPS?
+at+enpwrsave?
+AT+CPIN?
+ATD653316799;
+ATH
+AT+CPWROFF
+
+
+AT+TCPSETUP=0,216.58.211.227,80
+
+
+
+AT
+AT+XISP=0//set as the internal protocol stack
+at+cgdcont=1,"IP","orangeworld"//set APN
+AT+XGAUTH=1,0,"",""// No pwd
+AT+XGAUTH=1,1,"web","web" // authentication for user name and password
+at+creg?//check whether it is registered on the GSM network
+at+xiic=1//do the PPP connection
+at+xiic?//check whether the PPP is connected and the IP
+
+
+AT+TCPSETUP=1,216.58.211.227,80 //google
+AT+TCPSETUP=1,54.92.254.3,80 //arduino.cc
+at+ipstatus=0
+AT+TCPSEND=1,47
+GET /asciilogo.txt HTTP/1.1\nhost: arduino.cc
+
+at+ipstatus=1
+at+tcpclose=1
+at+ipstatus=1
+
+
+telnet 54.92.254.3 80
+
+AT+TCPSETUP=1,54.92.254.3,80
+AT+TCPSEND=1,46
+GET /asciilogo.txt HTTP/1.1
+host: arduino.cc
+
+==Server
+AT+TCPLISTEN=8080//Puerto 8080
+AT+TCPLISTEN?//Escucha?
+at+xiic?//ip ppp
+AT+CLOSELISTEN

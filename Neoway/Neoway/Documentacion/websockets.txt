@@ -1,0 +1,19 @@
+1-Abrir telnet demos.kaazing.com 80
+2- Realizar peticion GET con dos /r/n al final
+GET /echo HTTP/1.1
+Host: demos.kaazing.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13
+
+
+3- Repuesta del servidor
+HTTP/1.1 101 Web Socket Protocol Handshake
+Connection: Upgrade
+Date: Thu, 02 Nov 2017 17:20:55 GMT
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+Server: Kaazing Gateway
+Upgrade: websocket
+
+4- Enviar y recibir frames.
