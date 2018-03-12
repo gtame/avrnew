@@ -2,13 +2,6 @@
 #ifndef PINOUT_H_
 #define PINOUT_H_
 
-
-//Define de constantes  depuertos
-#define PORTS_NUM 1//15 Numero max de puertos:)
-#define PORTS_ABONO 2 //Numero de puertos de abono
-#define PORT_MOTOR 40  //Numero donde se conecta el motor de bombeo
-
-
 //LEDS 
 #define LED_WORKING_PIN 13
 #define LED_ERROR_MODULE_PIN 13
@@ -21,9 +14,7 @@
 #define GSM_READ_PIN
 #define GSM_WRITE_PIN
 
-//Pines de sectores
 
-#define SECTORES
 
 //El pin out del teclado las 4 primeros pines empezando por el * son las filas y los otras 4 las columnas
 //http://www.learningaboutelectronics.com/Articles/Arduino-keypad-circuit.php
@@ -38,7 +29,6 @@
 #define KEYBOARD_COL3_PIN 22
 #define KEYBOARD_COL4_PIN 23
 
-//Pin I2C
 
 
 //PIN COMUN
@@ -55,12 +45,17 @@
 //Pin Abono
 #define  PORT_ABONO1_PIN 39 
 #define  PORT_ABONO2_PIN 40
-//Pin Motor
 
-//Pin sectores
+//Pin Motor
+#define PORT_MOTOR_PIN 5
+
+//Pines de sectores
 #define PORT_SECTOR1_PIN 5
 //#define PORT_SECTOR2_PIN 6
 //#define PORT_SECTOR3_PIN 10
+
+//Pin rele de corte
+#define RELE_CORTE_PIN 5
 
 
 //Pin sensores

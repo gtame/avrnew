@@ -15,14 +15,12 @@
 #ifndef ATSERIAL_H_
 #define ATSERIAL_H_
 
-#include "settings.h"
 #include <string.h>
 #include <Arduino.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <inttypes.h>
-
-
+#include <Logger.h>
 
 
 

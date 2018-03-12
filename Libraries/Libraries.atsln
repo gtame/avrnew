@@ -1,9 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "SIM900", "SIM900\SIM900.cppproj", "{ABFD00F6-8412-4FC9-841E-120D5F452605}"
-EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Snozee", "Snozee\Snozee.cppproj", "{A5AE1869-F6AB-449C-B5AF-1816BF3640E0}"
 EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "SoftwareSerial", "SoftwareSerial\SoftwareSerial.cppproj", "{F4731520-2F36-472F-8E55-E45BDD130CBE}"
@@ -32,16 +30,20 @@ Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "DS1307RTC", "DS1307RTC\DS13
 EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "ArduinoUnit", "arduinounit\ArduinoUnit.cppproj", "{8B2A5AF4-04A9-400B-8E97-E96E7190100F}"
 EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "StateMachine", "StateMachine\StateMachine.cppproj", "{4700B1FA-88D9-487A-8C13-06F4DD4FF8C8}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "ATSerial", "ATSerial\ATSerial.cppproj", "{A5927136-A619-453F-928D-FE7A3C0EB056}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "SIM900", "SIM900\SIM900.cppproj", "{5BCFF6A4-D239-4BB7-94D5-264A621A4388}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "SIM900x", "SIM900x\SIM900x.cppproj", "{ABFD00F6-8412-4FC9-841E-120D5F452605}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
 		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Debug|AVR.ActiveCfg = Debug|AVR
-		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Debug|AVR.Build.0 = Debug|AVR
-		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Release|AVR.ActiveCfg = Release|AVR
-		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Release|AVR.Build.0 = Release|AVR
 		{A5AE1869-F6AB-449C-B5AF-1816BF3640E0}.Debug|AVR.ActiveCfg = Debug|AVR
 		{A5AE1869-F6AB-449C-B5AF-1816BF3640E0}.Debug|AVR.Build.0 = Debug|AVR
 		{A5AE1869-F6AB-449C-B5AF-1816BF3640E0}.Release|AVR.ActiveCfg = Release|AVR
@@ -98,6 +100,22 @@ Global
 		{8B2A5AF4-04A9-400B-8E97-E96E7190100F}.Debug|AVR.Build.0 = Debug|AVR
 		{8B2A5AF4-04A9-400B-8E97-E96E7190100F}.Release|AVR.ActiveCfg = Release|AVR
 		{8B2A5AF4-04A9-400B-8E97-E96E7190100F}.Release|AVR.Build.0 = Release|AVR
+		{4700B1FA-88D9-487A-8C13-06F4DD4FF8C8}.Debug|AVR.ActiveCfg = Debug|AVR
+		{4700B1FA-88D9-487A-8C13-06F4DD4FF8C8}.Debug|AVR.Build.0 = Debug|AVR
+		{4700B1FA-88D9-487A-8C13-06F4DD4FF8C8}.Release|AVR.ActiveCfg = Release|AVR
+		{4700B1FA-88D9-487A-8C13-06F4DD4FF8C8}.Release|AVR.Build.0 = Release|AVR
+		{A5927136-A619-453F-928D-FE7A3C0EB056}.Debug|AVR.ActiveCfg = Debug|AVR
+		{A5927136-A619-453F-928D-FE7A3C0EB056}.Debug|AVR.Build.0 = Debug|AVR
+		{A5927136-A619-453F-928D-FE7A3C0EB056}.Release|AVR.ActiveCfg = Release|AVR
+		{A5927136-A619-453F-928D-FE7A3C0EB056}.Release|AVR.Build.0 = Release|AVR
+		{5BCFF6A4-D239-4BB7-94D5-264A621A4388}.Debug|AVR.ActiveCfg = Debug|AVR
+		{5BCFF6A4-D239-4BB7-94D5-264A621A4388}.Debug|AVR.Build.0 = Debug|AVR
+		{5BCFF6A4-D239-4BB7-94D5-264A621A4388}.Release|AVR.ActiveCfg = Release|AVR
+		{5BCFF6A4-D239-4BB7-94D5-264A621A4388}.Release|AVR.Build.0 = Release|AVR
+		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Debug|AVR.ActiveCfg = Debug|AVR
+		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Debug|AVR.Build.0 = Debug|AVR
+		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Release|AVR.ActiveCfg = Release|AVR
+		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

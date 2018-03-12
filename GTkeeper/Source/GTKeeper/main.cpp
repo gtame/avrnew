@@ -6,7 +6,7 @@
 //devices because it can become a resource hog. If you must have it, create a .cpp file in the project
 //source folder with this content:
 /*
-__extension__ typedef int __guard __attribute__((mode (__DI__)));
+__extension__ typedef int __guard __attribute__((mode (__DI__)));git s
 extern "C" void * operator new(size_t size){  return malloc(size);}
 extern "C" void operator delete(void * ptr){  free(ptr);}
 extern "C" void * operator new[](size_t size){    return malloc(size);}

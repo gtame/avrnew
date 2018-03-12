@@ -10,8 +10,6 @@
 #define TYPES_H_
 
 
-
-
 //Sumatorio total 126 para todos los dias
 typedef enum {
 	SMSNone =0,//
@@ -52,10 +50,6 @@ typedef struct  {
 	char flag_check; //Este flag es para comprobar que la configuracion se lee correctamnete, siempre que se lee debe ir a 'X';
 
 } 	tConfiguracion_t , Configuracion, *tmConfiguracionPtr_t;
-
-
-
-
 
 
 //Sumatorio total 126 para todos los dias

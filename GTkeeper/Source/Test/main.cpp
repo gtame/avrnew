@@ -1,14 +1,8 @@
-#include <ArduinoUnit.h>
+ 
 #include "main.h"
-#include <gtkeeper.h>
-#include <Time.h>
-#include <DS1307RTC.h>
-
-
+ 
+GTKeeper gtKeeper;  
 Stream *sserial=&Serial;
-
-//Clase para comunicar con el SIM900 (ACCESO A DATOS)
-SIM900 Sim900(&Serial1);
 
 test(correct)
 {

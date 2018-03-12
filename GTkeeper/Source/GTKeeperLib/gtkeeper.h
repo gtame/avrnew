@@ -89,8 +89,19 @@
 #define NUMERO_HORAS(SEG) (SEG/SECS_PER_HOUR)
 #define NUMERO_MINUTOS(SEG) (SEG % SECS_PER_HOUR) / SECS_PER_MIN
 
-
-
+//Estados de la maquina , gtKeeper
+enum MachineStates
+{
+	Off,
+	Init,
+	Error,
+	Reset,
+	User,
+	Sms,
+	Working,
+	Call,
+	Web
+};
 
 
 

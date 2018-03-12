@@ -5,19 +5,12 @@
  *      Author: Gabi
  */
 //Referencia a la libreria comun de avr
-#include <stdlib.h>
-#include <string.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <avr/wdt.h>
-//Referencia al core de arduino
-#include <Arduino.h>
-#include <string.h>
-#include "settings.h"
-#include "gtKeeper.h"
-#include "SIM900.h"
-#include <SoftwareSerial.h>
+
+#include <gtkeeper.h>
 #include "gtkeepertest.h"
+#include <ArduinoUnit.h>
+#include <DS1307RTC.h>
+
 
 #ifndef MAINTEST_H_
 #define MAINTEST_H_

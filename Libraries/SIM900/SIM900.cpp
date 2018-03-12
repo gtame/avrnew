@@ -1,915 +1,937 @@
-#include "SIM900.h"  
-#include "Streaming.h"
+/*
+ * hilo.cpp
+ *
+ *  Created on: 17/10/2015
+ *  Author: Gabriel Tamé
+ */
 
-#define _GSM_CONNECTION_TOUT_ 5
-#define _TCP_CONNECTION_TOUT_ 20
-#define _GSM_DATA_TOUT_ 10
 
-//#define RESETPIN 7
 
-SIMCOM900 gsm;
-SIMCOM900::SIMCOM900(){};
-SIMCOM900::~SIMCOM900(){};
- 
-char SIMCOM900::forceON(){
-	char ret_val=0;
-	char *p_char; 
-	char *p_char1;
-	
-	SimpleWriteln(F("AT+CREG?"));
-	WaitResp(5000, 100, "OK");
-	if(IsStringReceived("OK")){
-		ret_val=1;
-	}
-	//BCL
-	p_char = strchr((char *)(gsm.comm_buf),',');
-	p_char1 = p_char+1;  //we are on the first char of BCS
-	*(p_char1+2)=0;
-	p_char = strchr((char *)(p_char1), ',');
-	if (p_char != NULL) {
-          *p_char = 0; 
-    }
+#include "SIM900.h"
 
-	if((*p_char1)=='4'){
-		digitalWrite(GSM_ON, HIGH);
-		delay(1200);
-		digitalWrite(GSM_ON, LOW);
-		delay(10000);
-		ret_val=2;
-	}
 
-	return ret_val;
+
+
+SIM900::SIM900(Stream * stream):ATSerial(stream) {	// TODO Auto-generated constructor stub
+	init();
 }
 
-int SIMCOM900::configandwait(char* pin)
+
+SIM900::~SIM900() {	// TODO Auto-generated destructor stub
+}
+
+
+
+void SIM900::init()
 {
-  int connCode;
-  //_tf.setTimeout(_GSM_CONNECTION_TOUT_);
+	_smslength=0;
+	_status=Sim900Unknown;
+	memset( _numeroSMS,0,NUM_SMS_LENGTH);
 
-  if(pin) setPIN(pin); //syv
 
-  // Try 10 times to register in the network. Note this can take some time!
-  for(int i=0; i<10; i++)
-  {  	
-    //Ask for register status to GPRS network.
-    SimpleWriteln(F("AT+CGREG?")); 
-	
-    //Se espera la unsolicited response de registered to network.
-    while(gsm.WaitResp(5000, 50, "+CGREG: 0,")!=RX_FINISHED_STR_RECV)
-	//while (_tf.find("+CGREG: 0,"))  // CHANGE!!!!
+	pinMode(PIN_GSM_ON, OUTPUT);
+
+}
+
+
+//buff = (char *) pgm_read_word (&messages [index]);
+
+void SIM900::SwitchModule() {
+
+
+	LOG_INFO_B( "Arrancando modulo");
+
+#if !defined(PROTEUS) && !defined(DEBUG)
+	LOG_INFO_ARGS( "Activando pulso pin %i",PIN_GSM_ON);
+	pinMode(PIN_GSM_ON, OUTPUT);
+	digitalWrite(PIN_GSM_ON,LOW);
+	delay(1000);
+	digitalWrite(PIN_GSM_ON,HIGH);
+	delay(2000);
+	digitalWrite(PIN_GSM_ON,LOW);
+	delay(3000);
+#endif
+
+    SendCommandAsync(F("ATE0"));
+    delay(100);
+    SetMode(SleepDisable);
+
+}
+
+
+
+
+void SIM900::WakeUp()
+{
+	SendCommandAsync("AT");
+}
+
+bool SIM900::SetMode(Sim900SleepMode mode)
+{
+	WakeUp();
+	uint8_t result= SendCommandCheck(F("AT+CSCLK=%i"),(__FlashStringHelper*) AT_OK,mode);
+	if (result==RX_CHECK_OK)
 	{
-		//connCode=_tf.getValue();
-		connCode=_cell.read();
-		if((connCode==1)||(connCode==5))
+		CurrentSleepMode=mode;
+		return true;
+	}
+	else
+		return false;
+}
+
+bool SIM900::GPIOWrite(uint8_t pin,uint8_t mode)
+{
+	/*
+	AT+SGPIO=<operation>,<GPIO>,<function>,<level> */
+	WakeUp();
+	uint8_t result= SendCommandCheck(F("AT+SGPIO=0,%i,1,%i"),(__FlashStringHelper*) AT_OK,pin,mode);
+	return (result==RX_CHECK_OK);
+}
+
+
+bool SIM900::ExisteContactoSIM(uint8_t entrySim) {
+	WakeUp();
+	uint8_t result= SendCommandCheck ( F("AT+CPBR=%i"),F("+CPBR"),entrySim);
+	return (result==RX_CHECK_OK);
+}
+
+
+bool SIM900::SIMEstaLista() {
+	WakeUp();
+	return (SendCommandCheck ( F("AT+CPIN?"), F("+CPIN: READY"))==RX_CHECK_OK);
+}
+
+
+
+/*
+ * Posibles devoluciones
+ -1 Error...
+ 0...1   0-Nada
+ 1...7:  1-Mala
+ 7...13: 2-Medio Bajo
+ 14..21: 3-Medio
+ 22..25: 4-Medio Alto
+ 26..31: 5-Buena
+ 99  99-Desconocido
+ */
+//
+//CSQ value is the return value from AT+CSQ command:
+//
+//AT+CSQ
+//+CSQ: 7,99
+//+CSQ: RSSI ( Received Signal Strength Indicator in dBm),BER (BITS ERROR RATE)
+//
+//The first value denoted Signal Quality Measure (SQM, which is treated by gnokii as RFLevel). The second value is Bit Error Rate (BER). Both measurements are used to ascertain the relative quality of the received cellular signal.
+//
+//The values of SQM should be interpreted in the following way (conversion to RSSI, Received Signal Strength Indicator in dBm, which would be an equivalent to GN_RF_dBm):
+//
+//    0: -113 or less
+//    1: -111
+//    2-30: -109 to -53
+//    31: -51 or greater
+//    99: not present or not measurable
+//
+//[approximate RSSI (dBm) = (-113) + (2 * CSQ)]
+//
+//The values of BER should be interpreted in the following way:
+//
+//    0: less than 0.2%
+//    1: 0.2-0.4%
+//    2: 0.4-0.8%
+//    3: 0.8-1.6%
+//    4: 1.6-3.2%
+//    5: 3.2-6.4%
+//    6: 6.4-12.8%
+//    7: more than 12.8%
+//    99: not known or not detectable
+
+
+uint8_t SIM900::GetCobertura() {
+	uint8_t rango = 0;
+	WakeUp();
+	if (SendCommandCheck( F("AT+CSQ"),F("+CSQ:"))==RX_CHECK_OK)
+	{
+		//La posicion 9 nos dira
+		char * respuesta=GetLastResponse();
+		char * t1 = strtok(respuesta + 5, ",");
+		/*if (t1[0]==' ')
+		 t1[0]='0';*/
+		/*
+		 *
+		 0...10 : Mala
+		 11..22: Normal
+		 23..31: Muy buena
+		 *
+		 *
+		 * */
+
+		int signal = atoi(t1);
+		if (signal <= 0)
+			rango = 0;
+		else if (signal >= 1 && signal <= 7)
+			rango = 1;
+		else if (signal >= 8 && signal <= 12)
+			rango = 2;
+		else if (signal >= 13 && signal <= 21)
+			rango = 3;
+		else if (signal >= 22 && signal <= 29)
+			rango = 4;
+		else if (signal >= 30 && signal < 99)
+			rango = 5;
+		else if (signal >= 99)
+			rango = 99;
+
+		return rango;
+
+	} else
+		return -1;
+}
+
+
+
+//Devuelve si el Modulo esta activo
+bool SIM900::EstaArrancado() {
+
+	WakeUp();
+	//Aseguramos que no queda nada de hez
+	uint8_t result=SendCommandCheck(F("AT"),(__FlashStringHelper*) AT_OK);
+
+	if (result==RX_CHECK_OK)
+	{
+		_status=Sim900Ready;
+		return true;
+	}
+	else
+	{
+		_status=Sim900Unknown;
+		return false;
+	}
+
+	return (result==RX_CHECK_OK);
+}
+
+//Comprueba si esta registrado
+//AT+CREG?
+//+CREG: 1,5
+bool SIM900::EstaRegistrado() {
+
+	WakeUp();
+	if (SendCommandCheck( F("AT+CREG?"),F("+CREG"))==RX_CHECK_OK)
+	{
+		//La posicion 9 nos dira
+		char * resultado=GetLastResponse();
+		return ( ( resultado[9] == '5' ||  resultado[9] == '1'));
+	}
+	else
+		return false;
+}
+
+
+bool SIM900::ConfigAPN(const __FlashStringHelper * variable,const char* valor)
+{
+
+	WakeUp();
+	memset(buff_expected,0,AT_BUFFER_SIZE_EXPECTED);
+	strcpy_P(buff_expected,(char *)variable);
+	return (SendCommandCheck( F("AT+SAPBR=3,1,\"%s\",\"%s\""),(__FlashStringHelper*) AT_OK,buff_expected,valor)==RX_CHECK_OK);
+}
+
+
+bool SIM900::BorrarContactoSIM(uint8_t index)
+{
+	WakeUp();
+	return (SendCommandCheck( F("AT+CPBW=%i"),(__FlashStringHelper*) AT_OK,index)==RX_CHECK_OK);
+}
+
+bool SIM900::GuardarEnSIM(uint8_t index,char *phone_number,char *contact_name)
+{
+	WakeUp();
+	return (SendCommandCheck( F("AT+CPBW=%i,\"%s\",129,\"%s\""),(__FlashStringHelper*) AT_OK,index,phone_number,contact_name)==RX_CHECK_OK);
+}
+
+
+void SIM900::SetDefaultSMSNum (char* numero)
+{
+	if (strlen(numero)==0 || strlen(numero)>NUM_SMS_LENGTH)
+		LOG_CRITICAL_ARGS("Numero Def SMS %s",numero);
+
+	strncpy(_numeroSMS,numero,NUM_SMS_LENGTH);
+
+}
+
+bool SIM900::getIMEI(char * imei)
+{
+	bool result=false;
+	WakeUp();
+	SendCommandAsync( F("AT+CGSN"));
+	delay(200);
+
+	if (ReadSerialLine()==RX_OK_READ)
+	{
+		char * response=GetLastResponse();
+
+		//LOG_DEBUG_ARGS("Respuesta IMEI: %s %i",response,strlen(response));
+		if(strlen(response)==14 || strlen(response)==15)
 		{
-		  setStatus(READY);
-		  
-		SimpleWriteln(F("AT+CMGF=1")); //SMS text mode.
-		delay(200);
-		  // Buah, we should take this to readCall()
-		SimpleWriteln(F("AT+CLIP=1")); //SMS text mode.
-		delay(200);
-		//_cell << "AT+QIDEACT" <<  _DEC(cr) << endl; //To make sure not pending connection.
-		//delay(1000);
-	  
-		  return 1;
+
+			strcpy(imei,response);
+			bool result=true;
 		}
 	}
-  }
-  return 0;
+
+	return result;
 }
 
-int SIMCOM900::read(char* result, int resultlength)
-{
-  // Or maybe do it with AT+QIRD
 
-  int charget;
-  //_tf.setTimeout(3);
-  // Not well. This way we read whatever comes in one second. If a CLOSED 
-  // comes, we have spent a lot of time
-    //charget=_tf.getString("",'\0',result, resultlength);
-    //charget=_tf.getString("","",result, resultlength);
-  /*if(strtok(result, "CLOSED")) // whatever chain the Q10 returns...
-  {
-    // TODO: use strtok to delete from the chain everything from CLOSED
-    if(getStatus()==TCPCONNECTEDCLIENT)
-      setStatus(ATTACHED);
-    else
-      setStatus(TCPSERVERWAIT);
-  }  */
-  
-  return charget;
+
+Sim900Status SIM900::GetStatus()
+{
+	return _status;
 }
 
- int SIMCOM900::readCellData(int &mcc, int &mnc, long &lac, long &cellid)
-{
-  if (getStatus()==IDLE)
-    return 0;
-    
-   //_tf.setTimeout(_GSM_DATA_TOUT_);
-   //_cell.flush();
-  SimpleWriteln(F("AT+QENG=1,0")); 
-  SimpleWriteln(F("AT+QENG?")); 
-  if(gsm.WaitResp(5000, 50, "+QENG")!=RX_FINISHED_STR_NOT_RECV)
-    return 0;
 
-  //mcc=_tf.getValue(); // The first one is 0
-  mcc=_cell.read();
-  //mcc=_tf.getValue();
-  mcc=_cell.read();
-  //mnc=_tf.getValue();
-  mnc=_cell.read();
-  //lac=_tf.getValue();
-  lac=_cell.read();
-  //cellid=_tf.getValue();
-  cellid=_cell.read();
-  
-  gsm.WaitResp(5000, 50, "+OK");
-  SimpleWriteln(F("AT+QENG=1,0")); 
-  gsm.WaitResp(5000, 50, "+OK");
-  return 1;
+
+
+
+uint8_t SIM900::Sms_P(const char* numero,PGM_P message) {
+
+	uint8_t result=SmsOpen(numero);
+
+	if (result==RX_CHECK_OK)
+	{
+		SmsMessage_P(message);
+		return SmsSend();
+
+	}
+	 return result;
 }
 
-boolean SIMCOM900::readSMS(char* msg, int msglength, char* number, int nlength)
-{
-  long index;
-  /*
-  if (getStatus()==IDLE)
-    return false;
-  */
-  //_tf.setTimeout(_GSM_DATA_TOUT_);
-  //_cell.flush();
-  SimpleWriteln(F("AT+CMGL=\"REC UNREAD\",1"));
-  if(gsm.WaitResp(5000, 50, "+CMGL")!=RX_FINISHED_STR_RECV)
-  //if(_tf.find("+CMGL: "))
-  {
-    //index=_tf.getValue();
-	index=_cell.read();
-	#ifdef UNO
-		_tf.getString("\"+", "\"", number, nlength);
-	#endif
-	#ifdef MEGA
-		_cell.getString("\"+", "\"", number, nlength);
-	#endif
-	#ifdef UNO
-		_tf.getString("\n", "\nOK", msg, msglength);
-	#endif
-	#ifdef MEGA
-		_cell.getString("\n", "\nOK", msg, msglength);
-	#endif
-    SimpleWrite(F("AT+CMGD="));
-	SimpleWriteln(index);
-    gsm.WaitResp(5000, 50, "OK"); 
-    return true;
-  };
-  return false;
-};
 
-boolean SIMCOM900::readCall(char* number, int nlength)
-{
-  int index;
+uint8_t SIM900::Sms(const char* numero,const   char* message) {
 
-  if (getStatus()==IDLE)
-    return false;
-  
-  //_tf.setTimeout(_GSM_DATA_TOUT_);
-  if(gsm.WaitResp(5000, 50, "+CLIP: \"")!=RX_FINISHED_STR_RECV)
-  //if(_tf.find("+CLIP: \""))
-  {
-	#ifdef UNO
-		_tf.getString("", "\"", number, nlength);
-	#endif
-	#ifdef MEGA
-		_cell.getString("", "\"", number, nlength);
-	#endif
-    SimpleWriteln("ATH");
-    delay(1000);
-    //_cell.flush();
-    return true;
-  };
-  return false;
-};
+	uint8_t result=SmsOpen(numero);
 
-boolean SIMCOM900::call(char* number, unsigned int milliseconds)
-{ 
-  if (getStatus()==IDLE)
-    return false;
-  
-  //_tf.setTimeout(_GSM_DATA_TOUT_);
+	if (result==RX_CHECK_OK)
+	{
+		SmsMessage(message);
+		return SmsSend();
 
-  SimpleWrite("ATD");
-  SimpleWrite(number);
-  SimpleWriteln(";");
-  delay(milliseconds);
-  SimpleWriteln("ATH");
-
-  return true;
- 
+	}
+	 return result;
 }
 
-int SIMCOM900::setPIN(char *pin)
+
+
+uint8_t SIM900::SmsOpen(const  char* numero)
 {
-  //Status = READY or ATTACHED.
-  if((getStatus() != IDLE))
-    return 2;
-      
-  //_tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
+	//Solo devuelve ->'> ' sin CRLF y el resultado es RX_NOD_DATA
+	//Por lo que utilizaremos el modo comando directamente
 
-  //_cell.flush();
+	if (_status!=Sim900SMS)
+	{
+		WakeUp();
+		//Reseteamos contador
+		_smslength=0;
 
-  //AT command to set PIN.
-  SimpleWrite(F("AT+CPIN="));
-  SimpleWriteln(pin);
+		//Copiamos el numero a enviar el sms, por si lo tenemos que trozear el msj ..ver SmsMessage Funtion
+		strcpy(_numeroSMS,numero);
 
-  //Expect "OK".
-  
-  if(gsm.WaitResp(5000, 50, "OK")!=RX_FINISHED_STR_NOT_RECV)
-    return 0;
-  else  
-    return 1;
+		SendCommandAsync( F("AT+CMGS=\"%s\""),_numeroSMS);
+
+
+		WaitResponse(getTimeout());
+
+		delay(100);
+		ProcessResults();
+
+		char * response= GetLastResponse();
+		if (strcmp_P(response,PSTR("> "))==0)
+		{
+			_status=Sim900SMS;
+			return RX_CHECK_OK;
+		}
+		else
+			return RX_NO_DATA;
+	}
+	else
+		return SMS_OPEN_ALREADY;
+
 }
 
-int SIMCOM900::changeNSIPmode(char mode)
+
+uint8_t SIM900::SmsMessage_P(PGM_P msg)
 {
-    //_tf.setTimeout(_TCP_CONNECTION_TOUT_);
-    
-    //if (getStatus()!=ATTACHED)
-    //    return 0;
 
-    //_cell.flush();
+	if (_status!=Sim900SMS && strlen(_numeroSMS)>0)
+	{
+		SmsOpen(_numeroSMS);
+	}
 
-    SimpleWrite(F("AT+QIDNSIP="));
-	SimpleWriteln(mode);
-	if(gsm.WaitResp(5000, 50, "OK")!=RX_FINISHED_STR_NOT_RECV) return 0;
-    //if(!_tf.find("OK")) return 0;
-    
-    return 1;
+
+
+	if (_status==Sim900SMS)
+	{
+
+		//Si con el nuevo SMS se pasa de la longitud max. para el sms entonces enviamos el contenido
+		//actual del mensaje y abrimos otro ;)
+		if (_smslength+strlen_P(msg)>=MAX_CHARACTERS_SMS)
+		{
+			if (_smslength>0)
+			{
+				SmsSend();
+				SmsOpen(_numeroSMS);
+			}
+		}
+
+		//Añadimos al actual msg el texto..
+		_smslength+=strlen_P(msg);
+		uint8_t result= SendRawData_P(msg);
+
+
+
+
+		//Cada vez que se envia una linea, el SIM900 envia por puerto serie estos chars '> '
+		ProcessResults(200);
+		return result;
+	}
+	else
+		return SMS_NO_OPENED;
+	// SendCommandCheck(F("AT+CMGDA=\"DEL ALL\""),F("OK"));
+
 }
 
-int SIMCOM900::getCCI(char *cci)
+
+uint8_t SIM900::SmsMessage(const  char* msg)
 {
-  //Status must be READY
-  if((getStatus() != READY))
-    return 2;
-      
-  //_tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
 
-  //_cell.flush();
+	if (_status!=Sim900SMS && strlen(_numeroSMS)>0)
+	{
+		SmsOpen(_numeroSMS);
+	}
 
-  //AT command to get CCID.
-  SimpleWriteln(F("AT+QCCID"));
-  
-  //Read response from modem
-  #ifdef UNO
-	_tf.getString("AT+QCCID\r\r\r\n","\r\n",cci, 21);
-  #endif
-  #ifdef MEGA
-	_cell.getString("AT+QCCID\r\r\r\n","\r\n",cci, 21);
-  #endif
-  
-  //Expect "OK".
-  if(gsm.WaitResp(5000, 50, "OK")!=RX_FINISHED_STR_NOT_RECV)
-    return 0;
-  else  
-    return 1;
-}
-  
-int SIMCOM900::getIMEI(char *imei)
-{
-      
-  //_tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
 
-  //_cell.flush();
 
-  //AT command to get IMEI.
-  SimpleWriteln(F("AT+GSN"));
-  
-  //Read response from modem
-  #ifdef UNO
-	_tf.getString("\r\n","\r\n",imei, 16);
-  #endif
-  #ifdef MEGA
-	_cell.getString("\r\n","\r\n",imei, 16);
-  #endif
-  
-  //Expect "OK".
-  if(gsm.WaitResp(5000, 50, "OK")!=RX_FINISHED_STR_NOT_RECV)
-    return 0;
-  else  
-    return 1;
+	if (_status==Sim900SMS)
+	{
+
+		//Si con el nuevo SMS se pasa de la longitud max. para el sms entonces enviamos el contenido
+		//actual del mensaje y abrimos otro ;)
+		if (_smslength+strlen(msg)>=MAX_CHARACTERS_SMS)
+		{
+			if (_smslength>0)
+			{
+				SmsSend();
+				SmsOpen(_numeroSMS);
+			}
+		}
+
+		//Añadimos al actual msg el texto..
+		_smslength+=strlen(msg);
+		uint8_t result= SendRawData(msg);
+
+
+
+
+		//Cada vez que se envia una linea, el SIM900 envia por puerto serie estos chars '> '
+		ProcessResults(200);
+		return result;
+	}
+	else
+		return SMS_NO_OPENED;
+	// SendCommandCheck(F("AT+CMGDA=\"DEL ALL\""),F("OK"));
+
 }
 
-uint8_t SIMCOM900::read()
+
+uint8_t  SIM900::SmsSend()
 {
-  return _cell.read();
+
+	const char ctrlz=0x1A;//Control+Z caracter equivalente a CTRl+z
+	const char escape=0x1B;//Escape  caracter equivalente a Escape , para cancelar envio
+
+	uint8_t result=RX_NO_DATA;
+
+	if (_status==Sim900SMS)
+	{
+
+		if (_smslength>0)
+		{
+
+				// end of message command 1A (hex)*/
+			   mSerial->write(ctrlz); // sends ctrl+z end of message
+
+			   //Cada vez que se envia una linea, el SIM900 envia por puerto serie estos chars '> '
+			   result= WaitResponseResult(buff_response,"+CMGS",15000);
+
+
+				//Limpia el ok despues de +CMGS:index<CR><LF>OK
+				ProcessResults();
+
+			   //Borramos todos SMS..
+			   SendCommandCheck(F("AT+CMGDA=\"DEL ALL\""),(__FlashStringHelper*) AT_OK);
+
+
+
+		}
+		else
+		{
+			   mSerial->write(escape); // sends Esc para cancelar msg
+			   ProcessResults();
+		}
+
+		//Una vez enviado
+	   //Reseteamos el contador y status
+	   _smslength=0;
+		_status=Sim900Ready;
+	}
+	else
+		result=SMS_NO_OPENED;
+
+	   return result;
+
+	   ///return SendCommandCheck("%x","OK",ctrlz);
 }
 
-void SIMCOM900::SimpleRead()
+
+
+
+bool SIM900::URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),void (*HttpResultCallback)(const char*,int))
 {
-	char datain;
-	if(_cell.available()>0){
-		datain=_cell.read();
-		if(datain>0){
-			Serial.print(datain);
+	bool result=false;
+	bool httpinit=false;
+	//Modificamos el timeout para darle más tiempo
+	int currentimeout=getTimeout();
+	setTimeout(10000);
+	Sim900SleepMode currentmode=CurrentSleepMode;
+	WakeUp();
+	SetMode(SleepDisable);
+
+
+	//Abrimos el ID de conexion 1
+		if (SendCommandCheckError( F("AT+SAPBR=1,1"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)ATSerial::AT_ALL_ERRORS)==RX_CHECK_OK)
+		{
+			//Consultamos si ha asignado IP
+			if (SendCommandCheckError( F("AT+SAPBR=2,1"),F("+SAPBR"),(__FlashStringHelper*)ATSerial::AT_ALL_ERRORS)==RX_CHECK_OK)
+			{
+
+			 //Iniciamos peticion Http
+			if(SendCommandCheckError( F("AT+HTTPINIT"),(__FlashStringHelper*)AT_OK,(__FlashStringHelper*)AT_ERROR_CME)==RX_CHECK_OK)
+			{
+				httpinit=true;
+
+				 //Indicamos que vamos a utilizarla conexion1 para realizar la peticion web
+				if (SendCommandCheckError( F("AT+HTTPPARA=\"CID\",1"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ERROR_CME)==RX_CHECK_OK)
+				{
+					 //Fijamos URl de conexion
+					if (SendCommandCheckError( F("AT+HTTPPARA=\"URL\",\"%s\""),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ERROR_CME,url)==RX_CHECK_OK)
+					{
+
+
+						//Para get no haria falta ningun header adicional
+						//Para post -> seria algo tal que si.. (Ejemplo enviar fichero)
+						//Set the Content as multipart/form-data type of HTTP POST and also set the boundary value
+						//AT+HTTPPARA="CONTENT","multipart/form-data; boundary=----WebKitFormBoundaryvZ0ZHShNAcBABWFy"
+						//OK
+						//====================================
+						//AT+HTTPDATA=192,10000
+						//OK
+						//DOWNLOAD
+						//Una vez recibimos el download , enviamos toda peticion el 192, es de todo Cabecera + Contenido .
+						//------WebKitFormBoundaryvZ0ZHShNAcBABWFy
+						//Content-Disposition: form-data; name="fileToUpload"; filename="data.txt"
+						//
+						//Content-Type: text/plain
+						//
+						//Hello Ravi
+						//
+						//------WebKitFormBoundaryvZ0ZHShNAcBABWFy--
+						//OK
+						if (HttpParametersCallback!=NULL)
+							HttpParametersCallback();
+
+						//AT+HTTPACTION=%i -> Action 0 = GET- 1 = POST
+						if (SendCommandCheckError( F("AT+HTTPACTION=%i"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ALL_ERRORS,(isGet?0:1))==RX_CHECK_OK)
+						{
+							//Alguna vez ocurre que no responde con +HTTPACTION
+							if (WaitResponseResult(buff_response,"+HTTPACTION",10000)==RX_CHECK_OK)
+							{
+								//+HTTPACTION:0,200,<length>
+								//delay(4000);
+								char *buffer=Sim900.GetLastResponse();
+								char *httplen=Sim900.GetToken(buffer,2,",");
+								int serialLen= atoi(httplen);
+
+								//Para bien tendria que devover un resultado
+								//para saber si la respuesta es ok o no..
+								if (HttpResultCallback!=NULL)
+									HttpResultCallback(url,serialLen);
+
+								result=true;
+
+							}
+						}
+						else
+							LOG_ERROR_ARGS("%s",GetLastCommand());
+					}
+					else
+						LOG_ERROR_ARGS("%s",GetLastCommand());
+				}
+			else
+				LOG_ERROR_ARGS("%s",GetLastCommand());
+			}
+			else
+				LOG_ERROR_ARGS("%s",GetLastCommand());
+			}
+			else
+				LOG_ERROR_ARGS("%s",GetLastCommand());
+		}
+		else
+			LOG_ERROR_ARGS("%s",GetLastCommand());
+
+
+
+		//setTimeout(1000);
+		 //Finalizamos peticion Http
+		if (httpinit)
+			SendCommandCheckError( F("AT+HTTPTERM"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ERROR_CME);
+
+
+		delay(100);
+		//Cerramos el ID de conexion 1¿?
+		SendCommandCheckError( F("AT+SAPBR=0,1"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ERROR_CME);
+
+		//setTimeout(AT_DEFAULT_TIMEOUT);
+		setTimeout(currentimeout);
+		SetMode(currentmode);
+
+		return result;
+}
+
+
+
+
+
+
+
+
+//12/12/12 10:30:23
+time_t SIM900::ParseTime(TimeElements &elements,char *charptr)
+{
+	 if(strlen(charptr)>17)
+		 charptr[17]=0;
+
+	 charptr[2]=0;
+	 elements.Year=y2kYearToTm(atoi(charptr));
+
+	 charptr=charptr+3;
+	 charptr[2]=0;
+	 elements.Month=atoi(charptr);
+
+	 charptr=charptr+3;
+	 charptr[2]=0;
+	 elements.Day=atoi(charptr);
+
+	 charptr=charptr+3;
+	 charptr[2]=0;
+	 elements.Hour=atoi(charptr);
+
+	 charptr=charptr+3;
+	 charptr[2]=0;
+	 elements.Minute=atoi(charptr);
+
+
+
+	 charptr=charptr+3;
+	 elements.Second=atoi(charptr);
+
+	 return makeTime(elements);
+}
+
+time_t SIM900::GetTime(TimeElements &elements)
+{
+	//AT+CCLK?
+	//+CCLK: "16/01/11,18:52:57+04"
+	WakeUp();
+
+	if (SendCommandCheck ( F("AT+CCLK?"),F("+CCLK"))==RX_CHECK_OK)
+	{
+			char *respuesta=GetLastResponse();
+			  // response in case valid phone number stored:
+			  //AT+CCLK?
+			  //+CCLK: "16/01/11,18:52:57+04"
+			  // <CR><LF>+CPBR: <index>,<number>,<type>,<text><CR><LF>
+			  // <CR><LF>OK<CR><LF>
+
+			  // response in case there is not phone number:
+			  // <CR><LF>OK<CR><LF>
+			 char * charptr=respuesta+8;
+			 return ParseTime(elements,charptr);
+
+
+	}
+	else
+		return 0;
+}
+
+
+bool  SIM900::GetSIMContact(uint8_t position, char *phone_number,char *contact_name)
+{
+
+	char *contactptr;
+	char *phoneptr;
+	bool result=false;
+	WakeUp();
+	ProcessResults();
+
+
+	// response in case valid phone number stored:
+	//+CPBR: 1,"653316799",129,"Casa"
+	// <CR><LF>+CPBR: <index>,<number>,<type>,<text><CR><LF>
+	// <CR><LF>OK<CR><LF>
+
+	// response in case there is not phone number:
+	// <CR><LF>OK<CR><LF>
+
+
+	SendCommandAsync (F("AT+CPBR=%i"), position);
+
+	WaitResponse(AT_DEFAULT_TIMEOUT);
+	if (ReadSerialLine()==RX_OK_READ)
+	{
+
+		char * line= GetLastResponse();
+
+		//Serial.println(line);
+		if (strcmp_P(line, AT_OK)==0)
+				result=false;
+		else if (strncmp_P(line,PSTR("+CPBR"),5)==0)
+		{
+
+
+
+			uint8_t contador=0;
+			const char *splitchar=",";
+			char *token=strtok(line,splitchar);
+			//LOG_DEBUG_ARGS("Token %i-> %s",contador,token);
+			while (token !=NULL)
+			{
+					contador++;
+					token=strtok(NULL,splitchar);
+
+					if (phone_number != NULL && contador==1)
+					{
+
+						strncpy(phone_number,token+1,strlen(token)-2);
+						LOG_DEBUG_ARGS("PHONE:%s",phone_number);
+					}
+					if (contador==3)
+					{
+						result=true;
+
+						if (contact_name != NULL)
+						{
+
+							//Quitamos comillas
+							 strncpy(contact_name,token+1,strlen(token)-2);
+							 LOG_DEBUG_ARGS("NAME:%s",contact_name);
+						}
+					}
+
+			 }
+
+
+
 		}
 	}
-}
 
-void SIMCOM900::SimpleWrite(char *comm)
-{
-	_cell.print(comm);
-}
+	/*
 
-void SIMCOM900::SimpleWrite(const char *comm)
-{
-	_cell.print(comm);
-}
+	if (SendCommandCheck ( F("AT+CPBR=%i"),F("+CPBR"), position)==RX_CHECK_OK)
+	{
 
-void SIMCOM900::SimpleWrite(int comm)
-{
-	_cell.print(comm);
-}
 
-void SIMCOM900::SimpleWrite(const __FlashStringHelper *pgmstr)
-{
-	_cell.print(pgmstr);
-}
+		// response in case valid phone number stored:
+							  //+CPBR: 1,"653316799",129,"Casa"
+							  // <CR><LF>+CPBR: <index>,<number>,<type>,<text><CR><LF>
+							  // <CR><LF>OK<CR><LF>
 
-void SIMCOM900::SimpleWriteln(char *comm)
-{
-	_cell.println(comm);
-}
+							  // response in case there is not phone number:
+							  // <CR><LF>OK<CR><LF>
+							result=true;
+							char *respuesta=GetLastResponse();
 
-void SIMCOM900::SimpleWriteln(const __FlashStringHelper *pgmstr)
-{
-	_cell.println(pgmstr);
-}
+							if (contact_name != NULL)
+							{
 
-void SIMCOM900::SimpleWriteln(char const *comm)
-{
-	_cell.println(comm);
-}
+								contactptr = strstr((char *)(respuesta),",");
 
-void SIMCOM900::SimpleWriteln(int comm)
-{
-	_cell.println(comm);
-}
+								if (contactptr!=NULL)
+								{
+									//Obtenemos la posicion
+									p_char=respuesta+6;
+									if (p_char[0]==' ')
+										p_char++;
+									position= atoi(p_char);
 
-void SIMCOM900::WhileSimpleRead()
-{
-	char datain;
-	while(_cell.available()>0){
-		datain=_cell.read();
-		if(datain>0){
-			Serial.print(datain);
-		}
+									contactptr++;
+									contactptr= strstr((char *)(contactptr),",");
+								}
+
+
+								if (contactptr!=NULL)
+								{
+									contactptr++;
+									contactptr = strstr((char *)(contactptr),",");
+
+
+									contactptr++;
+									contactptr++;
+
+									p_char1 = strchr((char *)(contactptr),'"');
+									if (p_char1 != NULL)
+									{
+											*p_char1 = 0; // end of string
+											strcpy(contact_name,contactptr);
+									}
+								}
+
+								 result= (strlen(contact_name)!=0);
+
+							}
+
+								if (phone_number != NULL)
+								{
+									p_char = strstr((char *)(respuesta),",");
+									if (p_char != NULL)
+									{
+										p_char++;
+										p_char = strstr((char *)(respuesta),",\"");
+
+										if (p_char != NULL) {
+											   p_char++;
+											   p_char++;       // we are on the first phone number character
+											   // find out '"' as finish character of phone number string
+											   p_char1 = strchr((char *)(p_char),'"');
+											   if (p_char1 != NULL) {
+													*p_char1 = 0; // end of string
+											   }
+											   // extract phone number string
+											   phone_number=strcpy(phone_number, (char *)(p_char));
+											   // output value = we have found out phone number string
+										  }
+									}
+
+									result= (strlen(phone_number)!=0);
+
+				}
 	}
-}
+	*/
+	return result;
 
-//---------------------------------------------
-/**********************************************************
-Turns on/off the speaker
-
-off_on: 0 - off
-        1 - on
-**********************************************************/
-void GSM::SetSpeaker(byte off_on)
-{
-  if (CLS_FREE != GetCommLineStatus()) return;
-  SetCommLineStatus(CLS_ATCMD);
-  if (off_on) {
-    //SendATCmdWaitResp("AT#GPIO=5,1,2", 500, 50, "#GPIO:", 1);
-  }
-  else {
-    //SendATCmdWaitResp("AT#GPIO=5,0,2", 500, 50, "#GPIO:", 1);
-  }
-  SetCommLineStatus(CLS_FREE);
 }
 
 
-byte GSM::IsRegistered(void)
-{
-  return (module_status & STATUS_REGISTERED);
-}
-
-byte GSM::IsInitialized(void)
-{
-  return (module_status & STATUS_INITIALIZED);
-}
 
 
-/**********************************************************
-Method checks if the GSM module is registered in the GSM net
-- this method communicates directly with the GSM module
-  in contrast to the method IsRegistered() which reads the
-  flag from the module_status (this flag is set inside this method)
 
-- must be called regularly - from 1sec. to cca. 10 sec.
 
-return values: 
-      REG_NOT_REGISTERED  - not registered
-      REG_REGISTERED      - GSM module is registered
-      REG_NO_RESPONSE     - GSM doesn't response
-      REG_COMM_LINE_BUSY  - comm line between GSM module and Arduino is not free
-                            for communication
-**********************************************************/
-byte GSM::CheckRegistration(void)
-{
-  byte status;
-  byte ret_val = REG_NOT_REGISTERED;
 
-  if (CLS_FREE != GetCommLineStatus()) return (REG_COMM_LINE_BUSY);
-  SetCommLineStatus(CLS_ATCMD);
-  _cell.println(F("AT+CREG?"));
-  // 5 sec. for initial comm tmout
-  // 50 msec. for inter character timeout
-  status = WaitResp(5000, 50); 
+//-2 Si se produjo un error con el pin
+//-1 Si se produjo un error al arrancar el modulo
+// 0 Si el modulo quedo activo y con el pin insertado
+bool SIM900::ActivaModulo() {
+	uint8_t result =false;
 
-  if (status == RX_FINISHED) {
-    // something was received but what was received?
-    // ---------------------------------------------
-    if(IsStringReceived("+CREG: 0,1") 
-      || IsStringReceived("+CREG: 0,5")) {
-      // it means module is registered
-      // ----------------------------
-      module_status |= STATUS_REGISTERED;
-    
-    
-      // in case GSM module is registered first time after reset
-      // sets flag STATUS_INITIALIZED
-      // it is used for sending some init commands which 
-      // must be sent only after registration
-      // --------------------------------------------
-      if (!IsInitialized()) {
-        module_status |= STATUS_INITIALIZED;
-        SetCommLineStatus(CLS_FREE);
-        InitParam(PARAM_SET_1);
-      }
-      ret_val = REG_REGISTERED;      
-    }
-    else {
-      // NOT registered
-      // --------------
-      module_status &= ~STATUS_REGISTERED;
-      ret_val = REG_NOT_REGISTERED;
-    }
-  }
-  else {
-    // nothing was received
-    // --------------------
-    ret_val = REG_NO_RESPONSE;
-  }
-  SetCommLineStatus(CLS_FREE);
- 
 
-  return (ret_val);
+	LOG_INFO("Activa modulo");
+	WakeUp();
+
+	if (!EstaArrancado())
+		SwitchModule();
+
+	if (EstaArrancado())
+	{
+		//Sin eco
+		SendCommandAsync( F("ATE0"));
+		//Control hardware
+		//SendCommandAsync("AT&K3");
+		// set SMS mode to text
+		SendCommandAsync( F("AT+CMGF=1"));
+		//This command will alert our GSM shield and now whenever it will receive message
+		SendCommandAsync( F("AT+CNMI=1,2,0,0,0"));
+
+		result=true;
+	}
+	else
+		result=false;
+
+	return result;
 }
 
 
-/**********************************************************
-Method sets speaker volume
 
-speaker_volume: volume in range 0..14
 
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module did not answer in timeout
-        -3 - GSM module has answered "ERROR" string
 
-        OK ret val:
-        -----------
-        0..14 current speaker volume 
-**********************************************************/
+
+
 /*
-char GSM::SetSpeakerVolume(byte speaker_volume)
+ *
+
+
+bool SIM900::TieneLlamadas()
 {
-  
-  char ret_val = -1;
 
-  if (CLS_FREE != GetCommLineStatus()) return (ret_val);
-  SetCommLineStatus(CLS_ATCMD);
-  // remember set value as last value
-  if (speaker_volume > 14) speaker_volume = 14;
-  // select speaker volume (0 to 14)
-  // AT+CLVL=X<CR>   X<0..14>
-  _cell.print("AT+CLVL=");
-  _cell.print((int)speaker_volume);    
-  _cell.print("\r"); // send <CR>
-  // 10 sec. for initial comm tmout
-  // 50 msec. for inter character timeout
-  if (RX_TMOUT_ERR == WaitResp(10000, 50)) {
-    ret_val = -2; // ERROR
-  }
-  else {
-    if(IsStringReceived("OK")) {
-      last_speaker_volume = speaker_volume;
-      ret_val = last_speaker_volume; // OK
-    }
-    else ret_val = -3; // ERROR
-  }
+	if (SendCommandCheck("AT+CPAS", "+CPAS:")==RX_CHECK_OK)
+	{
+		char * resultado=GetLastResponse();
+		return (resultado[7]==3 || resultado[7]==4);
+	}
 
-  SetCommLineStatus(CLS_FREE);
-  return (ret_val);
-}
-*/
-/**********************************************************
-Method increases speaker volume
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module did not answer in timeout
-        -3 - GSM module has answered "ERROR" string
-
-        OK ret val:
-        -----------
-        0..14 current speaker volume 
-**********************************************************/
-/*
-char GSM::IncSpeakerVolume(void)
-{
-  char ret_val;
-  byte current_speaker_value;
-
-  current_speaker_value = last_speaker_volume;
-  if (current_speaker_value < 14) {
-    current_speaker_value++;
-    ret_val = SetSpeakerVolume(current_speaker_value);
-  }
-  else ret_val = 14;
-
-  return (ret_val);
-}
-*/
-/**********************************************************
-Method decreases speaker volume
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module did not answer in timeout
-        -3 - GSM module has answered "ERROR" string
-
-        OK ret val:
-        -----------
-        0..14 current speaker volume 
-**********************************************************/
-/*
-char GSM::DecSpeakerVolume(void)
-{
-  char ret_val;
-  byte current_speaker_value;
-
-  current_speaker_value = last_speaker_volume;
-  if (current_speaker_value > 0) {
-    current_speaker_value--;
-    ret_val = SetSpeakerVolume(current_speaker_value);
-  }
-  else ret_val = 0;
-
-  return (ret_val);
-}
-*/
-
-/**********************************************************
-Method sends DTMF signal
-This function only works when call is in progress
-
-dtmf_tone: tone to send 0..15
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module didn't answer in timeout
-        -3 - GSM module has answered "ERROR" string
-
-        OK ret val:
-        -----------
-        0.. tone
-**********************************************************/
-/*
-char GSM::SendDTMFSignal(byte dtmf_tone)
-{
-  char ret_val = -1;
-
-  if (CLS_FREE != GetCommLineStatus()) return (ret_val);
-  SetCommLineStatus(CLS_ATCMD);
-  // e.g. AT+VTS=5<CR>
-  _cell.print("AT+VTS=");
-  _cell.print((int)dtmf_tone);    
-  _cell.print("\r");
-  // 1 sec. for initial comm tmout
-  // 50 msec. for inter character timeout
-  if (RX_TMOUT_ERR == WaitResp(1000, 50)) {
-    ret_val = -2; // ERROR
-  }
-  else {
-    if(IsStringReceived("OK")) {
-      ret_val = dtmf_tone; // OK
-    }
-    else ret_val = -3; // ERROR
-  }
-
-  SetCommLineStatus(CLS_FREE);
-  return (ret_val);
-}
-*/
-
-/**********************************************************
-Method returns state of user button
-
-
-return: 0 - not pushed = released
-        1 - pushed
-**********************************************************/
-byte GSM::IsUserButtonPushed(void)
-{
-  byte ret_val = 0;
-  if (CLS_FREE != GetCommLineStatus()) return(0);
-  SetCommLineStatus(CLS_ATCMD);
-  //if (AT_RESP_OK == SendATCmdWaitResp("AT#GPIO=9,2", 500, 50, "#GPIO: 0,0", 1)) {
-    // user button is pushed
-  //  ret_val = 1;
-  //}
-  //else ret_val = 0;
-  //SetCommLineStatus(CLS_FREE);
-  //return (ret_val);
 }
 
-
-
-/**********************************************************
-Method reads phone number string from specified SIM position
-
-position:     SMS position <1..20>
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module didn't answer in timeout
-        -3 - position must be > 0
-        phone_number is empty string
-
-        OK ret val:
-        -----------
-        0 - there is no phone number on the position
-        1 - phone number was found
-        phone_number is filled by the phone number string finished by 0x00
-                     so it is necessary to define string with at least
-                     15 bytes(including also 0x00 termination character)
-
-an example of usage:
-        GSM gsm;
-        char phone_num[20]; // array for the phone number string
-
-        if (1 == gsm.GetPhoneNumber(1, phone_num)) {
-          // valid phone number on SIM pos. #1 
-          // phone number string is copied to the phone_num array
-          #ifdef DEBUG_PRINT
-            gsm.DebugPrint("DEBUG phone number: ", 0);
-            gsm.DebugPrint(phone_num, 1);
-          #endif
-        }
-        else {
-          // there is not valid phone number on the SIM pos.#1
-          #ifdef DEBUG_PRINT
-            gsm.DebugPrint("DEBUG there is no phone number", 1);
-          #endif
-        }
-**********************************************************/
-
-
-char GSM::GetPhoneNumber(byte position, char *phone_number)
+bool SIM900::Llamar(callType_t tipo,const char *telefono)
 {
-  char ret_val = -1;
+	bool result = true;
+			char buffer[25];
 
-  char *p_char; 
-  char *p_char1;
+				if (EstaRegistrado()) {
+					//--LLamaada
+					if (tipo==SIM)
+						//Desde SIM
+						sprintf(buffer, "ATD>\"SM\"%s;", telefono);
+					else
+						//Desde tfno
+						sprintf(buffer, "ATD\"%s\";", telefono);
 
-  if (position == 0) return (-3);
-  if (CLS_FREE != GetCommLineStatus()) return (ret_val);
-  SetCommLineStatus(CLS_ATCMD);
-  ret_val = 0; // not found yet
-  phone_number[0] = 0; // phone number not found yet => empty string
-  
-  //send "AT+CPBR=XY" - where XY = position
-  _cell.print(F("AT+CPBR="));
-  _cell.print((int)position);  
-  _cell.print("\r");
+					SendCommandAsync(buffer);
 
-  // 5000 msec. for initial comm tmout
-  // 50 msec. for inter character timeout
-  switch (WaitResp(5000, 50, "+CPBR")) {
-    case RX_TMOUT_ERR:
-      // response was not received in specific time
-      ret_val = -2;
-      break;
+					//--Fin llamada
+					delay(5000);
 
-    case RX_FINISHED_STR_RECV:
-      // response in case valid phone number stored:
-      // <CR><LF>+CPBR: <index>,<number>,<type>,<text><CR><LF>
-      // <CR><LF>OK<CR><LF>
+					SendCommandAsync("ATH");
 
-      // response in case there is not phone number:
-      // <CR><LF>OK<CR><LF>
-      p_char = strchr((char *)(comm_buf),'"');
-      if (p_char != NULL) {
-        p_char++;       // we are on the first phone number character
-        // find out '"' as finish character of phone number string
-        p_char1 = strchr((char *)(p_char),'"');
-        if (p_char1 != NULL) {
-          *p_char1 = 0; // end of string
-        }
-        // extract phone number string
-        strcpy(phone_number, (char *)(p_char));
-        // output value = we have found out phone number string
-        ret_val = 1;
-      }
-      break;
 
-    case RX_FINISHED_STR_NOT_RECV:
-      // only OK or ERROR => no phone number
-      ret_val = 0; 
-      break;
-  }
+				} else {
+					result = false;
+				}
 
-  SetCommLineStatus(CLS_FREE);
-  return (ret_val);
+
+
+
+			return result;
 }
 
-/**********************************************************
-Method writes phone number string to the specified SIM position
-
-position:     SMS position <1..20>
-phone_number: phone number string for the writing
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module didn't answer in timeout
-        -3 - position must be > 0
-
-        OK ret val:
-        -----------
-        0 - phone number was not written
-        1 - phone number was written
-**********************************************************/
-char GSM::WritePhoneNumber(byte position, char *phone_number)
+bool SIM900::LlamarDesdeSim(uint8_t entrySim)
 {
-  char ret_val = -1;
-
-  if (position == 0) return (-3);
-  if (CLS_FREE != GetCommLineStatus()) return (ret_val);
-  SetCommLineStatus(CLS_ATCMD);
-  ret_val = 0; // phone number was not written yet
-  
-  //send: AT+CPBW=XY,"00420123456789"
-  // where XY = position,
-  //       "00420123456789" = phone number string
-  _cell.print(F("AT+CPBW="));
-  _cell.print((int)position);  
-  _cell.print(F(",\""));
-  _cell.print(phone_number);
-  _cell.print(F("\"\r"));
-
-  // 5000 msec. for initial comm tmout
-  // 50 msec. for inter character timeout
-  switch (WaitResp(5000, 50, "OK")) {
-    case RX_TMOUT_ERR:
-      // response was not received in specific time
-      break;
-
-    case RX_FINISHED_STR_RECV:
-      // response is OK = has been written
-      ret_val = 1;
-      break;
-
-    case RX_FINISHED_STR_NOT_RECV:
-      // other response: e.g. ERROR
-      break;
-  }
-
-  SetCommLineStatus(CLS_FREE);
-  return (ret_val);
+	char entry[4];
+	memset(entry, 0, sizeof(entry));
+	sprintf(entry, "%i", entrySim);
+	return Llamar(SIM,entry);
 }
 
-
-/**********************************************************
-Method del phone number from the specified SIM position
-
-position:     SMS position <1..20>
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module didn't answer in timeout
-        -3 - position must be > 0
-
-        OK ret val:
-        -----------
-        0 - phone number was not deleted
-        1 - phone number was deleted
-**********************************************************/
-char GSM::DelPhoneNumber(byte position)
-{
-  char ret_val = -1;
-
-  if (position == 0) return (-3);
-  if (CLS_FREE != GetCommLineStatus()) return (ret_val);
-  SetCommLineStatus(CLS_ATCMD);
-  ret_val = 0; // phone number was not written yet
-  
-  //send: AT+CPBW=XY
-  // where XY = position
-  _cell.print(F("AT+CPBW="));
-  _cell.print((int)position);  
-  _cell.print(F("\r"));
-
-  // 5000 msec. for initial comm tmout
-  // 50 msec. for inter character timeout
-  switch (WaitResp(5000, 50, "OK")) {
-    case RX_TMOUT_ERR:
-      // response was not received in specific time
-      break;
-
-    case RX_FINISHED_STR_RECV:
-      // response is OK = has been written
-      ret_val = 1;
-      break;
-
-    case RX_FINISHED_STR_NOT_RECV:
-      // other response: e.g. ERROR
-      break;
-  }
-
-  SetCommLineStatus(CLS_FREE);
-  return (ret_val);
-}
-
-
-
-
-
-/**********************************************************
-Function compares specified phone number string 
-with phone number stored at the specified SIM position
-
-position:       SMS position <1..20>
-phone_number:   phone number string which should be compare
-
-return: 
-        ERROR ret. val:
-        ---------------
-        -1 - comm. line to the GSM module is not free
-        -2 - GSM module didn't answer in timeout
-        -3 - position must be > 0
-
-        OK ret val:
-        -----------
-        0 - phone numbers are different
-        1 - phone numbers are the same
-
-
-an example of usage:
-        if (1 == gsm.ComparePhoneNumber(1, "123456789")) {
-          // the phone num. "123456789" is stored on the SIM pos. #1
-          // phone number string is copied to the phone_num array
-          #ifdef DEBUG_PRINT
-            gsm.DebugPrint("DEBUG phone numbers are the same", 1);
-          #endif
-        }
-        else {
-          #ifdef DEBUG_PRINT
-            gsm.DebugPrint("DEBUG phone numbers are different", 1);
-          #endif
-        }
-**********************************************************/
-char GSM::ComparePhoneNumber(byte position, char *phone_number)
-{
-  char ret_val = -1;
-  char sim_phone_number[20];
-
-
-  ret_val = 0; // numbers are not the same so far
-  if (position == 0) return (-3);
-  if (1 == GetPhoneNumber(position, sim_phone_number)) {
-    // there is a valid number at the spec. SIM position
-    // -------------------------------------------------
-    if (0 == strcmp(phone_number, sim_phone_number)) {
-      // phone numbers are the same
-      // --------------------------
-      ret_val = 1;
-    }
-  }
-  return (ret_val);
-}
-
-//-----------------------------------------------------
+//-2 No se pudo registrar
+//-1 Modulo GSM no se pudo activar
+//0 -si todo fue ok
+bool SIM900::LlamarTelefono(const char *telefono) {
+	return Llamar(Phone,telefono);
+}*/
