@@ -183,6 +183,7 @@
       <Value>SIM900</Value>
       <Value>GTkeeperLib</Value>
       <Value>ATSerial</Value>
+      <Value>StateMachine</Value>
     </ListValues>
   </avrgcccpp.linker.libraries.Libraries>
   <avrgcccpp.linker.libraries.LibrarySearchPaths>

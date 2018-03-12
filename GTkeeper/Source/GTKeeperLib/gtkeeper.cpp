@@ -11,6 +11,9 @@
  
 //Pin Teclado
 
+
+StateMachine stateMachine(4, 9);
+
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //three columns
 char keys[ROWS][COLS] = {
@@ -74,16 +77,44 @@ GTKeeper::~GTKeeper()
 
 void GTKeeper::Setup()
 {
-	//Inicializamos puertos series
+
+
+	//Configuramos la maquina
+	setupStateMachine();
+	//La inicializamos a parada
+	stateMachine.SetState(Off, false, true);
+
+
+	
+}
+
+void GTKeeper::OnLeaveOff()
+{
+	//Inicializamos los puertos series
 	Serial.begin(9600);
 	Serial1.begin(9600);
 	Serial2.begin(9600);
+
+
+	LOG_DEBUG("Arrancando..");
+
+	//Inicializacion para I2C
+	//Esta llamada es necesaria pq sino da un error el linker en la lib LiquidCrystal_I2C
+	//./LiquidCrystal_I2C.cpp:41: undefined reference to `Wire'
+	Wire.begin();
+	//Inicializacion LCD
+	lcd.init();
+
 
 	//Callbacks o punteros a funcion
 	Sim900.ProcessResultPtr = ProcessATMensajesCallback;
 	//gtKeeper.ChangeStatus=setLed;
 
-
+	
+}
+void GTKeeper::OnInitializating()
+{
+	LOG_DEBUG("OnInitializating");
 	SetupPantallaTeclado();
 }
 
@@ -95,14 +126,10 @@ void GTKeeper::SetupPantallaTeclado()
 	uint8_t line_num=0;
 
 	const uint8_t NUM_INTENTOS=5;
-	//Inicializamos interfaz de usuario
-	//Esta llamada es necesaria pq sino da un error el linker en la lib LiquidCrystal_I2C
-	//./LiquidCrystal_I2C.cpp:41: undefined reference to `Wire'
-	Wire.begin();
+ 
 
 
-	//lcd inicializacion ;>
-	lcd.init();
+
 	//Inicializamos el gestor de ventanas
 	screenManager.Initializate(&lcd,20,4,&keypad);
 
@@ -350,9 +377,6 @@ void GTKeeper::SetupPantallaTeclado()
 
 }
 
-
-
-
 void GTKeeper::setLed(uint8_t led )
 {
 
@@ -401,6 +425,38 @@ void GTKeeper::setLed(uint8_t led )
 }
 
 
+
+
+void GTKeeper::setupStateMachine()
+{
+	
+	//Fijamos las transiciones de estados
+//	stateMachine.AddTransition(Off, Initializating, []() { return true; });
+/*
+	stateMachine.AddTransition(PosicionA, PosicionB, []() { return input == Forward; });
+	
+	stateMachine.AddTransition(PosicionB, PosicionA, []() { return input == Backward; });
+	stateMachine.AddTransition(PosicionB, PosicionC, []() { return input == Forward; });
+	stateMachine.AddTransition(PosicionB, PosicionA, []() { return input == Reset; });
+	
+	stateMachine.AddTransition(PosicionC, PosicionB, []() { return input == Backward; });
+	stateMachine.AddTransition(PosicionC, PosicionD, []() { return input == Forward; });
+	stateMachine.AddTransition(PosicionC, PosicionA, []() { return input == Reset; });
+	
+	stateMachine.AddTransition(PosicionD, PosicionC, []() { return input == Backward; });
+	stateMachine.AddTransition(PosicionD, PosicionA, []() { return input == Reset; });
+	*/
+
+	///Fijamos las acciones de salida para cada estado
+ //	stateMachine.SetOnEntering(Initializating,  []() { OnInitializating();});
+	/*stateMachine.SetOnEntering(PosicionB, outputB);
+	stateMachine.SetOnEntering(PosicionC, outputC);
+	stateMachine.SetOnEntering(PosicionD, outputD);*/
+	
+	//Fijamos las acciones a ejecutar cuando se abandona un determinado estado
+//	stateMachine.SetOnLeaving(Off, OnLeaveOff);
+ 
+}
 
 
 char * GTKeeper::PBB (const __FlashStringHelper * p1,...)

@@ -158,6 +158,7 @@
       <Value>../../../../Libraries/DS1307RTC</Value>
       <Value>../../../../Libraries/ATSerial</Value>
       <Value>../../../../Libraries/SIM900</Value>
+      <Value>../../../../Libraries/StateMachine</Value>
     </ListValues>
   </avrgcccpp.compiler.directories.IncludePaths>
   <avrgcccpp.compiler.optimization.level>Optimize (-O1)</avrgcccpp.compiler.optimization.level>
@@ -182,6 +183,7 @@
       <Value>SD</Value>
       <Value>DS1307RTC</Value>
       <Value>ATSerial</Value>
+      <Value>StateMachine</Value>
     </ListValues>
   </avrgcccpp.linker.libraries.Libraries>
   <avrgcccpp.linker.libraries.LibrarySearchPaths>

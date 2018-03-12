@@ -155,6 +155,7 @@
       <Value>../../../../Libraries/SD</Value>
       <Value>../../../../Libraries/DS1307RTC</Value>
       <Value>../../../../Libraries/ATSerial</Value>
+      <Value>../../../../Libraries/StateMachine</Value>
       <Value>../../../../Libraries/SIM900</Value>
       <Value>..</Value>
     </ListValues>

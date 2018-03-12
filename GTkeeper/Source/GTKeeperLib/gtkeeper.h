@@ -31,7 +31,6 @@
 #include "settings.h"
 #include "SIM900.h"
 #include "settings.h"
-#include "EEPROM.h"
 #include "textos.h"
 
 #include  "types.h"
@@ -39,6 +38,8 @@
 
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
+#include <StateMachineLib.h>
+
 
 //Screens
 #include "Screens/Menu.h"
@@ -93,7 +94,7 @@
 enum MachineStates
 {
 	Off,
-	Init,
+	Initializating,
 	Error,
 	Reset,
 	User,
@@ -106,7 +107,7 @@ enum MachineStates
 
 
 
-class GTKeeper {
+class GTKeeper  {
 
 public:
 
@@ -256,6 +257,11 @@ public:
 
 protected:
 
+
+	 void  OnInitializating();
+	 void OnLeaveOff();
+
+
      static void DefaultHttpResultCallbackStatic(const char* url,int len);
 
 
@@ -268,6 +274,7 @@ protected:
   private:
 	
 	void SetupPantallaTeclado();
+	void setupStateMachine();
 
     void SendSmsProgramacion();
     void SendSmsSectoresEjecucion();
