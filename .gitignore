@@ -1,4 +1,5 @@
 .metadata/
+.vs/
 Debug/
 Release/
 */Libraries/**/Debug
