@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 #include <WString.h>
-
+#incñ
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -104,18 +104,22 @@ enum MachineStates
 	Web
 };
 
-
-
+//CallBacks
+//void ResetConfigsCallBack(uint8_t button,uint8_t func);
 
 class GTKeeper : public SIM900, public StateMachine {
 
 public:
 
+
+//CONSTRUCTOR & DESTRUCTOR
 	GTKeeper();
 	virtual ~GTKeeper();
-
+//END CONSTRUCTOR & DESTRUCTOR
 
 ///ESTADOS
+	 bool CheckOff();
+	 void OnOff();
 	 void OnLeaveOff();
 
 
@@ -137,7 +141,9 @@ public:
 
 
 
-
+//overrides
+	virtual bool OnProcessResult( char * ) override;
+	void Sleep();
 
 
 

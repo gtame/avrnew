@@ -14,7 +14,7 @@
  bool GTKeeper::CheckReset()
  {
 
-	 static bool blnResetLoop=false;
+	 bool result=false;
 
 	 int indexA= keypad->findInList('A');
 	 int indexD= keypad->findInList('D');
@@ -29,17 +29,15 @@
 	 keypad->getKeys();
 
 	 //Si pulsamos XX SEG estas dos teclas se resetearan TODAS configs. :)
-	 while (blnResetLoop &&
-	 (keypad->key[indexA].kstate==PRESSED || keypad->key[indexA].kstate==HOLD) &&
-	 (keypad->key[indexD].kstate==PRESSED || keypad->key[indexD].kstate==HOLD)
+	 while ( !result &&
+			(keypad->key[indexA].kstate==PRESSED || keypad->key[indexA].kstate==HOLD)  &&
+			(keypad->key[indexD].kstate==PRESSED || keypad->key[indexD].kstate==HOLD)
 	 )
-	 {
-		 if (ELAPSED_SECONDS(time)>10)
+	 {	  
+		 if (ELAPSED_SECONDS(time)>HOLD_TO_RESET)
 		 {
-			 screenManager.ShowMsgBox_P(PSTR("Desea resetear las \nconfiguraciones?"),MsgYesNoButton, ResetConfigsCallBack);
-
-			 while (blnResetLoop)
-			 screenManager.Loop();
+			result=true;
+		
 		 }
 		 delay(500);
 		 keypad->getKeys();
@@ -47,21 +45,39 @@
 
 
 	 LOG_DEBUG_B("CHECK TERMINADO");
+	 
+	 
+	 return result;
 
  }
 
  //ACCION
  void GTKeeper::OnReset()
  {
+	 static bool blnResetLoop=false;
+ 
+	  //Solicitamos confirmación 
+	  screenManager.ShowMsgBox_P(
+	  PSTR("Desea resetear las \nconfiguraciones?"),
+	  MsgYesNoButton,
+	  [](uint8_t button,uint8_t func) {
+		  if (button==0)
+		  {
+			  //REseteamos todo, config, programas y estadisticas.
+			  gtKeeper.ResetConfig();
+			  gtKeeper.EEPROMGuardaConfig();
+			  gtKeeper.ResetProgramas();
+			  gtKeeper.ResetearEstadisticas();
+		  }
+		  //Flag para salir del bucle loop.
+		  blnResetLoop=false;
+	  }
+	  );
 	 
-	 //REseteamos todo, config, programas y estadisticas.
-	 gtKeeper.ResetConfig();
-	 gtKeeper.EEPROMGuardaConfig();
-	 gtKeeper.ResetProgramas();
-	 gtKeeper.ResetearEstadisticas();
+	 //Bucle para reaccionar a eventos de pantalla
+	 while (blnResetLoop)
+		screenManager.Loop();
 
-	 //Flag para salir del bucle loop.
-	 // blnResetLoop=false;
  }
 
  //SALE
@@ -74,3 +90,6 @@
 	 //Flag para salir del bucle loop.
 	 // blnResetLoop=false;
  }
+ 
+ 
+ 

@@ -53,7 +53,7 @@ void GTKeeper::OnInit()
 	pinMode(PORT_COMUN_PIN, OUTPUT);
 	APAGA_RELE(PORT_COMUN_PIN);
 
-	//Puerto pu
+	//Puente H
 	pinMode(PORT_PUENTEH1_PIN, OUTPUT);
 	pinMode(PORT_PUENTEH2_PIN, OUTPUT);
 	digitalWrite(PORT_PUENTEH2_PIN, LOW);
@@ -101,8 +101,6 @@ void GTKeeper::OnInit()
 
 	 //Inicializamos el gestor de ventanas
 	 screenManager.Initializate(lcd,20,4,keypad);
-
-
 	 screenManager.Encender();
 
 
@@ -120,15 +118,14 @@ void GTKeeper::OnInit()
 	 line_num++;
 
 
-	 LOG_DEBUG_B("ACTIVANDO GSM");
-	 //Configura puertos y demas
+
  
 
 	 //Comprobamos si tiene gsm configurado
 	 if (IsGSMEnable())
 	 {
 
-		 LOG_DEBUG_B("ACTIVANDO GSM");
+		 LOG_DEBUG("ACTIVANDO GSM");
 		 bool blnOK=true;
 		 uint8_t num_veces=0;
 
@@ -155,7 +152,7 @@ void GTKeeper::OnInit()
 			 num_veces=0;
 			 while (!(blnOK=gtKeeper.CheckSIM())  &&  num_veces<NUM_INTENTOS)
 			 {
-				 gtKeeper.setLed(LED_ERROR_SIM_PIN);
+				 setLed(LED_ERROR_SIM_PIN);
 				 delay(500);
 				 num_veces++;
 			 }
@@ -184,15 +181,15 @@ void GTKeeper::OnInit()
 			 //Network
 			 while (!(blnOK=gtKeeper.EstaRegistradoGSM()) &&  num_veces<NUM_INTENTOS)
 			 {
-				 gtKeeper.setLed(LED_ERROR_NETWORK_PIN);
+				 setLed(LED_ERROR_NETWORK_PIN);
 				 delay(500);
 				 num_veces++;
 			 }
 
 			 if (blnOK)
-			 screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_OK);
+				 screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_OK);
 			 else
-			 screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_ERROR);
+				 screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_ERROR);
 
 			 line_num++;
 		 }

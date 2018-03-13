@@ -9,6 +9,8 @@
 #define SETTINGS_H_
 
 
+#define HOLD_TO_RESET 10 //Al arrancar numero de segundos que hay que mantener la tecla A-D pulsadas para entrar en RESET
+
 //Numero de programas , sectores 
 #define MAX_PROGRAMAS 5//Numero máximo de programas
 

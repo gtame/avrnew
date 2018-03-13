@@ -94,7 +94,7 @@ public:
 	//Procesamos resultados que halla en Buffer de serial
 	void ProcessResults(uint16_t wait=250);
 
-	bool OnProcessResult( char * );
+	virtual bool OnProcessResult( char * );
 
 
 

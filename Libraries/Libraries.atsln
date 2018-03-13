@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Snozee", "Snozee\Snozee.cppproj", "{A5AE1869-F6AB-449C-B5AF-1816BF3640E0}"
 EndProject
@@ -37,6 +37,8 @@ EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "SIM900", "SIM900\SIM900.cppproj", "{5BCFF6A4-D239-4BB7-94D5-264A621A4388}"
 EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "SIM900x", "SIM900x\SIM900x.cppproj", "{ABFD00F6-8412-4FC9-841E-120D5F452605}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "LowPower", "LowPower\LowPower.cppproj", "{DCA27C95-5E4F-439F-9731-64AC4E012D7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -116,6 +118,10 @@ Global
 		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Debug|AVR.Build.0 = Debug|AVR
 		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Release|AVR.ActiveCfg = Release|AVR
 		{ABFD00F6-8412-4FC9-841E-120D5F452605}.Release|AVR.Build.0 = Release|AVR
+		{DCA27C95-5E4F-439F-9731-64AC4E012D7A}.Debug|AVR.ActiveCfg = Debug|AVR
+		{DCA27C95-5E4F-439F-9731-64AC4E012D7A}.Debug|AVR.Build.0 = Debug|AVR
+		{DCA27C95-5E4F-439F-9731-64AC4E012D7A}.Release|AVR.ActiveCfg = Release|AVR
+		{DCA27C95-5E4F-439F-9731-64AC4E012D7A}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

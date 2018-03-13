@@ -157,6 +157,7 @@
       <Value>../../../../Libraries/ATSerial</Value>
       <Value>../../../../Libraries/StateMachine</Value>
       <Value>../../../../Libraries/SIM900</Value>
+      <Value>../../../../Libraries/LowPower</Value>
       <Value>..</Value>
     </ListValues>
   </avrgcccpp.compiler.directories.IncludePaths>
@@ -181,12 +182,6 @@
     <PostBuildEvent>mv $(OutputDirectory)\$(OutputFileName)$(OutputFileExtension) $(OutputDirectory)\..\..\..\..\output\</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="callbacks.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="callbacks.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="errors.h">
       <SubType>compile</SubType>
     </Compile>

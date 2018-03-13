@@ -85,6 +85,24 @@ void GTKeeper::Setup()
 	
 }
 
+bool GTKeeper::OnProcessResult( char * msg)
+{
+	
+	return this->ProcessATMensajes(msg);
+}
+
+
+
+
+void GTKeeper::Sleep()
+{
+	
+	//TO-DO
+	LowP
+}
+
+
+
 
 void GTKeeper::setLed(uint8_t led )
 {

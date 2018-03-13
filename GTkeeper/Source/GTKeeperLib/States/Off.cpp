@@ -9,7 +9,35 @@
 
 
 
+ bool GTKeeper::CheckOff()
+ {
+		return false;
+ }
  
+  void GTKeeper::OnOff()
+  {
+	  LOG_DEBUG("Inicializando Bus I2C");
+	  
+
+	  //Apaga lcd
+	  lcd->off();
+	  
+	  if (IsGSMEnable())
+	  {
+		//Desconecta GSM  
+		  
+	  }
+	  
+	  Sleep();
+	  //Desconectara todo rele activo
+	  
+	  
+	  //Dejara Ard. en Sleep mode KO.
+	  
+	  
+}
+	  
+	  
  void GTKeeper::OnLeaveOff()
  {
 
@@ -23,7 +51,7 @@
 	 lcd->init();
 
 	 //Callbacks o punteros a funcion
-	 ProcessResultPtr = ProcessATMensajesCallback;
+	 //ProcessResultPtr = ProcessATMensajesCallback;
 	 //gtKeeper.ChangeStatus=setLed;
 
 	 

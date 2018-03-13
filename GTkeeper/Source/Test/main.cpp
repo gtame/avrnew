@@ -153,7 +153,7 @@ void ListarSIM()
 
 	 memset(buffname,0,25);
 	 memset(buffnum,0,25);
-
+/*
 	 while (Sim900.GetSIMContact(contacto,buffname,buffnum))
 	 {
 
@@ -167,7 +167,7 @@ void ListarSIM()
 		 contacto++;
 	 }
 
-
+*/
 }
 
 
@@ -366,7 +366,7 @@ void setup()
 
 	return;
 	//Entorno de TEST
-	gtKeeper.Initializate();
+	/*gtKeeper.Initializate();
 
 
 
@@ -440,21 +440,21 @@ void setup()
 
 
 
-	 /*
+	 
 	 gtKeeper.EEPROMCargaProgramas();
 
 	 strcpy(gtKeeper.config.MovilAviso ,"653316799");
 	 strcpy(gtKeeper.config.APN ,"gprs-service.com");
 	 gtKeeper.config.GSMAvailable=true;
 	 gtKeeper.CargaConfigWeb();
-	 */
+	 
 
 
 
 	if (gtKeeper.IsGSMEnable())
 			 Sim900.ActivaModulo();
 
-	gtKeeper.EndInitializate();
+	gtKeeper.EndInitializate();*/
 }
 
 void loop() //----( LOOP: RUNS CONSTANTLY )----
@@ -506,10 +506,7 @@ void loop() //----( LOOP: RUNS CONSTANTLY )----
 					//LOG_DEBUG_ARGS("Cobertura %i",Sim900.GetCobertura());
 			}
 
-			if(SCREEN_ACTIVE())
-					Sim900.ProcessResults(1);
-				else
-					Sim900.ProcessResults(500);
+ 
 		}
 
 		char c=(char) sserial->read();

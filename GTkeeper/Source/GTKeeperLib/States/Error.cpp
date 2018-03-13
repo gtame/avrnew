@@ -12,7 +12,7 @@
  bool GTKeeper::CheckError()
  {
 	  LOG_DEBUG("CHECK ERROR");
-
+	//Hay error¿?
 	 LOG_DEBUG("CHECK ERROR TERMINADO");
 	 return false;
  }
@@ -20,7 +20,7 @@
  //ACCION
  void GTKeeper::OnError()
  {
-	  //Logeamos
+	  //Que hacemos en caso de error
 	  //Mostramos al usua¿?
 
  }
