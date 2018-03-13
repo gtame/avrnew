@@ -557,8 +557,8 @@ bool SIM900::URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),vo
 							{
 								//+HTTPACTION:0,200,<length>
 								//delay(4000);
-								char *buffer=Sim900.GetLastResponse();
-								char *httplen=Sim900.GetToken(buffer,2,",");
+								char *buffer=GetLastResponse();
+								char *httplen=GetToken(buffer,2,",");
 								int serialLen= atoi(httplen);
 
 								//Para bien tendria que devover un resultado

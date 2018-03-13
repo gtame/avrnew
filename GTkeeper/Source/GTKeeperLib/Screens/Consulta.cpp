@@ -267,7 +267,7 @@ void Consulta::OnDrawFields()
 		//Mostramos info de la cobertura!!
 		if (gtKeeper.IsGSMEnable())
 		{
-			uint8_t current_cobertura=Sim900.GetCobertura();
+			uint8_t current_cobertura=gtKeeper.GetCobertura();
 			writeMeter(current_cobertura);
 		}
 

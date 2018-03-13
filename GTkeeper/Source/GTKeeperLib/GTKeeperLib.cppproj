@@ -328,6 +328,18 @@
     <Compile Include="settings.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="States\Error.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\Init.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\Off.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\Reset.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="textos.h">
       <SubType>compile</SubType>
     </Compile>
@@ -342,7 +354,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="NewFolder1\" />
+    <Folder Include="States" />
     <Folder Include="Utils" />
     <Folder Include="Screens\" />
   </ItemGroup>

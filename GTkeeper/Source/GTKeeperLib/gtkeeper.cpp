@@ -1,6 +1,5 @@
 #include "gtkeeper.h"
 #include "callbacks.h"
-
 /*
  * gtkeeper.c
  *
@@ -9,11 +8,9 @@
  */
 
  
-//Pin Teclado
+Logger Log(&Serial);
 
-
-StateMachine stateMachine(4, 9);
-
+//KEYPAD 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //three columns
 char keys[ROWS][COLS] = {
@@ -23,26 +20,15 @@ char keys[ROWS][COLS] = {
 	{'7','8','9','C'},
 	{'*','0','#','D'}
 };
-
-
-
 byte colPins[COLS] =  { KEYBOARD_COL1_PIN,KEYBOARD_COL2_PIN,KEYBOARD_COL3_PIN,KEYBOARD_COL4_PIN};  //connect to the row pinouts of the keypad
 byte rowPins[ROWS] = {KEYBOARD_ROW1_PIN, KEYBOARD_ROW2_PIN, KEYBOARD_ROW3_PIN, KEYBOARD_ROW4_PIN};  //connect to the column pinouts of the keypad
 
-//Clase para hacer el log
-Logger Log(&Serial);
-//Clase para comunicar con el SIM900 (ACCESO A DATOS)
-SIM900 Sim900(&Serial1);
-LiquidCrystal_I2C lcd(0x20, 20, 4);//Display LCD I2C
-Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-
-
-//OJO el puerto 9 debe ser reservado para arrancar el modulo GSM
+ 
 const uint8_t GTKeeper::ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
 const uint8_t GTKeeper::ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
 
 
-GTKeeper::GTKeeper()
+GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(4,3)
 {
 	//hora_actual=0;
 	t_last_web=0; //Tiempo para controlar los tiempos de la web.
@@ -66,7 +52,11 @@ GTKeeper::GTKeeper()
 
 	ResetConfig();
 
+	 Keypad keypadInstance(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+	 keypad=&keypadInstance;
 
+	 LiquidCrystal_I2C lcdInstance(0x20, 20, 4);//Display LCD I2C
+	 lcd=&lcdInstance;
 }
 
 GTKeeper::~GTKeeper()
@@ -77,305 +67,24 @@ GTKeeper::~GTKeeper()
 
 void GTKeeper::Setup()
 {
-
-
-	//Configuramos la maquina
-	setupStateMachine();
-	//La inicializamos a parada
-	stateMachine.SetState(Off, false, true);
-
-
-	
-}
-
-void GTKeeper::OnLeaveOff()
-{
 	//Inicializamos los puertos series
 	Serial.begin(9600);
 	Serial1.begin(9600);
 	Serial2.begin(9600);
 
 
-	LOG_DEBUG("Arrancando..");
+	LOG_DEBUG("Configurando maquina.");
+	//Configuramos la maquina
+	setupStateMachine();
 
-	//Inicializacion para I2C
-	//Esta llamada es necesaria pq sino da un error el linker en la lib LiquidCrystal_I2C
-	//./LiquidCrystal_I2C.cpp:41: undefined reference to `Wire'
-	Wire.begin();
-	//Inicializacion LCD
-	lcd.init();
+	LOG_DEBUG("Arrancando maquina");
+	//La inicializamos a parada
+	SetState(Off, false, true);
 
-
-	//Callbacks o punteros a funcion
-	Sim900.ProcessResultPtr = ProcessATMensajesCallback;
-	//gtKeeper.ChangeStatus=setLed;
 
 	
 }
-void GTKeeper::OnInitializating()
-{
-	LOG_DEBUG("OnInitializating");
-	SetupPantallaTeclado();
-}
 
-
-void GTKeeper::SetupPantallaTeclado()
-{
-
-	static bool blnResetLoop=false;
-	uint8_t line_num=0;
-
-	const uint8_t NUM_INTENTOS=5;
- 
-
-
-
-	//Inicializamos el gestor de ventanas
-	screenManager.Initializate(&lcd,20,4,&keypad);
-
-
-	screenManager.Encender();
-
-	LOG_DEBUG_B("CHECK RESET");
-	time_t time=now();
-
-	keypad.getKeys();
-	int indexA= keypad.findInList('A');
-	int indexD= keypad.findInList('D');
-
-	//Si pulsamos XX SEG estas dos teclas se resetearan TODAS configs. :)
-	while (blnResetLoop &&
-	(keypad.key[indexA].kstate==PRESSED || keypad.key[indexA].kstate==HOLD) &&
-	(keypad.key[indexD].kstate==PRESSED || keypad.key[indexD].kstate==HOLD)
-	)
-	{
-		if (ELAPSED_SECONDS(time)>10)
-		{
-			screenManager.ShowMsgBox_P(PSTR("Desea resetear las \nconfiguraciones?"),MsgYesNoButton, ResetConfigsCallBack);
-
-			while (blnResetLoop)
-			screenManager.Loop();
-		}
-		delay(500);
-		keypad.getKeys();
-	}
-
-
-	LOG_DEBUG_B("CHECK TERMINADO");
-
-	//Cargamos la configuracion del terminal
-	bool config_error=!gtKeeper.EEPROMCargaConfig();
-
-	//Inicializamos gtKeeper
-	if (!config_error)
-	screenManager.PrintTextLine_P(line_num,TXT_CONFIG, TXT_OK);
-	else
-	{
-		gtKeeper.ResetConfig();
-		screenManager.PrintTextLine_P(line_num,TXT_CONFIG, TXT_ERROR);
-	}
-	line_num++;
-
-
-	LOG_DEBUG_B("ACTIVANDO GSM");
-	//Configura puertos y demas
-	gtKeeper.Initializate();
-
-	//Comprobamos si tiene gsm configurado
-	if (gtKeeper.IsGSMEnable())
-	{
-
-		LOG_DEBUG_B("ACTIVANDO GSM");
-		bool blnOK=true;
-		uint8_t num_veces=0;
-
-		//Arranca Modulo
-		while(!(blnOK=Sim900.ActivaModulo()) &&  num_veces<NUM_INTENTOS)
-		{
-			gtKeeper.setLed(LED_ERROR_MODULE_PIN);
-			delay(500);
-			num_veces++;
-		}
-
-		if (blnOK)
-		screenManager.PrintTextLine_P(line_num,TXT_MOD_GSM, TXT_OK);
-		else
-		screenManager.PrintTextLine_P(line_num,TXT_MOD_GSM, TXT_ERROR);
-
-		line_num++;
-
-
-		//SIM -- Ready¿?
-		if (blnOK)
-		{
-
-			num_veces=0;
-			while (!(blnOK=gtKeeper.CheckSIM())  &&  num_veces<NUM_INTENTOS)
-			{
-				gtKeeper.setLed(LED_ERROR_SIM_PIN);
-				delay(500);
-				num_veces++;
-			}
-
-			if (blnOK)
-			screenManager.PrintTextLine_P(line_num,TXT_SIM, TXT_OK);
-			else
-
-			screenManager.PrintTextLine_P(line_num,TXT_SIM, TXT_OK);
-
-			line_num++;
-		}
-		else
-		LOG_DEBUG_B("GSM NO ACTIVO");
-
-
-
-		//Esperamos 2 seg, para que coga red..
-		delay(2000);
-
-
-		if (blnOK)
-		{
-
-			num_veces=0;
-			//Network
-			while (!(blnOK=gtKeeper.EstaRegistradoGSM()) &&  num_veces<NUM_INTENTOS)
-			{
-				gtKeeper.setLed(LED_ERROR_NETWORK_PIN);
-				delay(500);
-				num_veces++;
-			}
-
-			if (blnOK)
-			screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_OK);
-			else
-			screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_ERROR);
-
-			line_num++;
-		}
-
-
-
-
-
-
-
-		//eNVIA SMS REINICIO
-
-		//Antes de hacer un clear de la pantalla esperamos 1 seg.
-
-
-		//Fijar Hora desde red GSM
-		if (blnOK)
-		{
-
-
-			lcd.clear();
-			line_num=0;
-			if (gtKeeper.config.AvisosSMS & SMSReset)
-			{
-				//Esperamos 2 seg SMS
-				delay(2000);
-
-				screenManager.PrintTextLine_P(line_num,TXT_SMS, PSTR(""));
-				//Envio mail de aviso
-				gtKeeper.SendSmsIniReinicio();
-				screenManager.PrintTextLine_P(line_num,TXT_SMS, TXT_OK);
-				line_num++;
-			}
-
-
-			num_veces=0;
-			delay(5000);
-			//Network
-			while (!(blnOK=gtKeeper.FijarHoraGSM()) &&  num_veces<NUM_INTENTOS)
-			{
-				delay(500);
-				num_veces++;
-			}
-
-
-
-			if (blnOK)
-			screenManager.PrintTextLine_P(line_num,TXT_RELOJ, TXT_OK);
-			else
-			screenManager.PrintTextLine_P(line_num,TXT_RELOJ, TXT_ERROR);
-
-			line_num++;
-		}
-	}
-	else
-	{
-		screenManager.PrintTextLine_P(line_num,TXT_RELOJ, TXT_ERROR);
-		line_num++;
-	}
-
-
-	if (line_num==4)
-	lcd.clear();
-
-
-
-	//Cargamos programas
-	if (gtKeeper.EEPROMCargaProgramas())
-	screenManager.PrintTextLine_P(line_num,TXT_PROGRAMAS, TXT_OK);
-	else
-	screenManager.PrintTextLine_P(line_num,TXT_PROGRAMAS, TXT_ERROR);
-
-
-	#ifdef PROTEUS
-	if (!gtKeeper.EstaEnHora())
-	{
-		TimeElements timeEl;
-		timeEl.Day=8;
-		timeEl.Month=4;
-		timeEl.Year=y2kYearToTm(16);
-		timeEl.Hour=23;
-		timeEl.Minute=38;
-
-		gtKeeper.SetHora(makeTime(timeEl));
-
-	}
-
-	screenManager.SetTimeInactivity(0);
-	#endif
-
-
-	//Avisa que ya se ha acabado la incializacion de gtkeeper
-	gtKeeper.EndInitializate();
-
-
-
-
-
-	if (strlen(gtKeeper.config.APN)==0)
-	{
-		strcpy(gtKeeper.config.APN,"gprs-service.com");
-	}
-
-	//Si no hemos conseguido ponerlo en hora , la solicitaremos manualmente
-	if (gtKeeper.EstaEnHora())
-	screenManager.SetPantallaActual((ScreenBase*)&menuScreen);
-	else
-	screenManager.SetPantallaActual((ScreenBase*)&fechahoraScreen);
-
-
-	if (config_error)
-	screenManager.ShowMsgBox_P(PSTR("Error configuracion\nParametros->Sistema"),MsgOkButton,NULL);
-
-
-
-	//Fijamos la pantalla actual..
-	if (!config_error)
-	//Ajustamos Config Web
-	gtKeeper.CargaConfigWeb();
-
-
-	//eNVIA SMS REINICIO ALL
-	if (gtKeeper.IsGSMEnable())
-	gtKeeper.SendSmsFinReinicio();
-
-}
 
 void GTKeeper::setLed(uint8_t led )
 {
@@ -424,14 +133,13 @@ void GTKeeper::setLed(uint8_t led )
 	(led!=LED_ERROR_NETWORK_PIN?digitalWrite(LED_ERROR_NETWORK_PIN,LOW):digitalWrite(LED_ERROR_NETWORK_PIN,HIGH));
 }
 
-
-
-
 void GTKeeper::setupStateMachine()
 {
 	
 	//Fijamos las transiciones de estados
-//	stateMachine.AddTransition(Off, Initializating, []() { return true; });
+	AddTransition(Off, Init, []() { return true; });
+	AddTransition(Init, Reset, []() { return gtKeeper.CheckReset(); });
+	AddTransition(Init, Error, []() { return gtKeeper.CheckError(); });
 /*
 	stateMachine.AddTransition(PosicionA, PosicionB, []() { return input == Forward; });
 	
@@ -448,16 +156,21 @@ void GTKeeper::setupStateMachine()
 	*/
 
 	///Fijamos las acciones de salida para cada estado
- //	stateMachine.SetOnEntering(Initializating,  []() { OnInitializating();});
+	SetOnEntering(Off,  []() { gtKeeper.OnReset();});
+ 	SetOnEntering(Init,  []() { gtKeeper.OnInit();});
+	SetOnEntering(Reset,  []() { gtKeeper.OnReset();});
+	SetOnEntering(Reset,  []() { gtKeeper.OnError();});
 	/*stateMachine.SetOnEntering(PosicionB, outputB);
 	stateMachine.SetOnEntering(PosicionC, outputC);
 	stateMachine.SetOnEntering(PosicionD, outputD);*/
 	
 	//Fijamos las acciones a ejecutar cuando se abandona un determinado estado
-//	stateMachine.SetOnLeaving(Off, OnLeaveOff);
+	SetOnLeaving(Off, []() { gtKeeper.OnLeaveOff();});
+	SetOnLeaving(Init, []() { gtKeeper.OnLeaveInit();});
+	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveReset();});
+	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveError();});
  
 }
-
 
 char * GTKeeper::PBB (const __FlashStringHelper * p1,...)
 {
@@ -474,24 +187,6 @@ void GTKeeper::OnChangeStatus(uint8_t status)
 {
 	if(ChangeStatus!=NULL)
 		ChangeStatus(status);
-}
-
-
-void GTKeeper::EndInitializate()
-{
-	if (this->IsGSMEnable())
-		Sim900.getIMEI(config.Imei);
-
-
-	Sim900.SetMode(SleepEnableAuto);
-
-	//Comprobamos bloqueo del sistema¿? ... de momento no
-
-
-
-	bSetupCompleted=true;
-
-
 }
 
 void GTKeeper::ShowConfigInfo()
@@ -521,65 +216,6 @@ void GTKeeper::ShowConfigInfo()
 
 
 }
-
-void GTKeeper::Initializate()
-{
-
-
-	bSetupCompleted=false;
-
-	//No se podia pasar el puntero a funcion dentro de una clase, requiere redefinir el puntero
-	//Sim900.Sim900HTTPGet=GetURL;
-	//Sim900.ProcessResultPtr = ProcessATMensajes;
-
-
-
-
-
-	//Fijamos los puertos conectados a los sectores
-	//Como salidas digitales
-	for(uint8_t i=0;i<PORTS_NUM;i++)
-	{
-		pinMode(ports[i], OUTPUT);
-		APAGA_RELE(ports[i]);
-	}
-
-	//Puertos de abono
-	for(uint8_t i=0;i<PORTS_ABONO;i++)
-	{
-		pinMode(ports_abono[i], OUTPUT);
-		APAGA_RELE(ports_abono[i]);
-	}
-	//Puerto de motor
-	pinMode(PORT_MOTOR, OUTPUT);
-	APAGA_RELE(PORT_MOTOR);
-
-	//Puerto comun
-	pinMode(PORT_COMUN_PIN, OUTPUT);
-	APAGA_RELE(PORT_COMUN_PIN);
-
-	//Puerto pu
-	pinMode(PORT_PUENTEH1_PIN, OUTPUT);
-	pinMode(PORT_PUENTEH2_PIN, OUTPUT);
-	digitalWrite(PORT_PUENTEH2_PIN, LOW);
-	digitalWrite(PORT_PUENTEH2_PIN, LOW);
-
-
-	//Arraay de salidas activas a 0
-	for (uint8_t i = 0; i < MAX_PROGRAMAS; i++)
-	{
-		salidas[i].Tipo=actNone;
-	}
-
-	//Ponemos como salida los dos pines para el control
- 	pinMode( LED_ERROR_MODULE_PIN, OUTPUT);
-	pinMode(GSM_ONOFF_PIN, OUTPUT);
-
-
-	Sim900.WakeUp();
-	Sim900.SetMode(SleepDisable);
-}
-
 
 //03101010120001200000
 //03->Sector
@@ -645,9 +281,6 @@ bool GTKeeper::CargaProgramaDesdeString(char *programa,Programa* tprograma)
 
 }
 
-
-
-
 bool GTKeeper::GrabarProgramaAEEPROM(uint8_t posicion,Programa* programa)
 {
 		memset(buffer,0, MAIN_BUFFER_SIZE);
@@ -697,7 +330,6 @@ bool GTKeeper::GrabarProgramaAEEPROM(uint8_t posicion,Programa* programa)
 		}
 }
 
-
 bool GTKeeper::CargarProgramaDesdeEEPROM(uint8_t posicion,Programa* programa)
 {
 	memset(buffer,0,MAIN_BUFFER_SIZE);
@@ -717,7 +349,6 @@ bool GTKeeper::CargarProgramaDesdeEEPROM(uint8_t posicion,Programa* programa)
 
 }
 
-
 bool GTKeeper::EEPROMCargaProgramas()
 {
 	bool bresult=true;
@@ -734,7 +365,6 @@ bool GTKeeper::EEPROMCargaProgramas()
 		}
 }
 
-
 void GTKeeper::ResetProgramas()
 {
 		for (uint8_t program=0;program<MAX_PROGRAMAS;program++)
@@ -743,7 +373,6 @@ void GTKeeper::ResetProgramas()
 			GrabarProgramaAEEPROM(program,&programas[program]);
 		 }
 }
-
 
 void GTKeeper::ResetPrograma(Programa* programa)
 {
@@ -755,7 +384,6 @@ void GTKeeper::ResetPrograma(Programa* programa)
 					programa->TiempoRiego=0;
 }
 
-
 void GTKeeper::ShowInfoProgramas()
 {
 	for (uint8_t program=0;program<MAX_PROGRAMAS;program++)
@@ -765,7 +393,6 @@ void GTKeeper::ShowInfoProgramas()
 			LOG_DEBUG_ARGS("%i->%s",program,buffer);
 		 }
 }
-
 
 void GTKeeper::ProgramaToString(char *text,Programa *programa) {
 
@@ -794,19 +421,18 @@ void GTKeeper::ProgramaToString(char *text,Programa *programa) {
 
 }
 
-
 //Si la SIM esta lista, y es la primera vez
 //verificamos que haya un contacto al que llamar
 bool GTKeeper::CheckSIM()
 {
 	//Ya no comprobamos si existe un contacto
-	return Sim900.SIMEstaLista();
+	return SIMEstaLista();
 	/*
 	static bool firstCheck=true;
-	bool result=Sim900.SIMEstaLista();
+	bool result=SIMEstaLista();
 	if (result && firstCheck)
 	{
-		if (Sim900.ExisteContactoSIM(1))
+		if (ExisteContactoSIM(1))
 			firstCheck=false;
 		else
 			result=false;
@@ -814,7 +440,6 @@ bool GTKeeper::CheckSIM()
 	return result;
 	*/
 }
-
 
 void GTKeeper::CheckRiegos(bool sendWeb)
 {
@@ -837,7 +462,7 @@ void GTKeeper::CheckRiegos(bool sendWeb)
 		RegistrarEstadisticas();
 
 		//actualizamos la hora de arduino
-		//time_t hora_actual=Sim900.GetTime(timeEl);
+		//time_t hora_actual=GetTime(timeEl);
 		//setTime(hora_actual);
 		breakTime( current_minute, timeEl);
 		//LOG_INFO7
@@ -882,7 +507,6 @@ void GTKeeper::CheckRiegos(bool sendWeb)
 	}
 
 }
-
 
 time_t GTKeeper::GetTimeWithoutSeconds(time_t tiempo)
 {
@@ -938,7 +562,7 @@ void GTKeeper::LanzaRiego(uint8_t contador,bool sendsms=false) {
 		if (IsGSMEnable() &&  sendsms || (config.AvisosSMS & SMSInicioSector))
 		{
 
-			Sim900.SmsMessage(PBB(F("Lanza S%i R%02d:%02d A%02d:%02d\n"),programas[contador].Sector
+			SmsMessage(PBB(F("Lanza S%i R%02d:%02d A%02d:%02d\n"),programas[contador].Sector
 					,hour(programas[contador].TiempoRiego),minute(programas[contador].TiempoRiego)
 					,hour(programas[contador].TiempoAbono),minute(programas[contador].TiempoAbono)));
 		}
@@ -982,7 +606,7 @@ void GTKeeper::PararRiego(uint8_t contador) {
 #ifdef SMS
 		if (IsGSMEnable() && (config.AvisosSMS & SMSFinSector))
 		{
-			Sim900.SmsMessage(PBB(F("Paro P%i S%i\n"),contador+1, programas[contador].Sector));
+			SmsMessage(PBB(F("Paro P%i S%i\n"),contador+1, programas[contador].Sector));
 
 		}
 #endif
@@ -990,7 +614,6 @@ void GTKeeper::PararRiego(uint8_t contador) {
 
 
 }
-
 
 void GTKeeper::ChequearRiegos(time_t tiempo) {
 
@@ -1001,7 +624,7 @@ void GTKeeper::ChequearRiegos(time_t tiempo) {
 	uint8_t hora_actual = hour(tiempo);
 	uint8_t minuto_actual = minute(tiempo);
 
-	//Sim900.SmsOpen(config.MovilAviso);
+	//SmsOpen(config.MovilAviso);
 
 	//Log.Info("Chequeando riegos de esta hora %02i:%02i", hora_actual, minuto_actual);
 
@@ -1034,7 +657,7 @@ void GTKeeper::ChequearRiegos(time_t tiempo) {
 #ifdef SMS
 						if (IsGSMEnable() && (config.AvisosSMS & SMSFinSector))
 						{
-							Sim900.SmsMessage_P(PSTR("Parada bomba abono\n"));
+							SmsMessage_P(PSTR("Parada bomba abono\n"));
 
 						}
 #endif
@@ -1095,10 +718,9 @@ void GTKeeper::ChequearRiegos(time_t tiempo) {
 
 #ifdef SMS
 	//Enviara el SMS - o si no tiene ningun msj lo cancela
-	Sim900.SmsSend();
+	SmsSend();
 #endif
 }
-
 
 //PAra las valvulas latch hay que dar un golpe(abrir y cerrar) el rele
 //Con una polaridad abre la valvula, con la otra la cierra
@@ -1158,8 +780,6 @@ void GTKeeper::CerrarValvulaLatch(uint8_t sector)
 		digitalWrite(PORT_PUENTEH2_PIN,LOW);
 
 }
-
- 
 
 bool GTKeeper::EnciendeSector(uint8_t sector)
 {
@@ -1317,7 +937,7 @@ void GTKeeper::EnciendeSectorSMS(uint8_t sector)
 		if (config.GSMAvailable &&  (config.AvisosSMS & SMSInicioSector))
 		{
 
-			Sim900.Sms(config.MovilAviso,PBB(F("Arrancado Sector %i desde SMS"),sector));
+			Sms(config.MovilAviso,PBB(F("Arrancado Sector %i desde SMS"),sector));
 		}
 #endif
 	}
@@ -1370,7 +990,6 @@ void GTKeeper::ApagarRiegos()
 
 }
 
-
 void GTKeeper::CheckWeb()
 {
 	//Comprobamos si hay que comprobar los programas de riego via peticion web
@@ -1396,11 +1015,11 @@ void GTKeeper::CheckWeb()
 			//Si se producen más errores de la cuenta
 			if (error_web>MAX_ERROR_WEB)
 			{
-				Sim900.SmsOpen(config.MovilAviso);
-				Sim900.SmsMessage_P(PSTR("Tras varios intentos no se puede acceder a la programacion web :(\nIntente sincronizar mas tarde."));
+				SmsOpen(config.MovilAviso);
+				SmsMessage_P(PSTR("Tras varios intentos no se puede acceder a la programacion web :(\nIntente sincronizar mas tarde."));
 				SendSmsHora();
 				SendSmsProgramacion();
-				Sim900.SmsSend();
+				SmsSend();
 
 
 				CargaConfigWeb();
@@ -1416,15 +1035,12 @@ void GTKeeper::CheckWeb()
 
 }
 
-
-
-
 void GTKeeper::SendSmsHora()
 {
 #ifdef SMS
 	time_t current_minute=now();
 	breakTime( current_minute, timeEl);
-	Sim900.SmsMessage(PBB(F("Hora: %02i/%s/%02i %02i:%02i:%02i\n"),timeEl.Day, monthStr(timeEl.Month),tmYearToY2k(timeEl.Year), timeEl.Hour,timeEl.Minute,timeEl.Second));
+	SmsMessage(PBB(F("Hora: %02i/%s/%02i %02i:%02i:%02i\n"),timeEl.Day, monthStr(timeEl.Month),tmYearToY2k(timeEl.Year), timeEl.Hour,timeEl.Minute,timeEl.Second));
 #endif
 }
 
@@ -1437,12 +1053,12 @@ void GTKeeper::SendSmsSectoresEjecucion()
 
 	if (config.MovilAviso!=NULL && strlen(config.MovilAviso)>0)
 	{
-			Sim900.SmsOpen(config.MovilAviso);
+			SmsOpen(config.MovilAviso);
 
 
 			if (GetSalidasActivas()>0)
 			{
-				Sim900.SmsMessage_P(PSTR("Sectores con riegos activos:\n"));
+				SmsMessage_P(PSTR("Sectores con riegos activos:\n"));
 
 				//Hacemos un bucle para recorrer todos los programas iremos agregandolos a los sms.
 				for(uint8_t i=0;i< MAX_PROGRAMAS;i++)
@@ -1451,23 +1067,23 @@ void GTKeeper::SendSmsSectoresEjecucion()
 					{
 						case actPrograma:
 						{
-							Sim900.SmsMessage(PBB(F("Programa %i Sector %i\n"),salidas[i].Ident,salidas[i].Sector));
+							SmsMessage(PBB(F("Programa %i Sector %i\n"),salidas[i].Ident,salidas[i].Sector));
 						}
 						break;
 						case actSector:
 						{
-							Sim900.SmsMessage(PBB(F("Sector %i\n"),salidas[i].Ident));
+							SmsMessage(PBB(F("Sector %i\n"),salidas[i].Ident));
 						}
 						break;
 						case actAbono:
 						{
-							Sim900.SmsMessage_P(PSTR("Bomba abono activada\n"));
+							SmsMessage_P(PSTR("Bomba abono activada\n"));
 
 						}
 						break;
 						case actMotor:
 						{
-							Sim900.SmsMessage_P(PSTR("Motor activado\n"));
+							SmsMessage_P(PSTR("Motor activado\n"));
 						}
 						break;
 						case actLimpieza:
@@ -1480,13 +1096,12 @@ void GTKeeper::SendSmsSectoresEjecucion()
 			}
 			else
 			//Si no hay en ejecucion . lo indicamos
- 				Sim900.SmsMessage(PBB(F("No hay ningun riego activado")));
+ 				SmsMessage(PBB(F("No hay ningun riego activado")));
 
-			Sim900.SmsSend();
+			SmsSend();
 	}
 //#endif
 }
-
 
 //Envia alerta cuando se completo el reinicio
 void GTKeeper::SendSmsFinReinicio()
@@ -1496,15 +1111,15 @@ void GTKeeper::SendSmsFinReinicio()
 
 	if (IsGSMEnable() && (config.AvisosSMS & SMSReset))
 	{
-		Sim900.SmsOpen(config.MovilAviso);
+		SmsOpen(config.MovilAviso);
 
-		Sim900.SmsMessage_P(PSTR("Reiniciado GTKeeper con exito\n"));
+		SmsMessage_P(PSTR("Reiniciado GTKeeper con exito\n"));
 		SendSmsHora();
-		Sim900.SmsMessage(PBB(F("Password SMS: %s\n"),config.PasswordSMS));
-		Sim900.SmsMessage(PBB(F("Aviso SMS: %i\n"),config.AvisosSMS));
-		Sim900.SmsMessage(PBB(F("Imei: %s\n"),config.Imei));
+		SmsMessage(PBB(F("Password SMS: %s\n"),config.PasswordSMS));
+		SmsMessage(PBB(F("Aviso SMS: %i\n"),config.AvisosSMS));
+		SmsMessage(PBB(F("Imei: %s\n"),config.Imei));
 		SendSmsProgramacion();
-		Sim900.SmsSend();
+		SmsSend();
 
 	}
 #endif
@@ -1521,7 +1136,7 @@ void GTKeeper::SendSmsIniReinicio()
 if (IsGSMEnable() && (config.AvisosSMS & SMSReset))
 {
 	delay(1000);
-	Sim900.Sms_P(config.MovilAviso,PSTR("Reiniciando GTKeeper.."));
+	Sms_P(config.MovilAviso,PSTR("Reiniciando GTKeeper.."));
 }
 
 #endif
@@ -1548,7 +1163,7 @@ void GTKeeper::SendSmsProgramacion()
 								memset(buffer,0,MAIN_BUFFER_SIZE);
 								ProgramaToString(buffer,&programas[program]);
 								buffer[strlen(buffer)]='\n'; //Salto linea por programa
-								Sim900.SmsMessage(buffer);
+								SmsMessage(buffer);
 
 						}
 					}
@@ -1558,14 +1173,12 @@ void GTKeeper::SendSmsProgramacion()
 					//Si hay algun pdte de enviar..
 					if (!tiene_programas)
 					{
-						Sim900.SmsMessage_P(PSTR("No hay programas cargados"));
+						SmsMessage_P(PSTR("No hay programas cargados"));
 					}
 	}
 #endif
 
 }
-
-
 
 void GTKeeper::ResetConfig()
 {
@@ -1591,20 +1204,19 @@ void GTKeeper::ResetConfig()
 
 bool GTKeeper::CargaConfigDesdeSim()
 {
-	if (Sim900.ExisteContactoSIM(1) && 	Sim900.ExisteContactoSIM(2) && 	Sim900.ExisteContactoSIM(3))
+	if (ExisteContactoSIM(1) && 	ExisteContactoSIM(2) && 	ExisteContactoSIM(3))
 	{
 
-		Sim900.GetSIMContact(1,config.MovilAviso,NULL);
-		Sim900.GetSIMContact(2,config.PasswordSMS,NULL);
-		Sim900.GetSIMContact(3,NULL,config.APN);
-		Sim900.GetSIMContact(4,NULL,config.userAPN);
-		Sim900.GetSIMContact(5,NULL,config.pwdAPN);
+		GetSIMContact(1,config.MovilAviso,NULL);
+		GetSIMContact(2,config.PasswordSMS,NULL);
+		GetSIMContact(3,NULL,config.APN);
+		GetSIMContact(4,NULL,config.userAPN);
+		GetSIMContact(5,NULL,config.pwdAPN);
 		return true;
 	}
 	else
 		return false;
 }
-
 
 void GTKeeper::CargaConfigDesdeString(char* configstr)
 {
@@ -1641,30 +1253,28 @@ void GTKeeper::CargaConfigDesdeString(char* configstr)
 
 }
 
-
 //Carga los parametros de configuración web para que el modulo pueda conectar a internet
 void GTKeeper::CargaConfigWeb()
 {
 
-		Sim900.ConfigAPN(F("CONTYPE"),"GPRS");
+		ConfigAPN(F("CONTYPE"),"GPRS");
 
 
-		Sim900.SendCommandCheckError(F("AT+CSTT=\"%s\",\"%s\",\"%s\""),(__FlashStringHelper*)SIM900::AT_OK,(__FlashStringHelper*)SIM900::AT_ALL_ERRORS,config.APN,config.userAPN,config.pwdAPN);
+		SendCommandCheckError(F("AT+CSTT=\"%s\",\"%s\",\"%s\""),(const __FlashStringHelper*)ATSerial::AT_OK,(const __FlashStringHelper*)ATSerial::AT_ALL_ERRORS,config.APN,config.userAPN,config.pwdAPN);
 
 		if (strlen(config.APN)>0)
-			Sim900.ConfigAPN(F("APN"),config.APN);
+			ConfigAPN(F("APN"),config.APN);
 
 		//--Configuracion APN
 		if (strlen(config.userAPN)>0)
-			Sim900.ConfigAPN(F("USER"),config.userAPN);
+			ConfigAPN(F("USER"),config.userAPN);
 
 		//--UserAPN
 			if (strlen(config.pwdAPN)>0)
-			Sim900.ConfigAPN(F("PWD"),config.pwdAPN);
+			ConfigAPN(F("PWD"),config.pwdAPN);
 
 
 }
-
 
 void GTKeeper::CheckWebConfig()
 {
@@ -1676,7 +1286,7 @@ void GTKeeper::CheckWebConfig()
 
 bool GTKeeper::GetConfig4Web(char *url)
 {
-	return Sim900.URLRequest(url,true,NULL,ConfigHttpResultCallbackStatic);
+	return URLRequest(url,true,NULL,ConfigHttpResultCallbackStatic);
 }
 
 void GTKeeper::ConfigHttpResultCallbackStatic(const char* url,int len)
@@ -1691,17 +1301,17 @@ void GTKeeper::ConfigHttpResultCallback(const char* url,int len)
 	uint8_t result=(len>0?LOAD_WEB_OK:LOAD_WEB_ERR_NO_RESPONSE);
 
 	//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
-	if (Sim900.SendCommandCheck( "AT+HTTPREAD=%i,%i","+HTTPREAD:",contador,LEN_CONFIG_STRING)==RX_CHECK_OK)
+	if (gtKeeper.SendCommandCheck( "AT+HTTPREAD=%i,%i","+HTTPREAD:",contador,LEN_CONFIG_STRING)==RX_CHECK_OK)
 	{
 		//19 Es por que el programa es de longuitud 17 +2 (CR+LF)
 		//+HTTPREAD: 19
-		//char *buffer=Sim900.GetLastResponse();
+		//char *buffer=GetLastResponse();
 		//buffer=buffer+10;
 		//int serialLen= atoi(buffer);<--Serial len
-		Sim900.WaitResponse(500);
+		gtKeeper.WaitResponse(500);
 		//Ahora llamamos a la funcion que gestionara los datos recibidos de la peticion GET
-		readResult= Sim900.ReadSerialLine();
-		char *line=Sim900.GetLastResponse();
+		readResult= gtKeeper.ReadSerialLine();
+		char *line=gtKeeper.GetLastResponse();
 		if(strlen(line)==LEN_CONFIG_STRING)
 		{
 			//Cargamos la config desde string si todo sale OK punto pelota
@@ -1712,19 +1322,15 @@ void GTKeeper::ConfigHttpResultCallback(const char* url,int len)
 	}
 }
 
-
-
 bool GTKeeper::GetURL(char *url)
 {
-	return Sim900.URLRequest(url,true,NULL,DefaultHttpResultCallbackStatic);
+	return URLRequest(url,true,NULL,DefaultHttpResultCallbackStatic);
 }
-
 
 void GTKeeper::DefaultHttpResultCallbackStatic(const char* url,int len)
 {
 	gtKeeper.GetHttpResultCallback(url,len);
 }
-
 
 //LLamada a metodo
 void GTKeeper::GetHttpResultCallback(const char* url,int len)
@@ -1746,17 +1352,17 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 			while (!delete_all && contador<len && readResult==RX_OK_READ && result==LOAD_WEB_OK)
 			{
 				//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
-				if (Sim900.SendCommandCheck( "AT+HTTPREAD=%i,%i","+HTTPREAD:",contador,LEN_PROGRAMA_STRING_CR_LF)==RX_CHECK_OK)
+				if (SendCommandCheck( "AT+HTTPREAD=%i,%i","+HTTPREAD:",contador,LEN_PROGRAMA_STRING_CR_LF)==RX_CHECK_OK)
 				{
 					//19 Es por que el programa es de longuitud 17 +2 (CR+LF)
 					//+HTTPREAD: 19
-					//char *buffer=Sim900.GetLastResponse();
+					//char *buffer=GetLastResponse();
 					//buffer=buffer+10;
 					//int serialLen= atoi(buffer);<--Serial len
-					Sim900.WaitResponse(500);
+					WaitResponse(500);
 					//Ahora llamamos a la funcion que gestionara los datos recibidos de la peticion GET
-					readResult= Sim900.ReadSerialLine();
-					char *line=Sim900.GetLastResponse();
+					readResult= ReadSerialLine();
+					char *line=GetLastResponse();
 
 					LOG_INFO_ARGS("Web=>%s",line);
 
@@ -1785,7 +1391,7 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 							//Borra todos programas ;)
 							/*while (contador<=SIM_MAX_ENTRIES)
 							{
-								Sim900.BorrarContactoSIM(contador);
+								BorrarContactoSIM(contador);
 								contador++;
 							}*/
 							result=LOAD_WEB_OK ;
@@ -1884,15 +1490,15 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 					//Avisamos de que se ha cargado nuevo programa
 					if (config.AvisosSMS & SMSProgramacionWeb)
 					{
-						Sim900.SmsOpen(config.MovilAviso);
-						Sim900.SmsMessage_P(PSTR("Cargada programacion\n"));
+						SmsOpen(config.MovilAviso);
+						SmsMessage_P(PSTR("Cargada programacion\n"));
 						SendSmsHora();
 						SendSmsProgramacion();
-						Sim900.SmsSend();
+						SmsSend();
 					}
 
 					//Registramos en la web que la carga del programa esta OK!!
-					//Sim900.GetURL()
+					//GetURL()
 				}
 		#endif
 			}
@@ -1919,7 +1525,7 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 
 		#ifdef SMS
 				//Algo ha ido mal :(((
-				Sim900.Sms(config.MovilAviso,PBB(F("Error cargando programas - %i"),result));
+				Sms(config.MovilAviso,PBB(F("Error cargando programas - %i"),result));
 		#endif
 			}
 
@@ -1928,7 +1534,6 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 	}
 
 }
-
 
 //Procesa los mensajes AT Recibidos para callbacks y demas
 bool GTKeeper::ProcessATMensajes(char * msg)
@@ -1959,7 +1564,7 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 
 			//Esperamos medio seg, para que reciba las siguientes lineas
 			delay(400);
-			if (Sim900.ReadSerialLine(buffer,MAIN_BUFFER_SIZE)==RX_OK_READ)
+			if (ReadSerialLine(buffer,MAIN_BUFFER_SIZE)==RX_OK_READ)
 			{
 				//La password debera ir entre corchetes #1111#
 				memset(buff_parse,0,MAIN_BUFFER_PARSE);
@@ -1986,12 +1591,12 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 						if (programa>0 && programa<=MAX_PROGRAMAS)
 						{
 #ifdef SMS
-							Sim900.SmsOpen(config.MovilAviso);
+							SmsOpen(config.MovilAviso);
 #endif
 							LanzaRiego(programa-1,true);
 #ifdef SMS
 							SendSmsHora();
-							Sim900.SmsSend();
+							SmsSend();
 #endif
 
 						}
@@ -2004,10 +1609,10 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 							strcpy(config.APN,sectorptr);
 							EEPROMGuardaConfig();
 							CargaConfigWeb();
-							Sim900.Sms(config.MovilAviso,PBB(F("APN Configurado %s"),config.APN));
+							Sms(config.MovilAviso,PBB(F("APN Configurado %s"),config.APN));
 						}
 						else
-							Sim900.Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
+							Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
 
 
 					}
@@ -2019,10 +1624,10 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 							strcpy(config.userAPN,sectorptr);
 							EEPROMGuardaConfig();
 							CargaConfigWeb();
-							Sim900.Sms(config.MovilAviso,PBB(F("User APN Configurado %s"),sectorptr));
+							Sms(config.MovilAviso,PBB(F("User APN Configurado %s"),sectorptr));
 						}
 						else
-							Sim900.Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
+							Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
 
 
 					}
@@ -2034,10 +1639,10 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 							strcpy(config.pwdAPN,sectorptr);
 							EEPROMGuardaConfig();
 							CargaConfigWeb();
-							Sim900.Sms(config.MovilAviso,PBB(F("Pwd APN Configurado %s"),sectorptr));
+							Sms(config.MovilAviso,PBB(F("Pwd APN Configurado %s"),sectorptr));
 						}
 						else
-							Sim900.Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
+							Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
 
 
 					}
@@ -2053,12 +1658,12 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 
 			#ifdef SMS
 
-									Sim900.SmsOpen(config.MovilAviso);
-									Sim900.SmsMessage_P(PSTR("Estoy preparado!\n"));
+									SmsOpen(config.MovilAviso);
+									SmsMessage_P(PSTR("Estoy preparado!\n"));
 									SendSmsHora();
 									SendSmsProgramacion();
 
-									Sim900.SmsSend();
+									SmsSend();
 			#endif
 
 
@@ -2090,7 +1695,7 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 									if (config.AvisosSMS & SMSFinSector)
 									{
 
-										Sim900.Sms_P(config.MovilAviso,PSTR("Parados todos programas"));
+										Sms_P(config.MovilAviso,PSTR("Parados todos programas"));
 									}
 			#endif
 								}
@@ -2106,7 +1711,7 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 										ApagaAbono(1);
 			#ifdef SMS
 										if (config.AvisosSMS & SMSFinSector)
-										Sim900.Sms_P(config.MovilAviso,PSTR("Apagada bomba de abono por SMS"));
+										Sms_P(config.MovilAviso,PSTR("Apagada bomba de abono por SMS"));
 			#endif
 									}
 									else
@@ -2114,7 +1719,7 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 										EnciendeAbono(1);
 			#ifdef SMS
 										if (config.AvisosSMS & SMSInicioSector)
-										Sim900.Sms_P(config.MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
+										Sms_P(config.MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
 			#endif
 									}
 
@@ -2194,7 +1799,7 @@ bool GTKeeper::Loop()
 			lastgtLoop=now();
 			//	LOG_DEBUG("FIN GTKEEPER LOOP");
 
-			//LOG_DEBUG_ARGS("Cobertura %i",Sim900.GetCobertura());
+			//LOG_DEBUG_ARGS("Cobertura %i",GetCobertura());
 		}
 	}
 
@@ -2206,9 +1811,9 @@ bool GTKeeper::Loop()
 		{
 			//LOG_DEBUG("INI PROCESS LOOP");
 			if(SCREEN_ACTIVE())
-			Sim900.ProcessResults(1);
+			ProcessResults(1);
 			else
-			Sim900.ProcessResults(1000);
+			ProcessResults(1000);
 		}
 
 		//LOG_DEBUG("FIN PROCESS LOOP");
@@ -2233,13 +1838,13 @@ bool GTKeeper::LoopGSM()
 	{
 			//Comprobamos si hay que lanzar/parar sectores
 			//Chequeamos si esta arrancado
-			if (Sim900.EstaArrancado() && error_web_salidas<2)
+			if (EstaArrancado() && error_web_salidas<2)
 			{
 				//Si la sim esta ok
 				if (CheckSIM())
 				{
 					//Chequeamos si esta registrado en la red movil
-					if (Sim900.EstaRegistrado())
+					if (EstaRegistrado())
 					{
 
 
@@ -2289,17 +1894,16 @@ bool GTKeeper::LoopGSM()
 					//Encendemos los led error en modo tranquilo
 					OnChangeStatus(LED_ERROR_MODULE_PIN);
 					if (error_web_salidas>2)
-						Sim900.SwitchModule();
+						SwitchModule();
 
 					error_web_salidas=0;
 					bRebootSIM=true;
-					Sim900.ActivaModulo();
+					ActivaModulo();
 			}
 	}
 
 	return hashError;
 }
-
 
 void GTKeeper::EEPROMGuardaConfig()
 {
@@ -2309,7 +1913,6 @@ void GTKeeper::EEPROMGuardaConfig()
 	 eeprom_write_block((void*)&config, ( void*) 0, sizeof(Configuracion));
 
 }
-
 
 bool GTKeeper::EEPROMCargaConfig()
 {
@@ -2327,7 +1930,7 @@ bool GTKeeper::EEPROMCargaConfig()
 bool GTKeeper::EstaRegistradoGSM()
 {
 	//Comprobamos si esta registrado a la red Movil
-	 return Sim900.EstaRegistrado();
+	 return EstaRegistrado();
 
 }
 
@@ -2335,7 +1938,7 @@ bool GTKeeper::EstaRegistradoGSM()
 bool GTKeeper::FijarHoraGSM()
 {
 	//Obtenemos hora del telefono
-	 time_t hora_actual=Sim900.GetTime(timeEl);
+	 time_t hora_actual=GetTime(timeEl);
 
 	 LOG_INFO_ARGS_B("Set hora->%02i/%s/%02i %02i:%02i:%02i",timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);
 
@@ -2371,10 +1974,6 @@ void GTKeeper::SetHora(time_t time)
 	t_last_web=time;
 	setTime(time);
 }
-
-
-
-
 
 void GTKeeper::RegistrarEstadisticas()
 {
@@ -2467,8 +2066,6 @@ void GTKeeper::EEPROMGuardarEstadistica(Estadistica * stat)
 //	}
 }
 
-
-
 void GTKeeper::ShowInfoSalidas()
 {
 
@@ -2540,7 +2137,6 @@ uint8_t GTKeeper::RiegosActivosEnSector(uint8_t sector)
 
 	 return num_riegos;
 }
-
 
 //Registra la salida
 void GTKeeper::RegistrarSalida(uint8_t salida , TipoSalidaActiva tipo)
@@ -2638,7 +2234,6 @@ void  GTKeeper::RegistrarSalidaEnEEPROM(SalidasActivas * stat,bool finaliza)
 	}
 }
 
-
 bool GTKeeper::PostHttpParametersCallback()
 {
 
@@ -2662,11 +2257,11 @@ bool GTKeeper::PostHttpParametersCallback()
 	const char  boundary[] = "---------------------------8278697928671";
 
 
-	if (Sim900.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(__FlashStringHelper*) ATSerial::AT_OK,boundary)==RX_CHECK_OK)
+	if (gtKeeper.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,boundary)==RX_CHECK_OK)
 	{
 
 		//gtKeeper.salidas_web-GET_ADDRES_SALIDAS_WEB
-	//	if (Sim900.SendCommandCheck( F("AT+HTTPDATA=%i,10000"),F("DOWNLOAD"),195)==RX_CHECK_OK)
+	//	if (SendCommandCheck( F("AT+HTTPDATA=%i,10000"),F("DOWNLOAD"),195)==RX_CHECK_OK)
 
 
 
@@ -2674,25 +2269,25 @@ bool GTKeeper::PostHttpParametersCallback()
 
 		LOG_DEBUG_ARGS_B("totalLen %i",totalLen);
 
-		if (Sim900.SendCommandCheck( F("AT+HTTPDATA=%i,10000"),F("DOWNLOAD"), totalLen)==RX_CHECK_OK)
+		if (gtKeeper.SendCommandCheck( F("AT+HTTPDATA=%i,10000"),F("DOWNLOAD"), totalLen)==RX_CHECK_OK)
 		{
 
 			delay(500);
 
 				uint8_t t=0;
-				//t+=Sim900.SendRawData("Accept-Encoding: deflate");
+				//t+=SendRawData("Accept-Encoding: deflate");
 				//Vomitamos lo que hayamos registrado
 				//Boundary
-				t=Sim900.SendRawData("--");
-				t+=Sim900.SendRawData(boundary);
-				t+=Sim900.SendRawData("\r\n");
+				t=gtKeeper.SendRawData("--");
+				t+=gtKeeper.SendRawData(boundary);
+				t+=gtKeeper.SendRawData("\r\n");
 
 				//Cabecera
-				t+=Sim900.SendRawData("Content-Disposition: form-data; name=\"submitted\"; filename=\"abcd.txt\"\r\n");
-				t+=Sim900.SendRawData("Content-Type: text/plain\r\n\r\n");
+				t+=gtKeeper.SendRawData("Content-Disposition: form-data; name=\"submitted\"; filename=\"abcd.txt\"\r\n");
+				t+=gtKeeper.SendRawData("Content-Type: text/plain\r\n\r\n");
 
 				//Ahora enviamos todo lo que haya en estadisticas
-				//t+=Sim900.SendRawData("abcd\r\n");
+				//t+=SendRawData("abcd\r\n");
 
 				uint16_t ee_addr=EEADDR_SW;
 
@@ -2712,14 +2307,14 @@ bool GTKeeper::PostHttpParametersCallback()
 					 }
 
 
-				    t+=Sim900.SendRawData(gtKeeper.buff_parse);
+				    t+=gtKeeper.SendRawData(gtKeeper.buff_parse);
 				  }
 
 
 				//Boundary
-				t+=Sim900.SendRawData("\r\n--");
-				t+=Sim900.SendRawData(boundary);
-				t+=Sim900.SendRawData("--\r\n");
+				t+=gtKeeper.SendRawData("\r\n--");
+				t+=gtKeeper.SendRawData(boundary);
+				t+=gtKeeper.SendRawData("--\r\n");
 
 				LOG_DEBUG_ARGS_B("Enviado x post--> %i",t);
 				delay(500);
@@ -2743,18 +2338,18 @@ void GTKeeper::PostHttpResultCallback(const char* url,int length)
 	if (length==2)
 	{
 		//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
-		if (Sim900.SendCommandCheck( F("AT+HTTPREAD=%i,%i"),F("+HTTPREAD:"),contador,length)==RX_CHECK_OK)
+		if (gtKeeper.SendCommandCheck( F("AT+HTTPREAD=%i,%i"),F("+HTTPREAD:"),contador,length)==RX_CHECK_OK)
 		{
 			//19 Es por que el programa es de longuitud 17 +2 (CR+LF)
 			//+HTTPREAD: 19
-			//char *buffer=Sim900.GetLastResponse();
+			//char *buffer=GetLastResponse();
 			//buffer=buffer+10;
 			//int serialLen= atoi(buffer);<--Serial len
 
-			Sim900.WaitResponse(500);
+			gtKeeper.WaitResponse(500);
 			//Ahora llamamos a la funcion que gestionara los datos recibidos de la peticion GET
-			readResult= Sim900.ReadSerialLine();
-			char *line=Sim900.GetLastResponse();
+			readResult= gtKeeper.ReadSerialLine();
+			char *line=gtKeeper.GetLastResponse();
 
 			LOG_INFO_ARGS("Web=>%s",line);
 
@@ -2785,7 +2380,7 @@ bool GTKeeper::RegistrarSalidaEnWeb()
 			//A enviar ..
 			memset(buffer,0,MAIN_BUFFER_SIZE);
 			sprintf(buffer,URL_SEND_SALIDAS,config.Imei);
-			if (!Sim900.URLRequest(buffer,false,PostHttpParametersCallback,PostHttpResultCallback))
+			if (!URLRequest(buffer,false,PostHttpParametersCallback,PostHttpResultCallback))
 				result=false;
 				//Reiniciamos modulo GSM
 		}
@@ -2793,9 +2388,6 @@ bool GTKeeper::RegistrarSalidaEnWeb()
 
 	return result;
 }
-
-
-
 
 //Negativo A>B
 //Cero =

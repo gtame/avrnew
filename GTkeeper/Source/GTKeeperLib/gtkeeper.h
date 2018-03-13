@@ -94,7 +94,7 @@
 enum MachineStates
 {
 	Off,
-	Initializating,
+	Init,
 	Error,
 	Reset,
 	User,
@@ -107,12 +107,40 @@ enum MachineStates
 
 
 
-class GTKeeper  {
+class GTKeeper : public SIM900, public StateMachine {
 
 public:
 
 	GTKeeper();
 	virtual ~GTKeeper();
+
+
+///ESTADOS
+	 void OnLeaveOff();
+
+
+	 bool CheckReset();
+	 void OnReset();
+	 void OnLeaveReset();
+
+
+	 bool CheckInit();
+	 void OnInit();
+	 void OnLeaveInit();
+
+	 
+	 bool CheckError();
+	 void OnError();
+	 void OnLeaveError();
+
+///END ESTADOS
+
+
+
+
+
+
+
 
     inline bool IsSetupCompleted() { return bSetupCompleted; }
     inline bool IsPendingWeb() { return bpendingWeb; }
@@ -120,8 +148,7 @@ public:
     //Funciones de clase
     void GetURL(const char * url,int length);
     bool ProcessATMensajes(char * msg);
-    void Initializate();
-    void EndInitializate();
+ 
     bool CheckSIM();
     void CheckRiegos(bool sendWeb);
     void CheckWeb();
@@ -242,6 +269,7 @@ public:
 
      static bool  PostHttpParametersCallback();
      static void PostHttpResultCallback(const char* url,int len);
+
      char buff_parse[MAIN_BUFFER_PARSE]; //Parser para Comandos desde MemoryPrograms
      bool GetURL(char *url);
      void GetHttpResultCallback(const char* url,int len);
@@ -258,8 +286,7 @@ public:
 protected:
 
 
-	 void  OnInitializating();
-	 void OnLeaveOff();
+	
 
 
      static void DefaultHttpResultCallbackStatic(const char* url,int len);
@@ -318,6 +345,9 @@ protected:
 
     bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
 
+
+	Keypad *keypad;
+	LiquidCrystal_I2C *lcd;
 };
 
 

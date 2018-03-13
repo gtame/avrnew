@@ -88,7 +88,7 @@ void GSMMenu::OnClickButton(uint8_t field)
 					if (isReady())
 					{
 
-						 if (Sim900.Sms(gtKeeper.config.MovilAviso,"Sms Test")==RX_CHECK_OK)
+						 if (gtKeeper.Sms(gtKeeper.config.MovilAviso,"Sms Test")==RX_CHECK_OK)
 						 {
 							 screenManager.PrintTextLine(3,"ENVIO SMS", "OK");
 						 }
@@ -120,7 +120,7 @@ void GSMMenu::OnClickButton(uint8_t field)
 			if (isReady())
 			{
 
-				 if (Sim900.URLRequest("http://www.google.es",true,NULL,NULL))
+				 if (gtKeeper.URLRequest("http://www.google.es",true,NULL,NULL))
 				 {
 					 screenManager.PrintTextLine_P(3,TXT_WWW, TXT_OK);
 				 }
@@ -146,7 +146,7 @@ void GSMMenu::OnClickButton(uint8_t field)
 
 bool GSMMenu::isReady()
 {
-	 if (Sim900.EstaArrancado())
+	 if (gtKeeper.EstaArrancado())
 	 {
 
 		 gtKeeper.CargaConfigWeb();

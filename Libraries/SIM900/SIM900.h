@@ -153,7 +153,5 @@ private:
 
 };
 
-
-extern SIM900 Sim900;
-
+ 
 #endif /* HILO_H_ */

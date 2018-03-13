@@ -19,13 +19,16 @@ extern "C" void __cxa_guard_abort (__guard *) {}
 GTKeeper gtKeeper;
 
 void setup() {
+
 	gtKeeper.Setup();
+
+
 } 
 
 void loop() //----( LOOP: RUNS CONSTANTLY )----
 {
 
-	gtKeeper.Loop();
+	gtKeeper.Update();
 }
  
 

@@ -100,7 +100,7 @@ void GsmTelefonoScreen::OnClickButton(uint8_t field)
 			{
 				strcpy(gtKeeper.config.MovilAviso,phone);
 
-				Sim900.SetDefaultSMSNum(gtKeeper.config.MovilAviso);
+				gtKeeper.SetDefaultSMSNum(gtKeeper.config.MovilAviso);
 				gtKeeper.EEPROMGuardaConfig();
 				screenManager.SetPantallaActual((ScreenBase *)&gsmMenuScreen);
 			}

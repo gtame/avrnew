@@ -18,7 +18,7 @@
 #include <ScreenBase.h>
 #include <ScreenManager.h>
 #include "Menu.h"
-#include <SIM900.h>
+#include <gtKeeper.h>
 #include <GTKeeper.h>
 
 class Consulta:ScreenBase {
