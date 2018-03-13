@@ -154,7 +154,15 @@
       <Value>../../../../Libraries/Keypad</Value>
       <Value>../../../../Libraries/Logger</Value>
       <Value>../../../../Libraries/SPI</Value>
-      <Value>../../../../Libraries/SD</Value>
+      <Value>../../../../Librari
+		if (RTC.chipPresent()) {
+			LOG_DEBUG("The DS1307 is stopped.  Please run the SetTime");
+			LOG_DEBUG("example to initialize the time and begin running.");
+			// get the date and time the compiler was run
+		
+		
+			} else {
+			LOG_DEBUG("DS1307 read error!  Please check the circuitry.");es/SD</Value>
       <Value>../../../../Libraries/DS1307RTC</Value>
       <Value>../../../../Libraries/ATSerial</Value>
       <Value>../../../../Libraries/SIM900</Value>

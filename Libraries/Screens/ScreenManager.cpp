@@ -58,7 +58,54 @@ void ScreenManager::SetPantallaActual(ScreenBase* screen)
 }
 
 
+int8_t ScreenManager::ShowMsgBox(char *msg,msgboxmode msgmode,uint8_t delayseconds)
+{
+	static uint8_t result=-1;
 
+	result=-1;
+
+	//Solicitamos confirmación
+	this->ShowMsgBox(
+	msg,
+	msgmode,
+	[](uint8_t button,uint8_t func) {
+		//Flag para salir del bucle loop.
+		result=button;
+	}
+	);
+	time_t timestamp=now();
+
+	while(result==-1 && (delayseconds==0 || ELAPSED_SECONDS(timestamp)<delayseconds))
+	this->Loop();
+
+
+	return result;
+}
+
+int8_t ScreenManager::ShowMsgBox_P(PGM_P msg,msgboxmode msgmode,uint8_t delayseconds)
+{
+	static int8_t result=-1;
+
+	result=-1;
+
+	//Solicitamos confirmación
+	this->ShowMsgBox_P(
+	msg,
+	msgmode,
+	[](uint8_t button,uint8_t func) {
+		//Flag para salir del bucle loop.
+		result=button;
+	}
+	);
+	time_t timestamp=now();
+
+	while(result==-1 && (delayseconds==0 || ELAPSED_SECONDS(timestamp)<delayseconds))
+		this->Loop();
+
+
+	return result;
+
+}
 
 void ScreenManager::ShowMsgBox_P(PGM_P msg,msgboxmode msgmode,void (*MsgFunc)( uint8_t result,uint8_t codefunc ))
 {

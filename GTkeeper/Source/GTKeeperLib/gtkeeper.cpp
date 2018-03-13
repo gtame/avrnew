@@ -8,55 +8,12 @@
  */
 
  
-Logger Log(&Serial);
-
-//KEYPAD 
-const byte ROWS = 4; //four rows
-const byte COLS = 4; //three columns
-char keys[ROWS][COLS] = {
-
-	{'1','2','3','A'},
-	{'4','5','6','B'},
-	{'7','8','9','C'},
-	{'*','0','#','D'}
-};
-byte colPins[COLS] =  { KEYBOARD_COL1_PIN,KEYBOARD_COL2_PIN,KEYBOARD_COL3_PIN,KEYBOARD_COL4_PIN};  //connect to the row pinouts of the keypad
-byte rowPins[ROWS] = {KEYBOARD_ROW1_PIN, KEYBOARD_ROW2_PIN, KEYBOARD_ROW3_PIN, KEYBOARD_ROW4_PIN};  //connect to the column pinouts of the keypad
-
- 
-const uint8_t GTKeeper::ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
-const uint8_t GTKeeper::ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
 
 
-GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(4,3)
+
+GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(4,5)
 {
-	//hora_actual=0;
-	t_last_web=0; //Tiempo para controlar los tiempos de la web.
-	last_RiegosCheck =0;
-	stop_abono=0;
-	error_web=0;//Numero de errores que se producen al intentar acceder al dispositivo
-
-	salidas_activas=0;//Al arrancar no hay salidas activas ;)
-
-	bSetupCompleted=false; //Flag para indicar que ya esta dentro del bloquee loop, y el terminal esta configurado
-	bWebInProcess=false;//Flag para indicar que estamos actualmente refrescando desde la web
-	bpendingWeb=false;//Flag para indicar que es necesario el update de web
-	bRebootSIM=false;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
-	isHourSet=false;//Flag para saber si se ha fijado la hora
-
-
-	salidas_web=0; //Numero de salidas pendientes de ser enviadas x WEB
-
-	memset(buffer,0,MAIN_BUFFER_SIZE);
-	memset(buff_parse,0,MAIN_BUFFER_PARSE);
-
-	ResetConfig();
-
-	 Keypad keypadInstance(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-	 keypad=&keypadInstance;
-
-	 LiquidCrystal_I2C lcdInstance(0x20, 20, 4);//Display LCD I2C
-	 lcd=&lcdInstance;
+	
 }
 
 GTKeeper::~GTKeeper()
@@ -67,19 +24,11 @@ GTKeeper::~GTKeeper()
 
 void GTKeeper::Setup()
 {
-	//Inicializamos los puertos series
-	Serial.begin(9600);
-	Serial1.begin(9600);
-	Serial2.begin(9600);
 
-
-	LOG_DEBUG("Configurando maquina.");
 	//Configuramos la maquina
 	setupStateMachine();
-
-	LOG_DEBUG("Arrancando maquina");
-	//La inicializamos a parada
-	SetState(Off, false, true);
+	//La inicializamos a ON
+	SetState(ON, false, true);
 
 
 	
@@ -98,7 +47,28 @@ void GTKeeper::Sleep()
 {
 	
 	//TO-DO
-	LowP
+	 	//Comprobamos si hay que lanzar algo.
+	 	//Se duerme durante 1 min
+	 	   
+  	    //Dormimos hasta que nos llegue interrupcion (SMS-CALL-USER ACTION)
+		/*sleep_enable();
+
+		attachInterrupt(0,[]{ 
+
+			//Sale del sleep mode
+			sleep_disable();
+			detachInterrupt(0);
+
+			//Vamos a ver lo que lo desperto
+			gtKeeper.Update();
+
+			},LOW);
+
+		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		digitalWrite(13,LOW);
+		sleep_cpu();
+		Serial.println("WOKE UP");
+		digitalWrite(13,HIGH);*/
 }
 
 
@@ -155,9 +125,12 @@ void GTKeeper::setupStateMachine()
 {
 	
 	//Fijamos las transiciones de estados
-	AddTransition(Off, Init, []() { return true; });
-	AddTransition(Init, Reset, []() { return gtKeeper.CheckReset(); });
+	AddTransition(ON, Init, []() {  return gtKeeper.CheckInit() ;});
+	AddTransition(ON, Reset, []() {  return gtKeeper.CheckReset();});
+
 	AddTransition(Init, Error, []() { return gtKeeper.CheckError(); });
+	AddTransition(Init, Run, []() { return gtKeeper.CheckRun(); });
+	//AddTransition(Run, Run,[]() { return true;});//(gtKeeper.GetState()==Run); });
 /*
 	stateMachine.AddTransition(PosicionA, PosicionB, []() { return input == Forward; });
 	
@@ -174,19 +147,21 @@ void GTKeeper::setupStateMachine()
 	*/
 
 	///Fijamos las acciones de salida para cada estado
-	SetOnEntering(Off,  []() { gtKeeper.OnReset();});
+	SetOnEntering(ON,  []() { gtKeeper.OnON();});
  	SetOnEntering(Init,  []() { gtKeeper.OnInit();});
 	SetOnEntering(Reset,  []() { gtKeeper.OnReset();});
-	SetOnEntering(Reset,  []() { gtKeeper.OnError();});
+	SetOnEntering(Error,  []() { gtKeeper.OnError();});
+	SetOnEntering(Run,  []() { gtKeeper.OnRun();});
 	/*stateMachine.SetOnEntering(PosicionB, outputB);
 	stateMachine.SetOnEntering(PosicionC, outputC);
 	stateMachine.SetOnEntering(PosicionD, outputD);*/
 	
 	//Fijamos las acciones a ejecutar cuando se abandona un determinado estado
-	SetOnLeaving(Off, []() { gtKeeper.OnLeaveOff();});
+	SetOnLeaving(ON, []() { gtKeeper.OnLeaveON();});
 	SetOnLeaving(Init, []() { gtKeeper.OnLeaveInit();});
 	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveReset();});
-	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveError();});
+	SetOnLeaving(Error, []() { gtKeeper.OnLeaveError();});
+	SetOnLeaving(Run, []() { gtKeeper.OnLeaveRun();});
  
 }
 
@@ -918,7 +893,7 @@ bool GTKeeper::ApagaMotor()
 {
 	if (SalidaRegistrada(1,actMotor))
 	{
-		APAGA_RELE(PORT_MOTOR);
+		APAGA_RELE(PORT_MOTOR_PIN);
 		EliminarSalida(1,actMotor);
 		return true;
 	}
@@ -930,7 +905,7 @@ bool GTKeeper::EnciendeMotor ()
 {
 	if (!SalidaRegistrada(1,actMotor))
 	{
-		ENCIENDE_RELE(PORT_MOTOR);
+		ENCIENDE_RELE(PORT_MOTOR_PIN);
 		RegistrarSalida(1,actMotor);
 		return true;
 	}
@@ -1952,6 +1927,22 @@ bool GTKeeper::EstaRegistradoGSM()
 
 }
 
+
+bool GTKeeper::FijarHoraRTC()
+{
+
+	tmElements_t tm;
+	if (RTC.read(tm)) 
+	{
+		time_t hora_actual =makeTime(tm);
+		this->SetHora(hora_actual);
+		return true;
+	}
+	else
+		return false;
+
+}
+
 //Trata de fijar la hora utilizando la red GSM
 bool GTKeeper::FijarHoraGSM()
 {
@@ -2389,6 +2380,7 @@ bool GTKeeper::RegistrarSalidaEnWeb()
 {
 	bool result=true;
 	//Comprobamos si hay algo pdte de enviar a la web
+
 	if (salidas_web!=0)
 	{
 

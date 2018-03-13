@@ -33,7 +33,7 @@ void  GSMAPNScreen::OnSave ()
 		OnGotoMenu();
 	}
 	else
-		screenManager.ShowMsgBox("ATENCION:\nAPN Vacio",MsgOkButton,NULL);
+		screenManager.ShowMsgBox("ATENCION:\nAPN Vacio",MsgOkButton);
 
 
 }

@@ -2,7 +2,7 @@
 #ifndef TEXTOS_H_
 #define TEXTOS_H_
 
-
+const static char TXT_UNKNOW[] PROGMEM= "**";;
 const static char TXT_OK[] PROGMEM= "OK";;
 const static char TXT_ERROR[] PROGMEM="ERROR";
 const static char TXT_CONFIG[] PROGMEM= "CONFIGURACION";
@@ -10,6 +10,7 @@ const static char TXT_MOD_GSM[] PROGMEM="MODULO GSM";
 const static char TXT_SIM[] PROGMEM="SIM";
 const static char TXT_CONECTIVIDAD[] PROGMEM="RED GSM";
 const static char TXT_SMS[] PROGMEM="ENVIO SMS";
+const static char TXT_SD[] PROGMEM ="TARJETA SD";
 const static char TXT_RELOJ[] PROGMEM ="RELOJ";
 const static char TXT_PROGRAMAS[] PROGMEM ="PROGRAMAS";
 const static char TXT_WWW[] PROGMEM ="PETICION WEB";

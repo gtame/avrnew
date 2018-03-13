@@ -162,6 +162,7 @@
     </ListValues>
   </avrgcccpp.compiler.directories.IncludePaths>
   <avrgcccpp.compiler.optimization.level>Optimize (-O1)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.OtherFlags>-std=c++11</avrgcccpp.compiler.optimization.OtherFlags>
   <avrgcccpp.compiler.optimization.PackStructureMembers>True</avrgcccpp.compiler.optimization.PackStructureMembers>
   <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcccpp.compiler.optimization.DebugLevel>Default (-g2)</avrgcccpp.compiler.optimization.DebugLevel>
@@ -323,6 +324,9 @@
     <Compile Include="settings.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="States\ON.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="States\Error.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -333,6 +337,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="States\Reset.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\Run.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="textos.h">

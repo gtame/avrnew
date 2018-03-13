@@ -22,7 +22,7 @@
  {
 	  //Que hacemos en caso de error
 	  //Mostramos al usua¿?
-
+	  LOG_DEBUG("OnError");
  }
 
  //SALE

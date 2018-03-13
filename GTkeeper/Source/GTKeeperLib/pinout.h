@@ -37,17 +37,17 @@
 //PORT_PUENTE: Es el pin donde va al rele que maneja el puente de la valvula
 //Si el rele esta abierto(sin encender) le envia -(negativo) a la salida de la valvula , en el caso que se active el rele de la valvula
 //Cuando esta cerrado (encendido) le envia + (positivo)  a la salida de la valvula , en el caso que se active el rele de la valvula
-#define PORT_PUENTEH1_PIN 2
-#define PORT_PUENTEH2_PIN 3
+#define PORT_PUENTEH1_PIN 30
+#define PORT_PUENTEH2_PIN 31
 
 //Pin SCLA
 
 //Pin Abono
-#define  PORT_ABONO1_PIN 39 
-#define  PORT_ABONO2_PIN 40
+#define  PORT_ABONO1_PIN 38
+#define  PORT_ABONO2_PIN 39
 
 //Pin Motor
-#define PORT_MOTOR_PIN 5
+#define PORT_MOTOR_PIN 40
 
 //Pines de sectores
 #define PORT_SECTOR1_PIN 5

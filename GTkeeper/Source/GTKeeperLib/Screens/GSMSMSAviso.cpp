@@ -154,7 +154,7 @@ void GsmSmsAvisoScreen::OnClickButton(uint8_t field)
 				screenManager.SetPantallaActual((ScreenBase *)&gsmMenuScreen);
 			}
 			else
-				screenManager.ShowMsgBox("Pass Incorrecta",MsgOkButton,NULL);
+				screenManager.ShowMsgBox("Pass Incorrecta",MsgOkButton);
 	}
 	else if (field==6) //CAncel
 	{

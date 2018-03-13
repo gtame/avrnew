@@ -18,7 +18,6 @@
 //Define de constantes  depuertos
 #define PORTS_NUM 1//15 Numero max de puertos:)
 #define PORTS_ABONO 2 //Numero de puertos de abono
-#define PORT_MOTOR 40  //Numero donde se conecta el motor de bombeo
 
 
 

@@ -6,8 +6,7 @@
  */ 
  
  #include <gtkeeper.h>
-
-
+ 
 
  //##Estado --- Reset ---
 
@@ -19,17 +18,54 @@
 
  }
 
+bool Check(bool (*checkfuntion)(),PGM_P txt ,uint8_t linenum,int delayms=0,uint8_t repeat=0)
+{
+	bool result=false;
+	uint8_t numintentos=0;
+	screenManager.PrintTextLine_P(linenum,txt, TXT_UNKNOW);	
+
+	while (!result && repeat>=numintentos)
+	{
+		delay(delayms);
+		result=(*checkfuntion)();
+		numintentos++;
+	}
+ 
+	if (result)
+		screenManager.PrintTextLine_P(linenum,txt, TXT_OK);		
+	else
+		screenManager.PrintTextLine_P(linenum,txt, TXT_ERROR);
+	return result;
+
+}
+ 
+bool SDInitializate()
+{
+	static bool isInitializated=false;
+	if (!isInitializated)
+	{
+		if ( SD.begin(SPI_QUARTER_SPEED, SD_CHIP_SELECT_PIN))
+			isInitializated=true;
+		return isInitializated;
+	}
+	else
+	{
+		if (!SD.exists("log"))
+			SD.mkdir("log");
+		return SD.exists("log");
+	}
+}
 
  //ACCION
 void GTKeeper::OnInit()
 {
-	LOG_DEBUG("OnInitializating");
+	LOG_DEBUG("OnInit");
+
+	error_code=NO_ERROR;
 	
 	bSetupCompleted=false;
 
-	//No se podia pasar el puntero a funcion dentro de una clase, requiere redefinir el puntero
-	//TTPGet=GetURL;
-	//ProcessResultPtr = ProcessATMensajes;
+	//Punto cero de todos pines
 
 	//Fijamos los puertos conectados a los sectores
 	//Como salidas digitales
@@ -39,15 +75,16 @@ void GTKeeper::OnInit()
 		APAGA_RELE(ports[i]);
 	}
 
+	//Puerto de motor
+	pinMode(PORT_MOTOR_PIN, OUTPUT);
+	APAGA_RELE(PORT_MOTOR_PIN);
+
 	//Puertos de abono
 	for(uint8_t i=0;i<PORTS_ABONO;i++)
 	{
 		pinMode(ports_abono[i], OUTPUT);
 		APAGA_RELE(ports_abono[i]);
 	}
-	//Puerto de motor
-	pinMode(PORT_MOTOR, OUTPUT);
-	APAGA_RELE(PORT_MOTOR);
 
 	//Puerto comun
 	pinMode(PORT_COMUN_PIN, OUTPUT);
@@ -67,255 +104,154 @@ void GTKeeper::OnInit()
 	}
 
 	//Ponemos como salida los dos pines para el control
-	pinMode( LED_ERROR_MODULE_PIN, OUTPUT);
+	pinMode(LED_ERROR_MODULE_PIN, OUTPUT);
 	pinMode(GSM_ONOFF_PIN, OUTPUT);
 
+	//Enciende Screen	 
+	screenManager.Encender();
 
-	WakeUp();
-	SetMode(SleepDisable);
+	//Realiza los checks pertinentes
+	
+	uint8_t line_num=0;
+	const uint8_t NUM_INTENTOS=5;
+	  
+	//Chequeamos hora, para asi grabar logs coherentes
+	gtKeeper.FijarHoraRTC();
+	
+	 
+	 //Chequeamos SD
+	if (!Check(SDInitializate,TXT_SD,line_num++))
+	{
+		error_code=ERROR_NO_SDCARD;
+		screenManager.ShowMsgBox_P(PSTR("Tarjeta SD no responde. Verificar."),MsgOkButton,30);
+		LOG_DEBUG("No se pudo inicializar SD");
+		return;
+	}
+	
 
-	SetupPantallaTeclado();
+
+
+	//Cargamos la configuracion del terminal
+	if (!Check([](){ return gtKeeper.EEPROMCargaConfig();},TXT_CONFIG,line_num++))
+	{
+		error_code=ERROR_NO_CONFIG;
+		//Grabamos log¿?
+
+		screenManager.ShowMsgBox_P(PSTR("Configuracion corrupta, ajuste manual"),MsgOkButton,30);
+
+		//Reseteamos config
+		gtKeeper.ResetConfig();
+		gtKeeper.EEPROMGuardaConfig();
+	
+
+		//Salimos para que sea vuelto a llamar el estado
+		return;
+	}
+
+	//Cargamos programas
+	if (!Check([](){ return gtKeeper.EEPROMCargaProgramas();},TXT_PROGRAMAS,line_num++))
+	{
+		error_code=ERROR_NO_PROG;
+		//Grabamos log
+		screenManager.ShowMsgBox_P(PSTR("NO SE PUDO CARGAR LA PROGRAMACIÓN, LA PROGRAMACIÓN SERÁ RESETEADA"),MsgOkButton,30);
+		//REseteamos todo, config, programas y estadisticas.
+		gtKeeper.ResetProgramas();
+		//Salimos para que sea vuelto a llamar el estado
+		return;
+	}
+
+
+	//Comprobamos si tiene gsm configurado
+	if (IsGSMEnable())
+	{
+		
+
+		LOG_DEBUG("ACTIVANDO GSM");
+		//Chequea si esta encendido el modulo GSM, sino lo apaga
+		if (EstaArrancado())
+		{
+			//apaganding........
+		}
+
+		if (Check([](){ return gtKeeper.ActivaModulo();},TXT_MOD_GSM,line_num++,50,NUM_INTENTOS))
+		{
+			gtKeeper.getIMEI(config.Imei);
+			lcd.clear();
+			line_num=0;
+
+			delay(2000);
+			if (!Check([](){ return gtKeeper.SIMEstaLista();},TXT_SIM,line_num++,500,NUM_INTENTOS))
+			{
+				error_code=ERROR_SIM;
+				//Solicitamos confirmación
+				screenManager.ShowMsgBox_P(PSTR("Tarjeta SIM no disponible"),MsgOkButton,30);
+				//Grabamos log
+						
+			}
+		}
+		else
+		{
+				error_code=ERROR_NO_RESPOND;
+				screenManager.ShowMsgBox_P(PSTR("Modulo gsm no responde"),MsgOkButton,30);
+				//Grabamos log
+		}
+	}
+	
+	
+	//Cargamos hora
+	if (!Check([](){ return gtKeeper.EstaEnHora();},TXT_RELOJ,line_num++))
+	{
+
+		delay(2000);
+		screenManager.ShowMsgBox_P(PSTR("Reloj no responde, ajuste manual"),MsgOkButton,30);
+		error_code=ERROR_NO_HORA;
+	}
+
+	#ifdef PROTEUS
+	if (!gtKeeper.EstaEnHora())
+	{
+		TimeElements timeEl;
+		timeEl.Day=8;
+		timeEl.Month=4;
+		timeEl.Year=y2kYearToTm(16);
+		timeEl.Hour=23;
+		timeEl.Minute=38;
+
+		gtKeeper.SetHora(makeTime(timeEl));
+
+	}
+
+	screenManager.SetTimeInactivity(0);
+	#endif
+
+
+
+	//Esto hay que trasladarlo a otro estado. :)
+	//Si no hemos conseguido ponerlo en hora , la solicitaremos manualmente
+	if (gtKeeper.EstaEnHora())
+		screenManager.SetPantallaActual((ScreenBase*)&menuScreen);
+	else
+		screenManager.SetPantallaActual((ScreenBase*)&fechahoraScreen);
+
+	bSetupCompleted=true;
 }
+
+
+
 
  //SALE
  void GTKeeper::OnLeaveInit()
  {
 	 
 	 //REseteamos todo, config, programas y estadisticas.
-	 LOG_DEBUG("Salimos de Init");
+	 LOG_DEBUG("OnLeaveInit");
  }
 
 
- //fUNCION ADICIONAL
- void GTKeeper::SetupPantallaTeclado()
- {
 
+void GTKeeper::SetupPantallaTeclado()
+{
 
-	 
-	 uint8_t line_num=0;
 
-	 const uint8_t NUM_INTENTOS=5;
-	 
+}
 
-
-
-	 //Inicializamos el gestor de ventanas
-	 screenManager.Initializate(lcd,20,4,keypad);
-	 screenManager.Encender();
-
-
-	 //Cargamos la configuracion del terminal
-	 bool config_error=!gtKeeper.EEPROMCargaConfig();
-
-	 //Inicializamos gtKeeper
-	 if (!config_error)
-	 screenManager.PrintTextLine_P(line_num,TXT_CONFIG, TXT_OK);
-	 else
-	 {
-		 gtKeeper.ResetConfig();
-		 screenManager.PrintTextLine_P(line_num,TXT_CONFIG, TXT_ERROR);
-	 }
-	 line_num++;
-
-
-
- 
-
-	 //Comprobamos si tiene gsm configurado
-	 if (IsGSMEnable())
-	 {
-
-		 LOG_DEBUG("ACTIVANDO GSM");
-		 bool blnOK=true;
-		 uint8_t num_veces=0;
-
-		 //Arranca Modulo
-		 while(!(blnOK=ActivaModulo()) &&  num_veces<NUM_INTENTOS)
-		 {
-			 gtKeeper.setLed(LED_ERROR_MODULE_PIN);
-			 delay(500);
-			 num_veces++;
-		 }
-
-		 if (blnOK)
-		 screenManager.PrintTextLine_P(line_num,TXT_MOD_GSM, TXT_OK);
-		 else
-		 screenManager.PrintTextLine_P(line_num,TXT_MOD_GSM, TXT_ERROR);
-
-		 line_num++;
-
-
-		 //SIM -- Ready¿?
-		 if (blnOK)
-		 {
-
-			 num_veces=0;
-			 while (!(blnOK=gtKeeper.CheckSIM())  &&  num_veces<NUM_INTENTOS)
-			 {
-				 setLed(LED_ERROR_SIM_PIN);
-				 delay(500);
-				 num_veces++;
-			 }
-
-			 if (blnOK)
-			 screenManager.PrintTextLine_P(line_num,TXT_SIM, TXT_OK);
-			 else
-
-			 screenManager.PrintTextLine_P(line_num,TXT_SIM, TXT_OK);
-
-			 line_num++;
-		 }
-		 else
-		 LOG_DEBUG_B("GSM NO ACTIVO");
-
-
-
-		 //Esperamos 2 seg, para que coga red..
-		 delay(2000);
-
-
-		 if (blnOK)
-		 {
-
-			 num_veces=0;
-			 //Network
-			 while (!(blnOK=gtKeeper.EstaRegistradoGSM()) &&  num_veces<NUM_INTENTOS)
-			 {
-				 setLed(LED_ERROR_NETWORK_PIN);
-				 delay(500);
-				 num_veces++;
-			 }
-
-			 if (blnOK)
-				 screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_OK);
-			 else
-				 screenManager.PrintTextLine_P(line_num,TXT_CONECTIVIDAD,TXT_ERROR);
-
-			 line_num++;
-		 }
-
-
-
-
-
-
-
-		 //eNVIA SMS REINICIO
-
-		 //Antes de hacer un clear de la pantalla esperamos 1 seg.
-
-
-		 //Fijar Hora desde red GSM
-		 if (blnOK)
-		 {
-
-
-			 lcd->clear();
-			 line_num=0;
-			 if (gtKeeper.config.AvisosSMS & SMSReset)
-			 {
-				 //Esperamos 2 seg SMS
-				 delay(2000);
-
-				 screenManager.PrintTextLine_P(line_num,TXT_SMS, PSTR(""));
-				 //Envio mail de aviso
-				 gtKeeper.SendSmsIniReinicio();
-				 screenManager.PrintTextLine_P(line_num,TXT_SMS, TXT_OK);
-				 line_num++;
-			 }
-
-
-			 num_veces=0;
-			 delay(5000);
-			 //Network
-			 while (!(blnOK=gtKeeper.FijarHoraGSM()) &&  num_veces<NUM_INTENTOS)
-			 {
-				 delay(500);
-				 num_veces++;
-			 }
-
-
-
-			 if (blnOK)
-			 screenManager.PrintTextLine_P(line_num,TXT_RELOJ, TXT_OK);
-			 else
-			 screenManager.PrintTextLine_P(line_num,TXT_RELOJ, TXT_ERROR);
-
-			 line_num++;
-		 }
-	 }
-	 else
-	 {
-		 screenManager.PrintTextLine_P(line_num,TXT_RELOJ, TXT_ERROR);
-		 line_num++;
-	 }
-
-
-	 if (line_num==4)
-	 lcd->clear();
-
-
-
-	 //Cargamos programas
-	 if (gtKeeper.EEPROMCargaProgramas())
-	 screenManager.PrintTextLine_P(line_num,TXT_PROGRAMAS, TXT_OK);
-	 else
-	 screenManager.PrintTextLine_P(line_num,TXT_PROGRAMAS, TXT_ERROR);
-
-
-	 #ifdef PROTEUS
-	 if (!gtKeeper.EstaEnHora())
-	 {
-		 TimeElements timeEl;
-		 timeEl.Day=8;
-		 timeEl.Month=4;
-		 timeEl.Year=y2kYearToTm(16);
-		 timeEl.Hour=23;
-		 timeEl.Minute=38;
-
-		 gtKeeper.SetHora(makeTime(timeEl));
-
-	 }
-
-	 screenManager.SetTimeInactivity(0);
-	 #endif
-
-
-	 //Avisa que ya se ha acabado la incializacion de gtkeeper
-		if (this->IsGSMEnable())
-			getIMEI(config.Imei);
-
-
-	SetMode(SleepEnableAuto);
-
-	bSetupCompleted=true;
-
-	 if (strlen(gtKeeper.config.APN)==0)
-	 {
-		 strcpy(gtKeeper.config.APN,"gprs-service.com");
-	 }
-
-	 //Si no hemos conseguido ponerlo en hora , la solicitaremos manualmente
-	 if (gtKeeper.EstaEnHora())
-	 screenManager.SetPantallaActual((ScreenBase*)&menuScreen);
-	 else
-	 screenManager.SetPantallaActual((ScreenBase*)&fechahoraScreen);
-
-
-	 if (config_error)
-	 screenManager.ShowMsgBox_P(PSTR("Error configuracion\nParametros->Sistema"),MsgOkButton,NULL);
-
-
-
-	 //Fijamos la pantalla actual..
-	 if (!config_error)
-	 //Ajustamos Config Web
-	 gtKeeper.CargaConfigWeb();
-
-
-	 //eNVIA SMS REINICIO ALL
-	 if (gtKeeper.IsGSMEnable())
-	 gtKeeper.SendSmsFinReinicio();
-
-
- }

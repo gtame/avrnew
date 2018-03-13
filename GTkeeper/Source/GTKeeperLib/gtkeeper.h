@@ -9,20 +9,21 @@
 #define GTKEEPER_H_
 
 
-
+#include <SD.h>
+#include <DS1307RTC.h>
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 #include <stdio.h>
 
 #include <WString.h>
-#incñ
-
+#include <LowPower.h>
+#include<avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/eeprom.h>
-
+#include <LowPower.h>
 //Referencia al core de arduino
 #include <Arduino.h>
 #include <Time.h>
@@ -93,16 +94,23 @@
 //Estados de la maquina , gtKeeper
 enum MachineStates
 {
-	Off,
-	Init,
-	Error,
-	Reset,
-	User,
-	Sms,
-	Working,
-	Call,
-	Web
+	ON=0,
+	Init=1,
+	Error=2,
+	Reset=3,
+	Run=4,
+	User=5,
+	Sms=6,
+	Call=7,
+	Web=8,
+	Off=99
 };
+
+
+//KEYPAD
+#define KEYPAD_ROWS  4 //four rows
+#define KEYPAD_COLUMNS  4//four columns
+
 
 //CallBacks
 //void ResetConfigsCallBack(uint8_t button,uint8_t func);
@@ -118,6 +126,11 @@ public:
 //END CONSTRUCTOR & DESTRUCTOR
 
 ///ESTADOS
+	 bool CheckON();
+	 void OnON();
+	 void OnLeaveON();
+
+	 
 	 bool CheckOff();
 	 void OnOff();
 	 void OnLeaveOff();
@@ -136,6 +149,12 @@ public:
 	 bool CheckError();
 	 void OnError();
 	 void OnLeaveError();
+
+
+	 
+	 bool CheckRun();
+	 void OnRun();
+	 void OnLeaveRun();
 
 ///END ESTADOS
 
@@ -211,6 +230,7 @@ public:
     void EnciendeSectorSMS(uint8_t sector);
 
     bool FijarHoraGSM();
+	bool FijarHoraRTC();
     bool EstaRegistradoGSM();
 
 
@@ -288,6 +308,7 @@ public:
 
      static const uint8_t ports[PORTS_NUM] ;
      static const uint8_t ports_abono[PORTS_ABONO] ;
+ 
 
 protected:
 
@@ -352,11 +373,11 @@ protected:
     bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
 
 
-	Keypad *keypad;
-	LiquidCrystal_I2C *lcd;
+	 uint16_t error_code;
 };
 
-
+extern	Keypad keypad;
+extern LiquidCrystal_I2C lcd;
 
 extern GTKeeper gtKeeper;
 

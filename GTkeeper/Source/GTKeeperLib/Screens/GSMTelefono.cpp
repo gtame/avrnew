@@ -105,7 +105,7 @@ void GsmTelefonoScreen::OnClickButton(uint8_t field)
 				screenManager.SetPantallaActual((ScreenBase *)&gsmMenuScreen);
 			}
 			else
-				screenManager.ShowMsgBox("Numero Incorrecto",MsgOkButton,NULL);
+				screenManager.ShowMsgBox("Numero Incorrecto",MsgOkButton);
 	}
 	else if (field==2) //CAncel
 	{

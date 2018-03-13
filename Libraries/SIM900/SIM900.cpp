@@ -41,13 +41,13 @@ void SIM900::SwitchModule() {
 
 	LOG_INFO_B( "Arrancando modulo");
 
-#if !defined(PROTEUS) && !defined(DEBUG)
+#if !defined(PROTEUS) //&& !defined(DEBUG)
 	LOG_INFO_ARGS( "Activando pulso pin %i",PIN_GSM_ON);
 	pinMode(PIN_GSM_ON, OUTPUT);
 	digitalWrite(PIN_GSM_ON,LOW);
 	delay(1000);
 	digitalWrite(PIN_GSM_ON,HIGH);
-	delay(2000);
+	delay(1000);
 	digitalWrite(PIN_GSM_ON,LOW);
 	delay(3000);
 #endif

@@ -96,6 +96,8 @@ public:
 
 	void ShowMsgBox(char *,msgboxmode,void (*MsgboxCallBack)( uint8_t result,uint8_t codefunc ));
 	void ShowMsgBox_P(PGM_P ,msgboxmode,void (*MsgboxCallBack)( uint8_t result,uint8_t codefunc ));
+	int8_t ShowMsgBox(char * ,msgboxmode,uint8_t delayseconds=0 ) ;
+	int8_t ShowMsgBox_P(PGM_P ,msgboxmode,uint8_t delayseconds=0 ) ;
 
 	void Loop();
 

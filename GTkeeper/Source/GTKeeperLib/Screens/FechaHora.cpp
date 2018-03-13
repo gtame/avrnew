@@ -180,7 +180,7 @@ void FechaHoraScreen::OnClickButton(uint8_t field)
 	{
 
 		if (fecha==0)
-			screenManager.ShowMsgBox("Debe fijar una \n fecha y hora",MsgOkButton,NULL);
+			screenManager.ShowMsgBox("Debe fijar una \n fecha y hora",MsgOkButton);
 		else
 		{
 			//Fija la hora en arduino

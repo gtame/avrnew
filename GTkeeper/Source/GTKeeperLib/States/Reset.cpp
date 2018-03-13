@@ -13,25 +13,27 @@
  //CHECK
  bool GTKeeper::CheckReset()
  {
-
+	 
+	 LOG_DEBUG("CheckReset");
 	 bool result=false;
+	 return false;
 
-	 int indexA= keypad->findInList('A');
-	 int indexD= keypad->findInList('D');
+	 int indexA= keypad.findInList('A');
+	 int indexD= keypad.findInList('D');
 
 
-	 LOG_DEBUG_B("CHECK RESET");
+	 
 
 	 //Marca de tiempo
 	 time_t time=now();
 
 	 //Obtenemos teclas pulsadas
-	 keypad->getKeys();
+	 keypad.getKeys();
 
 	 //Si pulsamos XX SEG estas dos teclas se resetearan TODAS configs. :)
 	 while ( !result &&
-			(keypad->key[indexA].kstate==PRESSED || keypad->key[indexA].kstate==HOLD)  &&
-			(keypad->key[indexD].kstate==PRESSED || keypad->key[indexD].kstate==HOLD)
+			(keypad.key[indexA].kstate==PRESSED || keypad.key[indexA].kstate==HOLD)  &&
+			(keypad.key[indexD].kstate==PRESSED || keypad.key[indexD].kstate==HOLD)
 	 )
 	 {	  
 		 if (ELAPSED_SECONDS(time)>HOLD_TO_RESET)
@@ -40,7 +42,7 @@
 		
 		 }
 		 delay(500);
-		 keypad->getKeys();
+		 keypad.getKeys();
 	 }
 
 
@@ -54,30 +56,17 @@
  //ACCION
  void GTKeeper::OnReset()
  {
-	 static bool blnResetLoop=false;
- 
-	  //Solicitamos confirmación 
-	  screenManager.ShowMsgBox_P(
-	  PSTR("Desea resetear las \nconfiguraciones?"),
-	  MsgYesNoButton,
-	  [](uint8_t button,uint8_t func) {
-		  if (button==0)
-		  {
-			  //REseteamos todo, config, programas y estadisticas.
-			  gtKeeper.ResetConfig();
-			  gtKeeper.EEPROMGuardaConfig();
-			  gtKeeper.ResetProgramas();
-			  gtKeeper.ResetearEstadisticas();
-		  }
-		  //Flag para salir del bucle loop.
-		  blnResetLoop=false;
-	  }
-	  );
-	 
-	 //Bucle para reaccionar a eventos de pantalla
-	 while (blnResetLoop)
-		screenManager.Loop();
 
+	//Enciende Screen
+	screenManager.Encender();
+
+	if (screenManager.ShowMsgBox_P(PSTR("Resetear todas configuraciones?"), MsgYesNoButton)==0)
+	{
+		ResetProgramas();
+		ResetearEstadisticas();
+		ResetConfig();
+	}
+	screenManager.Apagar();
  }
 
  //SALE
@@ -85,7 +74,7 @@
  {
 	 
 	 //REseteamos todo, config, programas y estadisticas.
-	 LOG_DEBUG("Salimos de Reset");
+	 LOG_DEBUG("OnLeaveReset");
 
 	 //Flag para salir del bucle loop.
 	 // blnResetLoop=false;

@@ -8,7 +8,13 @@
 #ifndef ERRORS_H_
 #define ERRORS_H_
 
-#define ERROR_BASE 0
+#define NO_ERROR	0
+#define ERROR_BASE -1
+#define WARN_BASE 100
+//ERRORES
+#define ERROR_NO_CONFIG		ERROR_BASE+1	// "La configuracion no se cargo correctamente"
+#define ERROR_NO_PROG		ERROR_BASE+2	// "Los programas no se cargaron correctamente"
+#define ERROR_NO_HORA		ERROR_BASE+3	// "No se pudo cargar la hora"
 
 //ERRORES GSM;
 #define ERROR_NO_REGISTER	ERROR_BASE-1	// "No Registrado en la red movil"
@@ -16,7 +22,7 @@
 #define ERROR_NO_RESPOND	ERROR_BASE-3		//"Modulo no responde - Reiniciando modulo"
 
 //ERRORES SD CARD
-#define WARN_NO_SDCARD		ERROR_BASE-4		//"No hay memoria SD CARD"
+#define ERROR_NO_SDCARD		ERROR_BASE-4		//"No hay memoria SD CARD"
 #define ERROR_IO_SDCARD		ERROR_BASE-5		//"Error en operacion I/O SD CARD"
 
 //ERRORES RTC
