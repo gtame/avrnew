@@ -24,10 +24,10 @@
 	   LOG_DEBUG("OnRun");
 	   
 		//Mientras no haya UserInput ó Call ó SMS
-		while()
+		while(false)
 		{
 			
-			
+			/*
 			int wakeUpPin=2;
 		   // Configure wake up pin as input.
 		   // This will consumes few uA of current.
@@ -42,7 +42,7 @@
    
 			// Disable external pin interrupt on wake up pin.
 			detachInterrupt(0);
-   
+   */
 			// Do something here
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min

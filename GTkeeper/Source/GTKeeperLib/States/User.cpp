@@ -22,15 +22,23 @@ void wakeUpInt ()
  //ACCION
  void GTKeeper::OnUser()
  {
+
+	LOG_DEBUG("OnUser");
+
+	if (!screenManager.IsActive())
+		screenManager.Encender();
+
+	screenManager.SetTimeInactivity(SCREEN_TIMEOUT);
+	 
 	//Marca de tiempo
 	time_t time=now();
-	while (ELAPSED_SECONDS(time)>100 && screenManager.IsActive())
+	while (screenManager.IsActive())
 	{
 		screenManager.Loop();
-		
 		//Chequeamos programacion
-		
 	}
+
+	LOG_DEBUG("Salimos de User");
  }
 
  //SALE

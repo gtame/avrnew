@@ -9,6 +9,16 @@
 #define SETTINGS_H_
 
 
+#ifdef PROTEUS
+	#define SECONDS_DELAY(x) x
+	#define SCREEN_TIMEOUT 500
+	#define ONINIT_REINTENTOS 1
+#else
+	#define SECONDS_DELAY(x) x*1000
+	#define SCREEN_TIMEOUT 30000
+	#define ONINIT_REINTENTOS 5
+#endif
+
 #define HOLD_TO_RESET 10 //Al arrancar numero de segundos que hay que mantener la tecla A-D pulsadas para entrar en RESET
 
 //Numero de programas , sectores 

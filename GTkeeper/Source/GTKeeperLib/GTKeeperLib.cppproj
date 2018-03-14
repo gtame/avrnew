@@ -137,6 +137,7 @@
       <Value>SERIAL_RX_BUFFER_SIZE=256</Value>
       <Value>TEST</Value>
       <Value>PANTALLA_TECLADO</Value>
+      <Value>PROTEUS</Value>
     </ListValues>
   </avrgcccpp.compiler.symbols.DefSymbols>
   <avrgcccpp.compiler.directories.IncludePaths>

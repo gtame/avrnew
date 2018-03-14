@@ -19,9 +19,9 @@
 //El pin out del teclado las 4 primeros pines empezando por el * son las filas y los otras 4 las columnas
 //http://www.learningaboutelectronics.com/Articles/Arduino-keypad-circuit.php
 
-#define KEYBOARD_ROW1_PIN 28
+#define KEYBOARD_ROW1_PIN 26
 #define KEYBOARD_ROW2_PIN 29
-#define KEYBOARD_ROW3_PIN 26
+#define KEYBOARD_ROW3_PIN 28
 #define KEYBOARD_ROW4_PIN 27
 
 #define KEYBOARD_COL1_PIN 24

@@ -334,7 +334,7 @@ protected:
 
   private:
 	
-	void SetupPantallaTeclado();
+
 	void setupStateMachine();
 
     void SendSmsProgramacion();

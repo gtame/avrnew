@@ -42,9 +42,13 @@ bool Check(bool (*checkfuntion)(),PGM_P txt ,uint8_t linenum,int delayms=0,uint8
 bool SDInitializate()
 {
 	static bool isInitializated=false;
+
 	if (!isInitializated)
 	{
+		LOG_DEBUG_ARGS("PIN SELECT %i",SD_CHIP_SELECT_PIN);
+
 		if ( SD.begin(SPI_QUARTER_SPEED, SD_CHIP_SELECT_PIN))
+		//if ( SD.begin( SD_CHIP_SELECT_PIN))
 			isInitializated=true;
 		return isInitializated;
 	}
@@ -113,19 +117,21 @@ void GTKeeper::OnInit()
 	//Realiza los checks pertinentes
 	
 	uint8_t line_num=0;
-	const uint8_t NUM_INTENTOS=5;
-	  
+
+    LOG_DEBUG("Fijando hora");
 	//Chequeamos hora, para asi grabar logs coherentes
-	gtKeeper.FijarHoraRTC();
-	
+	if (gtKeeper.FijarHoraRTC())
+		LOG_DEBUG("Hora fijada correctamente");
+	else
+		LOG_DEBUG("Error fijando hora RTC");
 	 
 	 //Chequeamos SD
 	if (!Check(SDInitializate,TXT_SD,line_num++))
 	{
+		LOG_DEBUG("No se pudo inicializar SD");
 		error_code=ERROR_NO_SDCARD;
 		screenManager.ShowMsgBox_P(PSTR("Tarjeta SD no responde. Verificar."),MsgOkButton,30);
-		LOG_DEBUG("No se pudo inicializar SD");
-		return;
+		
 	}
 	
 
@@ -170,14 +176,14 @@ void GTKeeper::OnInit()
 			//apaganding........
 			this->SwitchModule();
 
-		if (Check([](){ return gtKeeper.ActivaModulo();},TXT_MOD_GSM,line_num++,50,NUM_INTENTOS))
+		if (Check([](){ return gtKeeper.ActivaModulo();},TXT_MOD_GSM,line_num++,50,ONINIT_REINTENTOS))
 		{
 			gtKeeper.getIMEI(config.Imei);
 			lcd.clear();
 			line_num=0;
 
-			delay(2000);
-			if (!Check([](){ return gtKeeper.SIMEstaLista();},TXT_SIM,line_num++,500,NUM_INTENTOS))
+			delay(SECONDS_DELAY(2));
+			if (!Check([](){ return gtKeeper.SIMEstaLista();},TXT_SIM,line_num++,500,ONINIT_REINTENTOS))
 			{
 				error_code=ERROR_SIM;
 				//Solicitamos confirmación
@@ -198,27 +204,10 @@ void GTKeeper::OnInit()
 	//Cargamos hora
 	if (!Check([](){ return gtKeeper.EstaEnHora();},TXT_RELOJ,line_num++))
 	{
-		delay(2000);
+		delay(SECONDS_DELAY(2));
 		screenManager.ShowMsgBox_P(PSTR("Reloj no responde, ajuste manual"),MsgOkButton,30);
 		error_code=ERROR_NO_HORA;
 	}
-
-	#ifdef PROTEUS
-	if (!gtKeeper.EstaEnHora())
-	{
-		TimeElements timeEl;
-		timeEl.Day=8;
-		timeEl.Month=4;
-		timeEl.Year=y2kYearToTm(16);
-		timeEl.Hour=23;
-		timeEl.Minute=38;
-
-		gtKeeper.SetHora(makeTime(timeEl));
-
-	}
-
-	screenManager.SetTimeInactivity(0);
-	#endif
 
 
 
@@ -243,11 +232,4 @@ void GTKeeper::OnInit()
 	 LOG_DEBUG("OnLeaveInit");
  }
 
-
-
-void GTKeeper::SetupPantallaTeclado()
-{
-
-
-}
 

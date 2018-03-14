@@ -11,7 +11,7 @@
 
 
 
-GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(5,6)
+GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(6,11)
 {
 	
 }
@@ -183,7 +183,7 @@ void GTKeeper::setupStateMachine()
 	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveReset();});
 	SetOnLeaving(Error, []() { gtKeeper.OnLeaveError();});
 	SetOnLeaving(Run, []() { gtKeeper.OnLeaveRun();});
-	SetOnLeaving(Run, []() { gtKeeper.OnLeaveUser();});
+	SetOnLeaving(User, []() { gtKeeper.OnLeaveUser();});
  
 }
 
