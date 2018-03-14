@@ -11,7 +11,7 @@
 
 
 
-GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(4,5)
+GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(5,6)
 {
 	
 }
@@ -125,11 +125,31 @@ void GTKeeper::setupStateMachine()
 {
 	
 	//Fijamos las transiciones de estados
+	
+	//ON
 	AddTransition(ON, Init, []() {  return gtKeeper.CheckInit() ;});
 	AddTransition(ON, Reset, []() {  return gtKeeper.CheckReset();});
 
+	//Init
 	AddTransition(Init, Error, []() { return gtKeeper.CheckError(); });
-	AddTransition(Init, Run, []() { return gtKeeper.CheckRun(); });
+	AddTransition(Init, User, []() { return true; });	
+	
+	//Run
+	AddTransition(Run, User, []() { return gtKeeper.CheckUser(); });
+	AddTransition(Run, SMS , []() { return gtKeeper.CheckSMS(); });
+	AddTransition(Run, Call , []() { return gtKeeper.CheckCall(); });
+	AddTransition(Run, Web , []() { return gtKeeper.CheckToWeb(); });
+	
+	//SMS
+	AddTransition(SMS, Run , []() { return true; });
+	
+	//Web
+	AddTransition(Web, Run , []() { return true; });
+		
+	//Call
+	AddTransition(Call, Run , []() { return true; });	
+		
+		
 	//AddTransition(Run, Run,[]() { return true;});//(gtKeeper.GetState()==Run); });
 /*
 	stateMachine.AddTransition(PosicionA, PosicionB, []() { return input == Forward; });
@@ -152,6 +172,7 @@ void GTKeeper::setupStateMachine()
 	SetOnEntering(Reset,  []() { gtKeeper.OnReset();});
 	SetOnEntering(Error,  []() { gtKeeper.OnError();});
 	SetOnEntering(Run,  []() { gtKeeper.OnRun();});
+	SetOnEntering(User,  []() { gtKeeper.OnUser();});
 	/*stateMachine.SetOnEntering(PosicionB, outputB);
 	stateMachine.SetOnEntering(PosicionC, outputC);
 	stateMachine.SetOnEntering(PosicionD, outputD);*/
@@ -162,6 +183,7 @@ void GTKeeper::setupStateMachine()
 	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveReset();});
 	SetOnLeaving(Error, []() { gtKeeper.OnLeaveError();});
 	SetOnLeaving(Run, []() { gtKeeper.OnLeaveRun();});
+	SetOnLeaving(Run, []() { gtKeeper.OnLeaveUser();});
  
 }
 
@@ -356,6 +378,7 @@ bool GTKeeper::EEPROMCargaProgramas()
 			else
 				bresult=false;//LOG_ERROR_ARGS("Cargando programa %i",program);
 		}
+	return bresult;
 }
 
 void GTKeeper::ResetProgramas()

@@ -20,7 +20,7 @@
 
 #include <ScreenBase.h>
 #include <ScreenManager.h>
-#include "..\gtkeeper.h"
+#include <gtkeeper.h>
 
 #include "GSMMenu.h"
 

@@ -220,9 +220,9 @@ void CheckReles()
 
 
 	//Puente
-	ENCIENDE_RELE(PORT_MOTOR);
+	ENCIENDE_RELE(PORT_MOTOR_PIN);
 	delay(2000);
-	APAGA_RELE(PORT_MOTOR);
+	APAGA_RELE(PORT_MOTOR_PIN);
 
 
 	//Sectores

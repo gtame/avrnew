@@ -8,44 +8,41 @@
 #ifndef GTKEEPER_H_
 #define GTKEEPER_H_
 
-
-#include <SD.h>
-#include <DS1307RTC.h>
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 #include <stdio.h>
-
-#include <WString.h>
-#include <LowPower.h>
-#include<avr/sleep.h>
+#include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/eeprom.h>
-#include <LowPower.h>
-//Referencia al core de arduino
+#include <WString.h>
 #include <Arduino.h>
 #include <Time.h>
 
+#include "types.h"
 #include "pinout.h"
-#include "settings.h"
-#include "SIM900.h"
 #include "settings.h"
 #include "textos.h"
 
-#include  "types.h"
-#include "callbacks.h"
 
+
+//Referencia al core de arduino
+
+
+#include <SIM900.h>
+#include <ScreenManager.h>
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
 #include <StateMachineLib.h>
+#include <SD.h>
+#include <DS1307RTC.h>
+#include <LowPower.h>
 
 
 //Screens
-#include "Screens/Menu.h"
-#include "Screens/FechaHora.h"
-#include "Screens/GSMMenu.h"
+#include "Screens\Screens.h"
 
 
 
@@ -100,7 +97,7 @@ enum MachineStates
 	Reset=3,
 	Run=4,
 	User=5,
-	Sms=6,
+	SMS=6,
 	Call=7,
 	Web=8,
 	Off=99
@@ -129,33 +126,43 @@ public:
 	 bool CheckON();
 	 void OnON();
 	 void OnLeaveON();
-
 	 
 	 bool CheckOff();
 	 void OnOff();
 	 void OnLeaveOff();
 
-
 	 bool CheckReset();
 	 void OnReset();
 	 void OnLeaveReset();
-
 
 	 bool CheckInit();
 	 void OnInit();
 	 void OnLeaveInit();
 
-	 
 	 bool CheckError();
 	 void OnError();
 	 void OnLeaveError();
-
-
 	 
 	 bool CheckRun();
 	 void OnRun();
 	 void OnLeaveRun();
-
+	 
+	 bool CheckUser();
+	 void OnUser();
+	 void OnLeaveUser();
+	 
+	 bool CheckSMS();
+	 void OnSMS();
+	 void OnLeaveSMS();
+	 
+	bool CheckCall();
+	void OnCall();
+	void OnLeaveCall();
+	
+	
+	bool CheckToWeb();
+	void OnWeb();
+	void OnLeaveWeb();
 ///END ESTADOS
 
 
@@ -378,7 +385,6 @@ protected:
 
 extern	Keypad keypad;
 extern LiquidCrystal_I2C lcd;
-
 extern GTKeeper gtKeeper;
 
 

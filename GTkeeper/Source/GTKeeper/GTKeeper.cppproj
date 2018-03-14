@@ -96,7 +96,6 @@
       <Value>F_CPU=16000000</Value>
       <Value>ARDUINO=101</Value>
       <Value>LOG=0</Value>
-      <Value>SMS=1</Value>
       <Value>EEPROM_STORE</Value>
       <Value>SERIAL_RX_BUFFER_SIZE=256</Value>
       <Value>TEST</Value>
@@ -107,7 +106,6 @@
   <avrgcc.compiler.preprocessor.UndefSymbols>
     <ListValues>
       <Value>DEBUG</Value>
-      <Value>PANTALLA_TECLADO</Value>
     </ListValues>
   </avrgcc.compiler.preprocessor.UndefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
@@ -128,7 +126,6 @@
       <Value>ARDUINO=101</Value>
       <Value>F_CPU=16000000</Value>
       <Value>LOG=0</Value>
-      <Value>SMS=1</Value>
       <Value>EEPROM_STORE</Value>
       <Value>SERIAL_RX_BUFFER_SIZE=256</Value>
       <Value>TEST</Value>
@@ -138,7 +135,6 @@
   <avrgcccpp.compiler.preprocessor.UndefSymbols>
     <ListValues>
       <Value>DEBUG</Value>
-      <Value>PANTALLA_TECLADO</Value>
     </ListValues>
   </avrgcccpp.compiler.preprocessor.UndefSymbols>
   <avrgcccpp.compiler.directories.IncludePaths>
@@ -154,20 +150,12 @@
       <Value>../../../../Libraries/Keypad</Value>
       <Value>../../../../Libraries/Logger</Value>
       <Value>../../../../Libraries/SPI</Value>
-      <Value>../../../../Librari
-		if (RTC.chipPresent()) {
-			LOG_DEBUG("The DS1307 is stopped.  Please run the SetTime");
-			LOG_DEBUG("example to initialize the time and begin running.");
-			// get the date and time the compiler was run
-		
-		
-			} else {
-			LOG_DEBUG("DS1307 read error!  Please check the circuitry.");es/SD</Value>
       <Value>../../../../Libraries/DS1307RTC</Value>
       <Value>../../../../Libraries/ATSerial</Value>
       <Value>../../../../Libraries/SIM900</Value>
       <Value>../../../../Libraries/StateMachine</Value>
       <Value>../../../../Libraries/LowPower</Value>
+      <Value>../../../../Libraries/SD</Value>
     </ListValues>
   </avrgcccpp.compiler.directories.IncludePaths>
   <avrgcccpp.compiler.optimization.level>Optimize (-O1)</avrgcccpp.compiler.optimization.level>

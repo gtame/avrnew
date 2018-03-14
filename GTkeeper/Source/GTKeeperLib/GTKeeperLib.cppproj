@@ -133,7 +133,6 @@
       <Value>ARDUINO=101</Value>
       <Value>F_CPU=16000000</Value>
       <Value>LOG=0</Value>
-      <Value>SMS=1</Value>
       <Value>EEPROM_STORE</Value>
       <Value>SERIAL_RX_BUFFER_SIZE=256</Value>
       <Value>TEST</Value>
@@ -315,6 +314,9 @@
     <Compile Include="Screens\ProgramasTanda.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Screens\Screens.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Screens\Sistema.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -322,6 +324,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="settings.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\Call.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="States\ON.cpp">
@@ -340,6 +345,15 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="States\Run.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\SMS.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\User.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="States\Web.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="textos.h">

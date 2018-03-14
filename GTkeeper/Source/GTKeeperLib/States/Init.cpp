@@ -164,14 +164,11 @@ void GTKeeper::OnInit()
 	//Comprobamos si tiene gsm configurado
 	if (IsGSMEnable())
 	{
-		
-
 		LOG_DEBUG("ACTIVANDO GSM");
 		//Chequea si esta encendido el modulo GSM, sino lo apaga
 		if (EstaArrancado())
-		{
 			//apaganding........
-		}
+			this->SwitchModule();
 
 		if (Check([](){ return gtKeeper.ActivaModulo();},TXT_MOD_GSM,line_num++,50,NUM_INTENTOS))
 		{
@@ -201,7 +198,6 @@ void GTKeeper::OnInit()
 	//Cargamos hora
 	if (!Check([](){ return gtKeeper.EstaEnHora();},TXT_RELOJ,line_num++))
 	{
-
 		delay(2000);
 		screenManager.ShowMsgBox_P(PSTR("Reloj no responde, ajuste manual"),MsgOkButton,30);
 		error_code=ERROR_NO_HORA;

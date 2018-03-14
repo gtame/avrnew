@@ -133,7 +133,6 @@
       <Value>ARDUINO=101</Value>
       <Value>F_CPU=16000000</Value>
       <Value>LOG=0</Value>
-      <Value>SMS=1</Value>
       <Value>EEPROM_STORE</Value>
       <Value>SERIAL_RX_BUFFER_SIZE=256</Value>
       <Value>TEST</Value>
