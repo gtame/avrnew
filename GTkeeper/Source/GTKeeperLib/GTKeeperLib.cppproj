@@ -323,6 +323,9 @@
     <Compile Include="Screens\Sistema.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Screens\SMS.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="settings.h">
       <SubType>compile</SubType>
     </Compile>
@@ -345,9 +348,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="States\Run.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="States\SMS.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="States\User.cpp">

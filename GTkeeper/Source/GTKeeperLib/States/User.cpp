@@ -6,6 +6,12 @@
  */ 
  #include <gtkeeper.h>
 
+//interrupcion
+void wakeUpInt ()
+{
+	
+}
+
  //CHECK
  bool GTKeeper::CheckUser()
  {
@@ -21,6 +27,9 @@
 	while (ELAPSED_SECONDS(time)>100 && screenManager.IsActive())
 	{
 		screenManager.Loop();
+		
+		//Chequeamos programacion
+		
 	}
  }
 
@@ -31,5 +40,8 @@
 	  screenManager.Apagar();
 	 //REseteamos todo, config, programas y estadisticas.
 	 LOG_DEBUG("Salimos de User");
+	 
+	 
+	 
  
  }
