@@ -2,18 +2,24 @@
 #ifndef PINOUT_H_
 #define PINOUT_H_
 
+//INTERRUPTS
+#define INTERRUPT_USER_INPUT 2
+#define INTERRUPT_GSM_INPUT 3
+
+
+
 //LEDS 
-#define LED_WORKING_PIN 13
-#define LED_ERROR_MODULE_PIN 13
-#define LED_ERROR_SIM_PIN 13
-#define LED_ERROR_NETWORK_PIN 13
-#define	LED_ERROR_MODULE_PIN 13 //LED INDICADOR DE ERRORES
+#define LED_WORKING_PIN 12
+#define LED_ERROR_MODULE_PIN 12
+#define LED_ERROR_SIM_PIN 12
+#define LED_ERROR_NETWORK_PIN 12
+#define	LED_ERROR_MODULE_PIN 12 //LED INDICADOR DE ERRORES
 
 //Pines para el Modulo  GSM 
 #define GSM_ONOFF_PIN 9
 #define GSM_READ_PIN
 #define GSM_WRITE_PIN
-
+#define GSM_SLEEP_PIN 13
 
 
 //El pin out del teclado las 4 primeros pines empezando por el * son las filas y los otras 4 las columnas

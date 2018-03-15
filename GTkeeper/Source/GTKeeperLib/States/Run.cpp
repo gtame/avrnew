@@ -9,14 +9,15 @@
 
    bool GTKeeper::CheckRun()
    {
-		//Comprobaremos si toca parar// lanzar 
-	   return true;
+ 	 //Si hemos arrancado, no toca tecla usuario, ni recibimos SMS ó Calls
+	 return !CheckUser() && !CheckSMS() && !CheckCall();
    }
+
    
-   void wakeUp()
+   
+   void wakeUpUser()
    {
-     
-     
+     int_input_user=true;
    }
    
    void GTKeeper::OnRun()
@@ -28,42 +29,34 @@
 	   //attachInterrupt(digitalPinToInterrupt(2),wakeUp,HIGH);
 	   
 	   LOG_DEBUG("OnRun");
-	   
+
+	   	// Allow wake up pin to trigger interrupt on low.
+	   	attachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT), wakeUpUser, HIGH);
+
+
+	   int_input_user=false;
+	   int_input_gsm=false;
 		//Mientras no haya UserInput ó Call ó SMS
-		while(true)
+		while(!int_input_user && !int_input_gsm)
 		{
-			
-			
-			int wakeUpPin=2;
-		   // Configure wake up pin as input.
-		   // This will consumes few uA of current.
-		   pinMode(wakeUpPin, INPUT_PULLUP);
-			
-			// Allow wake up pin to trigger interrupt on low.
-			attachInterrupt(digitalPinToInterrupt(2), wakeUp, LOW);
-   
 			LOG_DEBUG("A DORMIR COOO!");
-      
-			delay(100);
 			// Enter power down state with ADC and BOD module disabled.
 			// Wake up when wake up pin is low.SLEEP_8S
 			//SLEEP_FOREVER
-			LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
-   
-			// Disable external pin interrupt on wake up pin.
-			detachInterrupt(digitalPinToInterrupt(2));
-   
+			//LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+			GTKEEPER_SLEEP(SLEEP_8S);
 			// Do something here
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min
 			//Sleep();	
-      
 			LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
 			//Chequeamos programacion
-			 
 			//Chequeamos si debemos realizar el envio Stats via Web
-		}
 
+		
+		}
+		// Disable external pin interrupt on wake up pin.
+		detachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT));
 		
    }
    

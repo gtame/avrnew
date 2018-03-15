@@ -8,6 +8,11 @@
  #include <gtkeeper.h>
  
 
+ void wakeUpGSM()
+ {
+	int_input_gsm=true;
+ }
+
  //##Estado --- Reset ---
 
  //CHECK
@@ -65,11 +70,15 @@ void GTKeeper::OnInit()
 {
 	LOG_DEBUG("OnInit");
 
+
+
 	error_code=NO_ERROR;
 	
 	bSetupCompleted=false;
 
-	//Punto cero de todos pines
+	//Punto cero de todos pines ¿?
+	//noInterrupts();
+
 
 	//Fijamos los puertos conectados a los sectores
 	//Como salidas digitales
@@ -106,10 +115,22 @@ void GTKeeper::OnInit()
 	{
 		salidas[i].Tipo=actNone;
 	}
-
+	
 	//Ponemos como salida los dos pines para el control
 	pinMode(LED_ERROR_MODULE_PIN, OUTPUT);
 	pinMode(GSM_ONOFF_PIN, OUTPUT);
+
+	//Pin para poner en sleep mode el modulo
+	pinMode( GSM_SLEEP_PIN,OUTPUT);
+	digitalWrite(GSM_SLEEP_PIN, LOW);
+
+
+	//Pin interrupciones
+	// Configure wake up pin as input.	// This will consumes few uA of current.
+	pinMode(INTERRUPT_USER_INPUT, INPUT); // La interrupcion ocurre cuando cambia a HIGH
+	pinMode(INTERRUPT_GSM_INPUT, INPUT_PULLUP); //La interrupcion ocurre cuando cambia a LOW
+
+	
 
 	//Enciende Screen	 
 	screenManager.Encender();
@@ -179,6 +200,7 @@ void GTKeeper::OnInit()
 
 		if (Check([](){ return gtKeeper.ActivaModulo();},TXT_MOD_GSM,line_num++,50,ONINIT_REINTENTOS))
 		{
+
 			gtKeeper.getIMEI(config.Imei);
 			lcd.clear();
 			line_num=0;
@@ -202,7 +224,9 @@ void GTKeeper::OnInit()
 #endif
 	}
 	
-	
+	if (EstaArrancado())
+		attachInterrupt(digitalPinToInterrupt(3),wakeUpGSM, LOW);
+
 	//Cargamos hora
 	if (!Check([](){ return gtKeeper.EstaEnHora();},TXT_RELOJ,line_num++))
 	{
@@ -232,6 +256,8 @@ void GTKeeper::OnInit()
 	 
 	 //REseteamos todo, config, programas y estadisticas.
 	 LOG_DEBUG("OnLeaveInit");
+	 
+
  }
 
 

@@ -11,7 +11,7 @@
 
 
 
-GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(6,12)
+GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(9,13)
 {
 	
 }
@@ -142,6 +142,7 @@ void GTKeeper::setupStateMachine()
 	AddTransition(Run, SMS , []() { return gtKeeper.CheckSMS(); });
 	AddTransition(Run, Call , []() { return gtKeeper.CheckCall(); });
 	AddTransition(Run, Web , []() { return gtKeeper.CheckToWeb(); });
+	AddTransition(Run, Run , []() { return gtKeeper.CheckRun(); });
 	
 	//SMS
 	AddTransition(SMS, Run , []() { return true; });
@@ -174,19 +175,26 @@ void GTKeeper::setupStateMachine()
  	SetOnEntering(Init,  []() { gtKeeper.OnInit();});
 	SetOnEntering(Reset,  []() { gtKeeper.OnReset();});
 	SetOnEntering(Error,  []() { gtKeeper.OnError();});
-	SetOnEntering(Run,  []() { gtKeeper.OnRun();});
 	SetOnEntering(User,  []() { gtKeeper.OnUser();});
+	SetOnEntering(Run,  []() { gtKeeper.OnRun();});
+	SetOnEntering(Web,  []() { gtKeeper.OnWeb();});
+	SetOnEntering(Call,  []() { gtKeeper.OnCall();});
+	SetOnEntering(SMS,  []() { gtKeeper.OnSMS();});
+
 	/*stateMachine.SetOnEntering(PosicionB, outputB);
 	stateMachine.SetOnEntering(PosicionC, outputC);
 	stateMachine.SetOnEntering(PosicionD, outputD);*/
 	
 	//Fijamos las acciones a ejecutar cuando se abandona un determinado estado
-	SetOnLeaving(ON, []() { gtKeeper.OnLeaveON();});
-	SetOnLeaving(Init, []() { gtKeeper.OnLeaveInit();});
-	SetOnLeaving(Reset, []() { gtKeeper.OnLeaveReset();});
-	SetOnLeaving(Error, []() { gtKeeper.OnLeaveError();});
-	SetOnLeaving(Run, []() { gtKeeper.OnLeaveRun();});
-	SetOnLeaving(User, []() { gtKeeper.OnLeaveUser();});
+	SetOnLeaving(ON,  []() { gtKeeper.OnLeaveON();});
+	SetOnLeaving(Init,  []() { gtKeeper.OnLeaveInit();});
+	SetOnLeaving(Reset,  []() { gtKeeper.OnLeaveReset();});
+	SetOnLeaving(Error,  []() { gtKeeper.OnLeaveError();});
+	SetOnLeaving(User,  []() { gtKeeper.OnLeaveUser();});
+	SetOnLeaving(Run,  []() { gtKeeper.OnLeaveRun();});
+	SetOnLeaving(Web,  []() { gtKeeper.OnLeaveWeb();});
+	SetOnLeaving(Call,  []() { gtKeeper.OnLeaveCall();});
+	SetOnLeaving(SMS,  []() { gtKeeper.OnLeaveSMS();});
  
 }
 
@@ -1554,6 +1562,188 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 
 }
 
+
+bool GTKeeper::ExecuteCommand(char* commandstr)
+{
+
+
+//La password debera ir entre corchetes #1111#
+memset(buff_parse,0,MAIN_BUFFER_PARSE);
+sprintf(buff_parse,"#%s#",config.PasswordSMS);
+//Comprobamos que contiene la pwd correcta
+if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
+{
+	//Comprobamos el comando
+	char command= commandstr[strlen(buff_parse)];
+
+	LOG_DEBUG_ARGS ("COMANDO %s",command);
+
+	//lanzar Sector!!!
+	char * sectorptr=commandstr+(strlen(commandstr));
+
+
+
+	//Si es comando de arrancar sector-- Mays or Min
+	if (command=='P' || command=='p')
+	{
+		sectorptr=sectorptr+1;
+		int programa=atoi(sectorptr);
+		LOG_DEBUG_ARGS ("PROGRAMA %i %s",programa,sectorptr);
+		if (programa>0 && programa<=MAX_PROGRAMAS)
+		{
+			#ifdef SMS
+			SmsOpen(config.MovilAviso);
+			#endif
+			LanzaRiego(programa-1,true);
+			#ifdef SMS
+			SendSmsHora();
+			SmsSend();
+			#endif
+
+		}
+	}
+	else if (strncmp(sectorptr,"APN:",4)==0)
+	{
+		sectorptr=sectorptr+4;
+		if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
+		{
+			strcpy(config.APN,sectorptr);
+			EEPROMGuardaConfig();
+			CargaConfigWeb();
+			Sms(config.MovilAviso,PBB(F("APN Configurado %s"),config.APN));
+		}
+		else
+		Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
+
+
+	}
+	else if (strncmp(sectorptr,"USERAPN:",8)==0)
+	{
+		sectorptr=sectorptr+8;
+		if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
+		{
+			strcpy(config.userAPN,sectorptr);
+			EEPROMGuardaConfig();
+			CargaConfigWeb();
+			Sms(config.MovilAviso,PBB(F("User APN Configurado %s"),sectorptr));
+		}
+		else
+		Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
+
+
+	}
+	else if (strncmp(sectorptr,"PWDAPN:",7)==0)
+	{
+		sectorptr=sectorptr+7;
+		if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
+		{
+			strcpy(config.pwdAPN,sectorptr);
+			EEPROMGuardaConfig();
+			CargaConfigWeb();
+			Sms(config.MovilAviso,PBB(F("Pwd APN Configurado %s"),sectorptr));
+		}
+		else
+		Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
+
+
+	}
+	else
+	{
+
+		//Comandos numericos
+		int sector=atoi(sectorptr);
+
+		//El comando  77 -- Quiere muestra info! :)
+		if (sector==77)
+		{
+
+			#ifdef SMS
+
+			SmsOpen(config.MovilAviso);
+			SmsMessage_P(PSTR("Estoy preparado!\n"));
+			SendSmsHora();
+			SendSmsProgramacion();
+
+			SmsSend();
+			#endif
+
+
+		}
+		//Si el comando es 88 -- Quiere decir que queremos forzar el chequeo web
+		//Comprobamos tb que no estamos en pleno proceso de actualizacion web
+		if (sector==88)
+		{
+
+			bpendingWeb=true; //Ponemos pendiente
+			delay(300);
+			//Reseteamos la fecha de ultimo refresco para forzarlo, en caso que estemos actualizando cada x tiempo;
+			t_last_web=0;
+
+			CheckWeb();
+		}
+
+		else if (sector==89)
+		{
+			this->CheckWebConfig();
+
+		}
+		//Si el comando es 99 quiere decir que apague todos sectores
+		//Y si esta ejecutandose la programacion que la cancele
+		else if ( sector==99)
+		{
+			ApagarRiegos();
+			#ifdef SMS
+			if (config.AvisosSMS & SMSFinSector)
+			{
+
+				Sms_P(config.MovilAviso,PSTR("Parados todos programas"));
+			}
+			#endif
+		}
+		//Comando 101 este comando quiere decir que enciende la bomba
+		else if (sector==101)
+		{
+
+			//Dependiendo si esta encendido o no
+			//OJO!!!NOTAR QUE ENCENDIDO ES ESTADO LOW, SI ES HIGH LA BOMBA NO FUNCIONA
+
+			if (GetPosicion(1,actAbono)!=-1)
+			{
+				ApagaAbono(1);
+				#ifdef SMS
+				if (config.AvisosSMS & SMSFinSector)
+				Sms_P(config.MovilAviso,PSTR("Apagada bomba de abono por SMS"));
+				#endif
+			}
+			else
+			{
+				EnciendeAbono(1);
+				#ifdef SMS
+				if (config.AvisosSMS & SMSInicioSector)
+				Sms_P(config.MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
+				#endif
+			}
+
+		}
+		//Comando para mostrar la información de estado del reiego
+		else if (sector==100)
+		{
+			SendSmsSectoresEjecucion();
+
+		}
+		//Si el comando esta dentro del rango de sectores lo arrancamos
+		else if (sector>0 && sector<=PORTS_NUM )
+		{
+
+			LOG_INFO_ARGS("Arrancar sector %i",sector);
+			EnciendeSectorSMS(sector);
+
+		}
+	}
+}
+
+}
+
 //Procesa los mensajes AT Recibidos para callbacks y demas
 bool GTKeeper::ProcessATMensajes(char * msg)
 {
@@ -1585,180 +1775,7 @@ bool GTKeeper::ProcessATMensajes(char * msg)
 			delay(400);
 			if (ReadSerialLine(buffer,MAIN_BUFFER_SIZE)==RX_OK_READ)
 			{
-				//La password debera ir entre corchetes #1111#
-				memset(buff_parse,0,MAIN_BUFFER_PARSE);
-				sprintf(buff_parse,"#%s#",config.PasswordSMS);
-				//Comprobamos que contiene la pwd correcta
-				if (strncmp(buffer,buff_parse,strlen(buff_parse))==0)
-				{
-					//Comprobamos el comando
-					char command= buffer[strlen(buff_parse)];
-
-					LOG_DEBUG_ARGS ("COMANDO %s",command);
-
-					//lanzar Sector!!!
-					char * sectorptr=buffer+(strlen(buff_parse));
-
-
-
-					//Si es comando de arrancar sector-- Mays or Min
-					if (command=='P' || command=='p')
-					{
-						 sectorptr=sectorptr+1;
-						int programa=atoi(sectorptr);
-						LOG_DEBUG_ARGS ("PROGRAMA %i %s",programa,sectorptr);
-						if (programa>0 && programa<=MAX_PROGRAMAS)
-						{
-#ifdef SMS
-							SmsOpen(config.MovilAviso);
-#endif
-							LanzaRiego(programa-1,true);
-#ifdef SMS
-							SendSmsHora();
-							SmsSend();
-#endif
-
-						}
-					}
-					else if (strncmp(sectorptr,"APN:",4)==0)
-					{
-						sectorptr=sectorptr+4;
-						if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
-						{
-							strcpy(config.APN,sectorptr);
-							EEPROMGuardaConfig();
-							CargaConfigWeb();
-							Sms(config.MovilAviso,PBB(F("APN Configurado %s"),config.APN));
-						}
-						else
-							Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
-
-
-					}
-					else if (strncmp(sectorptr,"USERAPN:",8)==0)
-					{
-						sectorptr=sectorptr+8;
-						if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
-						{
-							strcpy(config.userAPN,sectorptr);
-							EEPROMGuardaConfig();
-							CargaConfigWeb();
-							Sms(config.MovilAviso,PBB(F("User APN Configurado %s"),sectorptr));
-						}
-						else
-							Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
-
-
-					}
-					else if (strncmp(sectorptr,"PWDAPN:",7)==0)
-					{
-						sectorptr=sectorptr+7;
-						if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
-						{
-							strcpy(config.pwdAPN,sectorptr);
-							EEPROMGuardaConfig();
-							CargaConfigWeb();
-							Sms(config.MovilAviso,PBB(F("Pwd APN Configurado %s"),sectorptr));
-						}
-						else
-							Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
-
-
-					}
-					else
-					{
-
-						//Comandos numericos
-								int sector=atoi(sectorptr);
-
-								//El comando  77 -- Quiere muestra info! :)
-								if (sector==77)
-								{
-
-			#ifdef SMS
-
-									SmsOpen(config.MovilAviso);
-									SmsMessage_P(PSTR("Estoy preparado!\n"));
-									SendSmsHora();
-									SendSmsProgramacion();
-
-									SmsSend();
-			#endif
-
-
-								}
-								//Si el comando es 88 -- Quiere decir que queremos forzar el chequeo web
-								//Comprobamos tb que no estamos en pleno proceso de actualizacion web
-								if (sector==88)
-								{
-
-									bpendingWeb=true; //Ponemos pendiente
-									delay(300);
-									//Reseteamos la fecha de ultimo refresco para forzarlo, en caso que estemos actualizando cada x tiempo;
-									t_last_web=0;
-
-									CheckWeb();
-								}
-
-								else if (sector==89)
-								{
-									this->CheckWebConfig();
-
-								}
-								//Si el comando es 99 quiere decir que apague todos sectores
-								//Y si esta ejecutandose la programacion que la cancele
-								else if ( sector==99)
-								{
-									ApagarRiegos();
-			#ifdef SMS
-									if (config.AvisosSMS & SMSFinSector)
-									{
-
-										Sms_P(config.MovilAviso,PSTR("Parados todos programas"));
-									}
-			#endif
-								}
-								//Comando 101 este comando quiere decir que enciende la bomba
-								else if (sector==101)
-								{
-
-									//Dependiendo si esta encendido o no
-									//OJO!!!NOTAR QUE ENCENDIDO ES ESTADO LOW, SI ES HIGH LA BOMBA NO FUNCIONA
-
-									if (GetPosicion(1,actAbono)!=-1)
-									{
-										ApagaAbono(1);
-			#ifdef SMS
-										if (config.AvisosSMS & SMSFinSector)
-										Sms_P(config.MovilAviso,PSTR("Apagada bomba de abono por SMS"));
-			#endif
-									}
-									else
-									{
-										EnciendeAbono(1);
-			#ifdef SMS
-										if (config.AvisosSMS & SMSInicioSector)
-										Sms_P(config.MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
-			#endif
-									}
-
-								}
-								//Comando para mostrar la información de estado del reiego
-								else if (sector==100)
-								{
-									SendSmsSectoresEjecucion();
-
-								}
-								//Si el comando esta dentro del rango de sectores lo arrancamos
-								else if (sector>0 && sector<=PORTS_NUM )
-								{
-
-									LOG_INFO_ARGS("Arrancar sector %i",sector);
-									EnciendeSectorSMS(sector);
-
-								}
-					}
-				}
+				
 			}
 		}
 

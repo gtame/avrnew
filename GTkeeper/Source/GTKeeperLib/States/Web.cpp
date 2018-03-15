@@ -10,18 +10,12 @@
 bool GTKeeper::CheckToWeb()
 {
 	//Entra en user mode cuando el user pulsa una tecla
-	return (keypad.getKey()!=NO_KEY);
+	return false;
 }
-
 //ACCION
 void GTKeeper::OnWeb()
 {
-	//Marca de tiempo
-	time_t time=now();
-	while (ELAPSED_SECONDS(time)>100 && screenManager.IsActive())
-	{
-		screenManager.Loop();
-	}
+	 
 }
 
 //SALE

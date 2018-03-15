@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.btnEditDictionary = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.txtDictionaryPath = new System.Windows.Forms.TextBox();
             this.btnDictionary = new System.Windows.Forms.Button();
@@ -48,13 +49,13 @@
             this.btnSendAscii = new System.Windows.Forms.Button();
             this.btnSendHex = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSelectAll = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuCopiar = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.pnlTop.SuspendLayout();
             this.pnlBottom.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -64,6 +65,7 @@
             // 
             // pnlTop
             // 
+            this.pnlTop.Controls.Add(this.btnEditDictionary);
             this.pnlTop.Controls.Add(this.label3);
             this.pnlTop.Controls.Add(this.txtDictionaryPath);
             this.pnlTop.Controls.Add(this.btnDictionary);
@@ -79,6 +81,19 @@
             this.pnlTop.Size = new System.Drawing.Size(1059, 90);
             this.pnlTop.TabIndex = 2;
             // 
+            // btnEditDictionary
+            // 
+            this.btnEditDictionary.Image = global::ATSerialEmulator.Properties.Resources.script_edit;
+            this.btnEditDictionary.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnEditDictionary.Location = new System.Drawing.Point(759, 45);
+            this.btnEditDictionary.Margin = new System.Windows.Forms.Padding(4);
+            this.btnEditDictionary.Name = "btnEditDictionary";
+            this.btnEditDictionary.Size = new System.Drawing.Size(204, 31);
+            this.btnEditDictionary.TabIndex = 9;
+            this.btnEditDictionary.Text = "Edit dictionary...";
+            this.btnEditDictionary.UseVisualStyleBackColor = true;
+            this.btnEditDictionary.Click += new System.EventHandler(this.btnEditDictionary_Click);
+            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -92,8 +107,9 @@
             // txtDictionaryPath
             // 
             this.txtDictionaryPath.BackColor = System.Drawing.Color.White;
-            this.txtDictionaryPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtDictionaryPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtDictionaryPath.Location = new System.Drawing.Point(84, 49);
+            this.txtDictionaryPath.Multiline = true;
             this.txtDictionaryPath.Name = "txtDictionaryPath";
             this.txtDictionaryPath.ReadOnly = true;
             this.txtDictionaryPath.Size = new System.Drawing.Size(484, 26);
@@ -101,12 +117,14 @@
             // 
             // btnDictionary
             // 
-            this.btnDictionary.Location = new System.Drawing.Point(572, 45);
+            this.btnDictionary.Image = global::ATSerialEmulator.Properties.Resources.book_open;
+            this.btnDictionary.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnDictionary.Location = new System.Drawing.Point(585, 45);
             this.btnDictionary.Margin = new System.Windows.Forms.Padding(4);
             this.btnDictionary.Name = "btnDictionary";
-            this.btnDictionary.Size = new System.Drawing.Size(135, 31);
+            this.btnDictionary.Size = new System.Drawing.Size(166, 31);
             this.btnDictionary.TabIndex = 6;
-            this.btnDictionary.Text = "Dictionary...";
+            this.btnDictionary.Text = "Open dictionary...";
             this.btnDictionary.UseVisualStyleBackColor = true;
             this.btnDictionary.Click += new System.EventHandler(this.btnDictionary_Click);
             // 
@@ -276,43 +294,44 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem3,
-            this.toolStripMenuItem4,
-            this.toolStripMenuItem5});
+            this.mnuSelectAll,
+            this.toolStripSeparator1,
+            this.mnuCopiar,
+            this.toolStripSeparator2,
+            this.mnuSave});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 114);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(141, 82);
             // 
-            // toolStripMenuItem1
+            // mnuSelectAll
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem1.Text = "toolStripMenuItem1";
+            this.mnuSelectAll.Name = "mnuSelectAll";
+            this.mnuSelectAll.Size = new System.Drawing.Size(140, 22);
+            this.mnuSelectAll.Text = "Select All";
+            this.mnuSelectAll.Click += new System.EventHandler(this.mnuSelectAll_Click);
             // 
-            // toolStripMenuItem2
+            // toolStripSeparator1
             // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem2.Text = "toolStripMenuItem2";
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
             // 
-            // toolStripMenuItem3
+            // mnuCopiar
             // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem3.Text = "toolStripMenuItem3";
+            this.mnuCopiar.Name = "mnuCopiar";
+            this.mnuCopiar.Size = new System.Drawing.Size(140, 22);
+            this.mnuCopiar.Text = "Copy";
+            this.mnuCopiar.Click += new System.EventHandler(this.mnuCopiar_Click);
             // 
-            // toolStripMenuItem4
+            // toolStripSeparator2
             // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem4.Text = "toolStripMenuItem4";
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(137, 6);
             // 
-            // toolStripMenuItem5
+            // mnuSave
             // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem5.Text = "toolStripMenuItem5";
+            this.mnuSave.Name = "mnuSave";
+            this.mnuSave.Size = new System.Drawing.Size(140, 22);
+            this.mnuSave.Text = "Save Log file";
+            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
             // 
             // frmMain
             // 
@@ -362,11 +381,12 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtDictionaryPath;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem mnuSelectAll;
+        private System.Windows.Forms.ToolStripMenuItem mnuCopiar;
+        private System.Windows.Forms.ToolStripMenuItem mnuSave;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.Button btnEditDictionary;
     }
 }
 

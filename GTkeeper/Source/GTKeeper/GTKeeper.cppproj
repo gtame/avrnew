@@ -213,6 +213,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Docs\411 RI Behaviors.txt">
+      <SubType>compile</SubType>
+    </None>
     <None Include="Docs\interrupts.txt">
       <SubType>compile</SubType>
     </None>

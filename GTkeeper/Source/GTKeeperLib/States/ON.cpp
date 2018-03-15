@@ -28,7 +28,9 @@ Logger Log(&Serial);
 const uint8_t GTKeeper::ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
 const uint8_t GTKeeper::ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
  
-
+ //Interrupciones variables (Volatile)
+ volatile bool int_input_user=false; //User interaccion
+ volatile bool int_input_gsm=false;//GSM interaccion
 
 bool GTKeeper::CheckON()
 {

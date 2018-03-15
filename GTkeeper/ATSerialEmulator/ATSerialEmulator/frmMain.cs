@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
@@ -177,7 +178,9 @@ namespace ATSerialEmulator
                 System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
                 fileDialog.Multiselect = false;
                 fileDialog.CheckFileExists = true;
-                if (fileDialog.ShowDialog() == DialogResult.OK)
+                fileDialog.Filter = "Text Files | *.txt";
+                fileDialog.DefaultExt = "txt";
+            if (fileDialog.ShowDialog() == DialogResult.OK)
                 {
                     LoadDictionary(fileDialog.FileName);
                 }
@@ -266,6 +269,55 @@ namespace ATSerialEmulator
                 }
                 Logger.Info($"Dictionary contains {serial.CommandDictionary.Count} entries");
                 txtDictionaryPath.Text = file;
+            }
+        }
+
+        private void mnuSelectAll_Click(object sender, EventArgs e)
+        {
+            txtLog.SelectAll();
+        }
+
+        private void mnuCopiar_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(txtLog.SelectedText);
+        }
+
+        private void mnuSave_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.SaveFileDialog fileDialog = new System.Windows.Forms.SaveFileDialog();
+            fileDialog.Filter = "Text Files | *.txt";
+            fileDialog.DefaultExt = "txt";
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+              try
+                {
+                    System.IO.File.WriteAllText(fileDialog.FileName,txtLog.Text);
+                }
+                catch(System.Exception ex)
+                {
+                    MessageBox.Show(this,"Unexpected error, more details in monitor","Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Logger.Error("An error happens when the file was being saved :(", ex);
+                }
+            }
+        }
+
+        private void btnEditDictionary_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (System.IO.File.Exists(txtDictionaryPath.Text))
+                {
+                    ProcessStartInfo psi = new ProcessStartInfo(txtDictionaryPath.Text);
+                    psi.UseShellExecute = true;
+                    Process.Start(psi);
+                }
+                else
+                    MessageBox.Show(this, "There isn't a dictionary file selected valid", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch(System.Exception ex )
+            {
+                MessageBox.Show(this, "Unexpected error, more details in monitor", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Logger.Error("An error happens when the file was being saved :(", ex);
             }
         }
     }

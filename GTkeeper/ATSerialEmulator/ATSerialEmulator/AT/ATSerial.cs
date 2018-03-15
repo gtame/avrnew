@@ -205,11 +205,15 @@ namespace ATSerialEmulator
                         //Like option
                         foreach(var response in responseDict)
                         {
-                            if (response.Key.Like(readed))
-                            { 
-                                Logger.Info($"<<{response.Value}");
-                                _serial.WriteLine(ParseCommand(response.Value));
-                                break;
+
+                            if (response.Key.Contains("*") || response.Key.Contains("%"))
+                            {
+                                if (readed.Like(response.Key))
+                                {
+                                    Logger.Info($"<<{response.Value}");
+                                    _serial.WriteLine(ParseCommand(response.Value));
+                                    break;
+                                }
                             }
                         }
                     }

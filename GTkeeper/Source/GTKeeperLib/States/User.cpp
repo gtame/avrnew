@@ -6,17 +6,12 @@
  */ 
  #include <gtkeeper.h>
 
-//interrupcion
-void wakeUpInt ()
-{
-	
-}
 
  //CHECK
  bool GTKeeper::CheckUser()
  {
 	 //Entra en user mode cuando el user pulsa una tecla
-	 return (keypad.getKey()!=NO_KEY);
+	 return int_input_user;
  }
 
  //ACCION
@@ -26,7 +21,10 @@ void wakeUpInt ()
 	LOG_DEBUG("OnUser");
 
 	if (!screenManager.IsActive())
+	{
 		screenManager.Encender();
+		screenManager.Paint();
+	}
 
 	screenManager.SetTimeInactivity(SCREEN_TIMEOUT);
 	 

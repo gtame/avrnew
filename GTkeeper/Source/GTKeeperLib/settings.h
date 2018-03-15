@@ -10,16 +10,29 @@
 
 
 #ifdef PROTEUS
+	#define GTKEEPER_SLEEP(x)  delay(500)
+	#define MILLISECONDS_DELAY(x) x/100
 	#define SECONDS_DELAY(x) x
-	#define SCREEN_TIMEOUT 5 //En segundos
+	#define SCREEN_TIMEOUT 3 //En segundos
 	#define ONINIT_REINTENTOS 1
 #else
+	#define GTKEEPER_SLEEP(x) LowPower.powerDown(x, ADC_OFF, BOD_OFF)
+	#define MILLISECONDS_DELAY(x) x
 	#define SECONDS_DELAY(x) x*1000
 	#define SCREEN_TIMEOUT 60  //segundos
 	#define ONINIT_REINTENTOS 5
 #endif
 
+
+#define MAX_SECONDS_DTMF_TONE SECONDS_DELAY(10)
 #define HOLD_TO_RESET 10 //Al arrancar numero de segundos que hay que mantener la tecla A-D pulsadas para entrar en RESET
+
+
+//KEYPAD
+#define KEYPAD_ROWS  4 //four rows
+#define KEYPAD_COLUMNS  4//four columns
+
+
 
 //Numero de programas , sectores 
 #define MAX_PROGRAMAS 5//Numero máximo de programas

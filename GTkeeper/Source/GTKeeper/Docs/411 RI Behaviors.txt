@@ -1,0 +1,8 @@
+﻿Los ring indicators
+En el manual de hardware, el punto 4.11 lo aclara
+Normalmente esta a alto el pin DTR
+
+Cuando se recibe un SMS ->  cambia a low 120 ms despues alto.
+LLamada -> El pin es cambiado a LOW hasta que se descuelga la llamada o se cancela 
+			ESTABLISH	
+			HANG UP

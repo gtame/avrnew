@@ -28,6 +28,9 @@
 	#define PIN_GSM_ON         9 // connect GSM Module turn ON to pin 77
 #endif
 
+#ifndef GSM_SLEEP_PIN
+#define GSM_SLEEP_PIN 13
+#endif
 
 #define NUM_SMS_LENGTH 15 //Numero de sms Ej.. 0034653316799
 
@@ -112,12 +115,15 @@ bool SIMEstaLista();
 bool GetSIMContact(uint8_t position, char *phone_number,char *contact_name);
 bool ExisteContactoSIM(uint8_t entrySim);
 
+
+bool GenerarPulsoDTMF(char caracter,uint16_t duration);
+bool TieneLlamadas();
 //uint8_t Llamar(callType_t tipo,const char *telefono);
 /*
 bool LlamarTelefono(const char *telefono);
 bool LlamarDesdeSim(uint8_t entrySim);
 bool Llamar(callType_t tipo,const char *telefono);
-bool TieneLlamadas();
+
 */
 
 

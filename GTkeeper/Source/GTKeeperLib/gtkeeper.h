@@ -104,9 +104,8 @@ enum MachineStates
 };
 
 
-//KEYPAD
-#define KEYPAD_ROWS  4 //four rows
-#define KEYPAD_COLUMNS  4//four columns
+
+
 
 
 //CallBacks
@@ -372,7 +371,7 @@ protected:
 
 
 
-
+	bool ExecuteCommand(char* commandstr);//Ejecuta un comando desde string , bien sea desde SMS o desde CALL
 
     static const uint16_t EEADDR_SW =GET_ADDRES_SALIDAS_WEB;
 
@@ -381,11 +380,16 @@ protected:
 
 
 	 uint16_t error_code;
+	 
 };
 
 extern	Keypad keypad;
 extern LiquidCrystal_I2C lcd;
 extern GTKeeper gtKeeper;
+
+//Interrupciones variables
+extern volatile bool int_input_user;//El user pulso una key
+extern volatile bool int_input_gsm;//El user pulso una key
 
 
 

@@ -63,7 +63,13 @@ void SIM900::SwitchModule() {
 
 void SIM900::WakeUp()
 {
-	SendCommandAsync("AT");
+
+	//para leventar hay que poner el pin DTR a low
+	digitalWrite(GSM_SLEEP_PIN, LOW);
+#ifndef PROTEUS
+	delay(100);
+#endif
+ 
 }
 
 bool SIM900::SetMode(Sim900SleepMode mode)
@@ -874,9 +880,10 @@ bool SIM900::ActivaModulo() {
 
 
 
-/*
- *
-
+bool  SIM900::GenerarPulsoDTMF(char caracter,uint16_t duration=100)
+{
+	return (SendCommandCheckError(F("AT+CLDTMF=5,\"%c\",duration"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*) AT_ERROR,caracter,duration)==RX_CHECK_OK);
+}
 
 bool SIM900::TieneLlamadas()
 {
@@ -884,11 +891,15 @@ bool SIM900::TieneLlamadas()
 	if (SendCommandCheck("AT+CPAS", "+CPAS:")==RX_CHECK_OK)
 	{
 		char * resultado=GetLastResponse();
-		return (resultado[7]==3 || resultado[7]==4);
+		return (resultado[7]=='3' || resultado[7]=='4');
 	}
+	else
+		return false;
 
 }
 
+/*
+ *
 bool SIM900::Llamar(callType_t tipo,const char *telefono)
 {
 	bool result = true;
