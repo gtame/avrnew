@@ -13,42 +13,54 @@
 	   return true;
    }
    
+   void wakeUp()
+   {
+     
+     
+   }
+   
    void GTKeeper::OnRun()
    {
 	   
 	   ////Activamos la interrupcion para capturar pulsaciones de teclado
-	   //attachInterrupt(digitalPinToInterrupt(2),wakeUpInt,HIGH);
+	   //attachInterrupt(digitalPinToInterrupt(2),wakeUp,HIGH);
 	   ////Activamos la interrupcion para capturar llamadas/sms
-	   //attachInterrupt(digitalPinToInterrupt(2),wakeUpInt,HIGH);
+	   //attachInterrupt(digitalPinToInterrupt(2),wakeUp,HIGH);
 	   
 	   LOG_DEBUG("OnRun");
 	   
 		//Mientras no haya UserInput ó Call ó SMS
-		while(false)
+		while(true)
 		{
 			
-			/*
+			
 			int wakeUpPin=2;
 		   // Configure wake up pin as input.
 		   // This will consumes few uA of current.
-		   pinMode(wakeUpPin, INPUT);
+		   pinMode(wakeUpPin, INPUT_PULLUP);
 			
 			// Allow wake up pin to trigger interrupt on low.
-			attachInterrupt(0, wakeUp, LOW);
+			attachInterrupt(digitalPinToInterrupt(2), wakeUp, LOW);
    
+			LOG_DEBUG("A DORMIR COOO!");
+      
+			delay(100);
 			// Enter power down state with ADC and BOD module disabled.
-			// Wake up when wake up pin is low.
+			// Wake up when wake up pin is low.SLEEP_8S
+			//SLEEP_FOREVER
 			LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
    
 			// Disable external pin interrupt on wake up pin.
-			detachInterrupt(0);
-   */
+			detachInterrupt(digitalPinToInterrupt(2));
+   
 			// Do something here
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min
-			Sleep();	
+			//Sleep();	
+      
+			LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
 			//Chequeamos programacion
-			
+			 
 			//Chequeamos si debemos realizar el envio Stats via Web
 		}
 

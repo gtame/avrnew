@@ -11,7 +11,7 @@
 
 
 
-GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(6,11)
+GTKeeper::GTKeeper():SIM900(&Serial1), StateMachine(6,12)
 {
 	
 }
@@ -133,7 +133,10 @@ void GTKeeper::setupStateMachine()
 	//Init
 	AddTransition(Init, Error, []() { return gtKeeper.CheckError(); });
 	AddTransition(Init, User, []() { return true; });	
-	
+    
+    //User
+	AddTransition(User, Run, []() { return true; });
+    
 	//Run
 	AddTransition(Run, User, []() { return gtKeeper.CheckUser(); });
 	AddTransition(Run, SMS , []() { return gtKeeper.CheckSMS(); });

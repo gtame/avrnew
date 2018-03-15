@@ -38,16 +38,20 @@ void wakeUpInt ()
 		//Chequeamos programacion
 	}
 
-	LOG_DEBUG("Salimos de User");
+	LOG_DEBUG("End OnUser");
  }
 
  //SALE
  void GTKeeper::OnLeaveUser()
  {
+	LOG_DEBUG("Salimos de User Init");
+	
 	 //Apagamos
-	  screenManager.Apagar();
+	  if (screenManager.IsActive())
+		screenManager.Apagar();
+    
 	 //REseteamos todo, config, programas y estadisticas.
-	 LOG_DEBUG("Salimos de User");
+	 LOG_DEBUG("Salimos de User Fin");
 	 
 	 
 	 

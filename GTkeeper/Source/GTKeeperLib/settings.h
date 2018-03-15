@@ -11,11 +11,11 @@
 
 #ifdef PROTEUS
 	#define SECONDS_DELAY(x) x
-	#define SCREEN_TIMEOUT 500
+	#define SCREEN_TIMEOUT 5 //En segundos
 	#define ONINIT_REINTENTOS 1
 #else
 	#define SECONDS_DELAY(x) x*1000
-	#define SCREEN_TIMEOUT 30000
+	#define SCREEN_TIMEOUT 60  //segundos
 	#define ONINIT_REINTENTOS 5
 #endif
 

@@ -170,6 +170,7 @@ void GTKeeper::OnInit()
 	//Comprobamos si tiene gsm configurado
 	if (IsGSMEnable())
 	{
+#ifndef PROTEUS
 		LOG_DEBUG("ACTIVANDO GSM");
 		//Chequea si esta encendido el modulo GSM, sino lo apaga
 		if (EstaArrancado())
@@ -198,6 +199,7 @@ void GTKeeper::OnInit()
 				screenManager.ShowMsgBox_P(PSTR("Modulo gsm no responde"),MsgOkButton,30);
 				//Grabamos log
 		}
+#endif
 	}
 	
 	
