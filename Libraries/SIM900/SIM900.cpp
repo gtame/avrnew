@@ -880,9 +880,11 @@ bool SIM900::ActivaModulo() {
 
 
 
-bool  SIM900::GenerarPulsoDTMF(char caracter,uint16_t duration=100)
+bool  SIM900::GenerarPulsoDTMF(char caracter,uint16_t durationseg=1)
 {
-	return (SendCommandCheckError(F("AT+CLDTMF=5,\"%c\",duration"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*) AT_ERROR,caracter,duration)==RX_CHECK_OK);
+
+
+	return (SendCommandCheckError(F("AT+CLDTMF=%i,\"%c\",%i,2"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*) AT_ERROR,durationseg,caracter,durationseg*100)==RX_CHECK_OK);
 }
 
 bool SIM900::TieneLlamadas()

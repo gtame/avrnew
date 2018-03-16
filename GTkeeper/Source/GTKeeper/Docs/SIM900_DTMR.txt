@@ -1,4 +1,5 @@
-at+vts=1;+vts=1;+vts=1;+vts=1;+vts=8;+vts=4;+vts=5ATDT7782251603528033#;
+at+vts=1;+vts=1;+vts=1;+vts=1;+vts=8;+vts=4;+vts=5
+ATDT7782251603528033#;
 
 AT+VTD=100
 AT+VTS=1;VTS=1;VTS=1;VTS=1;AT+VTS=1;AT+VTS=1
@@ -30,6 +31,11 @@ AT+CLDTMF=5,"F,F",100,1
 AT+CLDTMF=5,"F",500,1
 --Plsacon de tecla
 AT+CLDTMF=1,"F",50,1
+
+
+==SMS==
+Borramos todos Msg
+AT+CMGD=0,4
 
 
 http://cassiopeia.hk/arduino-dtmf/

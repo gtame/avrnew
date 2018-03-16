@@ -39,7 +39,7 @@
 		//Mientras no haya UserInput ó Call ó SMS
 		while(!int_input_user && !int_input_gsm)
 		{
-			LOG_DEBUG("A DORMIR COOO!");
+			//LOG_DEBUG("A DORMIR COOO!");
 			// Enter power down state with ADC and BOD module disabled.
 			// Wake up when wake up pin is low.SLEEP_8S
 			//SLEEP_FOREVER
@@ -49,7 +49,7 @@
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min
 			//Sleep();	
-			LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
+			//LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
 			//Chequeamos programacion
 			//Chequeamos si debemos realizar el envio Stats via Web
 

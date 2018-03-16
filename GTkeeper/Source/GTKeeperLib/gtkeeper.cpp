@@ -177,9 +177,10 @@ void GTKeeper::setupStateMachine()
 	SetOnEntering(Error,  []() { gtKeeper.OnError();});
 	SetOnEntering(User,  []() { gtKeeper.OnUser();});
 	SetOnEntering(Run,  []() { gtKeeper.OnRun();});
+	SetOnEntering(SMS,  []() { gtKeeper.OnSMS();});
 	SetOnEntering(Web,  []() { gtKeeper.OnWeb();});
 	SetOnEntering(Call,  []() { gtKeeper.OnCall();});
-	SetOnEntering(SMS,  []() { gtKeeper.OnSMS();});
+	
 
 	/*stateMachine.SetOnEntering(PosicionB, outputB);
 	stateMachine.SetOnEntering(PosicionC, outputC);
@@ -192,9 +193,10 @@ void GTKeeper::setupStateMachine()
 	SetOnLeaving(Error,  []() { gtKeeper.OnLeaveError();});
 	SetOnLeaving(User,  []() { gtKeeper.OnLeaveUser();});
 	SetOnLeaving(Run,  []() { gtKeeper.OnLeaveRun();});
+	SetOnLeaving(SMS,  []() { gtKeeper.OnLeaveSMS();});
 	SetOnLeaving(Web,  []() { gtKeeper.OnLeaveWeb();});
 	SetOnLeaving(Call,  []() { gtKeeper.OnLeaveCall();});
-	SetOnLeaving(SMS,  []() { gtKeeper.OnLeaveSMS();});
+	
  
 }
 
@@ -1566,6 +1568,7 @@ void GTKeeper::GetHttpResultCallback(const char* url,int len)
 bool GTKeeper::ExecuteCommand(char* commandstr)
 {
 
+bool error	=false;
 
 //La password debera ir entre corchetes #1111#
 memset(buff_parse,0,MAIN_BUFFER_PARSE);
@@ -1599,8 +1602,10 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			SendSmsHora();
 			SmsSend();
 			#endif
-
+			
 		}
+		else
+			error=true;
 	}
 	else if (strncmp(sectorptr,"APN:",4)==0)
 	{
@@ -1613,7 +1618,11 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			Sms(config.MovilAviso,PBB(F("APN Configurado %s"),config.APN));
 		}
 		else
-		Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
+		{
+			Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
+			error=true;
+		}
+		
 
 
 	}
@@ -1628,7 +1637,11 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			Sms(config.MovilAviso,PBB(F("User APN Configurado %s"),sectorptr));
 		}
 		else
-		Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
+		{
+			Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
+			error=true;
+		}
+		
 
 
 	}
@@ -1643,7 +1656,11 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			Sms(config.MovilAviso,PBB(F("Pwd APN Configurado %s"),sectorptr));
 		}
 		else
-		Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
+		{
+			error=true;
+			Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
+		}
+		
 
 
 	}
@@ -1666,7 +1683,7 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 
 			SmsSend();
 			#endif
-
+						
 
 		}
 		//Si el comando es 88 -- Quiere decir que queremos forzar el chequeo web
@@ -1739,14 +1756,19 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			EnciendeSectorSMS(sector);
 
 		}
+		else
+			error=true;
 	}
 }
-
+	return !error;
 }
 
 //Procesa los mensajes AT Recibidos para callbacks y demas
 bool GTKeeper::ProcessATMensajes(char * msg)
 {
+
+
+	return false;
 
 	if (msg!=NULL && bSetupCompleted)
 	{

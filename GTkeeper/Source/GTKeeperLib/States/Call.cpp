@@ -9,6 +9,7 @@
 //CHECK
 bool GTKeeper::CheckCall()
 {
+		LOG_DEBUG("CheckCall");
 		//Entra en user mode cuando el user pulsa una tecla
 		//1-Recibi una interrupcion  GSM
 		if (int_input_gsm)
@@ -35,9 +36,9 @@ void GTKeeper::OnCall()
 	 {
 		 MILLISECONDS_DELAY(500);
 		 //Emitimos dos pitidos
-		 GenerarPulsoDTMF('F',20);
+		 GenerarPulsoDTMF('F',2);
 		 MILLISECONDS_DELAY(100);
-		 GenerarPulsoDTMF('F',20);
+		 GenerarPulsoDTMF('F',2);
 		 MILLISECONDS_DELAY(100);
 
 		 //Pasamos a modo DTMF
@@ -57,18 +58,21 @@ void GTKeeper::OnCall()
 					 {
 						//En el 6 viene la tecla
 						LOG_DEBUG_ARGS("Tecla %c",response[6]);
-						GenerarPulsoDTMF(response[6],20);
+						//GenerarPulsoDTMF(response[6],20);
 						if (response[6]=='*')
 						{
 							if (ExecuteCommand(buffer))
 							{
+
+							LOG_DEBUG("OK!!!");
+							/*
 								//indicamos al usuario que todo OK
 								GenerarPulsoDTMF('F',20);
 								MILLISECONDS_DELAY(100);
 								GenerarPulsoDTMF('F',20);
 								MILLISECONDS_DELAY(100);
 								GenerarPulsoDTMF('F',20);
-								MILLISECONDS_DELAY(100);
+								MILLISECONDS_DELAY(100);*/
 							}
 
 							bexit=true;
