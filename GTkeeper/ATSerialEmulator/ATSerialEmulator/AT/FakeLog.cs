@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace ATSerialEmulator
     public interface ILogWriter
     {
 
-        void Write(string message);
+        void Write(string message, LogLevel level);
 
         /// <summary>
         /// {L} level
@@ -52,7 +53,7 @@ namespace ATSerialEmulator
 
     public class ConsoleWriter : ILogWriter
     {
-        public void Write(string message)
+        public void Write(string message,LogLevel level)
         {
             System.Console.WriteLine(message);
         }
@@ -75,7 +76,7 @@ namespace ATSerialEmulator
 
         }
 
-        public void Write(string message)
+        public void Write(string message,LogLevel level)
         {
             lock (_lock)
             {
@@ -128,32 +129,50 @@ namespace ATSerialEmulator
 
     public class ControlWriter : ILogWriter
     {
-        private System.Windows.Forms.TextBox textBox;
+        private System.Windows.Forms.RichTextBox textBox;
 
-        public ControlWriter(System.Windows.Forms.TextBox txt,string format)
+        public ControlWriter(System.Windows.Forms.RichTextBox txt,string format)
         {
             textBox = txt;
             Format = format;
         }
         public string Format { get; set; }
 
-        private void PutText(string message)
+        private void PutText(string message,LogLevel level)
         {
+            Color color =Color.Black;
+            switch(level)
+            {
+                case LogLevel.Debug:
+                    color = Color.Green;
+                    break;
+                case LogLevel.Info:
+                    color = Color.Blue;
+                    break;
+                case LogLevel.Warning:
+                    color = Color.Indigo;
+                    break;
+                case LogLevel.Error:
+                case LogLevel.Fatal:
+                    color = Color.Red;
+                    break;
+            }
 
-            textBox.Text += message + System.Environment.NewLine;
+
+            textBox.AppendText(color, message + System.Environment.NewLine );
             textBox.SelectionStart = textBox.Text.Length;
             textBox.ScrollToCaret();
         }
 
-        public void Write(string message)
+        public void Write(string message, LogLevel level)
         {
             if (textBox.InvokeRequired)
                 textBox.Invoke(new System.Windows.Forms.MethodInvoker(delegate
                 {
-                    PutText(message);
+                    PutText(message, level);
                 }));
             else
-                PutText(message);
+                PutText(message, level);
         }
 
 
@@ -193,7 +212,7 @@ namespace ATSerialEmulator
                         .Replace("{T}",type.ToString())
                         .Replace("{M}", message);
 
-                    writer.Write(format);
+                    writer.Write(format, level);
 
                 }
                 catch (System.Exception ex)
@@ -260,7 +279,7 @@ namespace ATSerialEmulator
             if (LogManager.GetLevel() <= LogLevel.Error)
             {
                 msg += ToString(ex);
-                logWriter.Write( LogLevel.Info, System.Threading.Thread.CurrentThread.ManagedThreadId, typeReference, msg);
+                logWriter.Write( LogLevel.Error, System.Threading.Thread.CurrentThread.ManagedThreadId, typeReference, msg);
 
             }
         }

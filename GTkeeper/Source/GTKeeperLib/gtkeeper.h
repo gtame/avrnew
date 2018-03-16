@@ -315,6 +315,7 @@ public:
      static const uint8_t ports[PORTS_NUM] ;
      static const uint8_t ports_abono[PORTS_ABONO] ;
  
+	 bool ExecuteCommand(char* commandstr);//Ejecuta un comando desde string , bien sea desde SMS o desde CALL
 
 protected:
 
@@ -371,7 +372,6 @@ protected:
 
 
 
-	bool ExecuteCommand(char* commandstr);//Ejecuta un comando desde string , bien sea desde SMS o desde CALL
 
     static const uint16_t EEADDR_SW =GET_ADDRES_SALIDAS_WEB;
 

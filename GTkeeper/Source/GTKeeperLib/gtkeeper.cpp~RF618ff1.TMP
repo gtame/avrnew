@@ -1573,25 +1573,25 @@ bool error	=false;
 //La password debera ir entre corchetes #1111#
 memset(buff_parse,0,MAIN_BUFFER_PARSE);
 sprintf(buff_parse,"#%s#",config.PasswordSMS);
-
-volatile char buffvolatile [MAIN_BUFFER_PARSE];
-memcpy((char*)buffvolatile, buff_parse,MAIN_BUFFER_PARSE);
-
-LOG_DEBUG("PWD CORRECTA! ");
-	
 //Comprobamos que contiene la pwd correcta
 if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 {
 	
-	//Comprobamos el comando
-	char* command =commandstr+strlen(buff_parse);
-	//lanzar Sector!!!
-	 char * sectorptr=command+1;
-
- 
+	LOG_DEBUG("PWD CORRECTA! ");
+	LOG_DEBUG_ARGS_B("->%s",commandstr);
 	
+	//Comprobamos el comando
+	char* command= commandstr[strlen(buff_parse)];
+
+	LOG_DEBUG_ARGS ("COMANDO %s",command);
+
+	//lanzar Sector!!!
+	char * sectorptr=commandstr+(strlen(commandstr));
+
+
+
 	//Si es comando de arrancar sector-- Mays or Min
-	if (command[0]=='P' || command[0]=='p')
+	if (command=='P' || command=='p')
 	{
 		sectorptr=sectorptr+1;
 		int programa=atoi(sectorptr);

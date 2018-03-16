@@ -87,49 +87,11 @@ namespace ATSerialEmulator
         }
 
 
-        /// <summary>
-        /// Open serial port with default properies
-        /// </summary>
-        /// <param name="serialport"></param>
-        public ATSerial(string serialport)
-        {
-            _serial = new SerialPort(serialport);
-            
-        }
 
-
-        /// <summary>
-        /// Open serial port with the specified baudrate & default properies 
-        /// </summary>
-        public ATSerial(string serialport, int baudrate)
+        public ATSerial()
         {
 
-            _serial = new SerialPort(serialport)
-            {
-                ReadTimeout = TIMEOUT,
-                WriteTimeout = SerialPort.InfiniteTimeout,
-                BaudRate = baudrate,
-            };
-            
         }
-
-        /// <summary>
-        /// Open serial port with the specified  properies 
-        /// </summary>
-        public ATSerial(string serialport,int baudrate,int databits, System.IO.Ports.Parity parity, System.IO.Ports.StopBits stopbits, System.IO.Ports.Handshake handshake)
-        {
-            _serial = new SerialPort(serialport)
-            {
-                ReadTimeout = TIMEOUT,
-                WriteTimeout = SerialPort.InfiniteTimeout,
-                BaudRate = baudrate,
-                DataBits=databits,
-                Parity=parity,
-                StopBits=stopbits,
-                Handshake=handshake
-            };
-        }
-
 
         public void AddResponse(string request,string response)
         {
@@ -154,65 +116,104 @@ namespace ATSerialEmulator
         /// <returns></returns>
         private async Task SerialProcessAsync(CancellationToken ct)
         {
-            
+            string readed = string.Empty;
             while (!cts.IsCancellationRequested)
             {
                 try
                 {
                     //Commands
+             
                     foreach (Command command in commands)
                     {
                         if (command.Type == TypeCommand.Command)
                         {
-                            Logger.Info("=== SEND  COMMAND ===");
-                            Logger.Info($"<<{command.CommandString}");
-                            _serial.Write(ParseCommand(command.CommandString));
-                            Logger.Info("=== END SEND  COMMAND ===");
+                            try
+                            {
+                                _serial.Write(ParseCommand(command.CommandString));
+                                Logger.Info("=== SEND  COMMAND ===");
+                                Logger.Info($"<<{command.CommandString}");
+                                Logger.Info("=== END SEND  COMMAND ===");
+                            }
+                            catch(System.TimeoutException ex)
+                            {
+                                Logger.Error($"Error send command {command.CommandString}", ex);
+                            }
 
                         }
-                        else if  (command.Type == TypeCommand.File)
+                        else if (command.Type == TypeCommand.File)
                         {
-                            Logger.Info($"=== SEND  FILE {command.CommandString} ===");
-                            Logger.Info(System.IO.File.ReadAllText(command.CommandString));
-                            _serial.Write(System.IO.File.ReadAllText(command.CommandString));
-                            Logger.Info($"=== END SEND  FILE {command.CommandString} ===");
+                            try
+                            {
+                                _serial.Write(System.IO.File.ReadAllText(command.CommandString));
+                                Logger.Info($"=== SEND  FILE {command.CommandString} ===");
+                                Logger.Info(System.IO.File.ReadAllText(command.CommandString));
+                                Logger.Info($"=== END SEND  FILE {command.CommandString} ===");
+                            }
+                            catch (System.TimeoutException ex)
+                            {
+                                Logger.Error($"Error send file {command.CommandString}", ex);
+                            }
+
                         }
                         else if (command.Type == TypeCommand.CommandBytes)
                         {
-                            byte[] bytes = ((CommandByte)command).Bytes;
-                            Logger.Info($"=== SEND  BYTES {bytes.Length} ===");
-                            Logger.Info(System.Text.UTF8Encoding.Unicode.GetString(bytes));
-                            _serial.Write(bytes, 0, bytes.Length);
-                            Logger.Info($"=== END SEND  BYTES ===");
+                            try
+                            { 
+                                byte[] bytes = ((CommandByte)command).Bytes;
+                                Logger.Info(System.Text.UTF8Encoding.Unicode.GetString(bytes));
+                                Logger.Info($"=== SEND  BYTES {bytes.Length} ===");
+                                _serial.Write(bytes, 0, bytes.Length);
+                                Logger.Info($"=== END SEND  BYTES ===");
+
+                            }
+                            catch (System.TimeoutException ex)
+                            {
+                                Logger.Error($"Error send bytes {System.Text.UTF8Encoding.Unicode.GetString(((CommandByte)command).Bytes)}", ex);
+                            }
                         }
                     }
                     //Clear Commands
                     commands.Clear();
+                    
+                    
 
-                    //Read serial port
-                    string readed = _serial.ReadLine();
-                    Logger.Info($">>{readed}");
-
-                    //Dictionary responses
-                    if (responseDict.ContainsKey(readed))
+                    //READ
+                    try
                     {
-                        string response = responseDict[readed];
-                        Logger.Info($"<<{response}");
-                        _serial.WriteLine(response);
+                        readed = string.Empty;
+                        //Read serial port
+                        readed=_serial.ReadLine();
+                        Logger.Info($">>{readed}");
                     }
-                    else
+                    catch (System.Exception ex)
                     {
-                        //Like option
-                        foreach(var response in responseDict)
-                        {
 
-                            if (response.Key.Contains("*") || response.Key.Contains("%"))
+                    }
+
+                    //IF readed something
+                    if (!string.IsNullOrEmpty(readed))
+                    {
+                        //Dictionary responses
+                        if (responseDict.ContainsKey(readed))
+                        {
+                            string response = responseDict[readed];
+                            Logger.Info($"<<{response}");
+                            _serial.WriteLine(response);
+                        }
+                        else
+                        {
+                            //Like option
+                            foreach (var response in responseDict)
                             {
-                                if (readed.Like(response.Key))
+
+                                if (response.Key.Contains("*") || response.Key.Contains("%"))
                                 {
-                                    Logger.Info($"<<{response.Value}");
-                                    _serial.WriteLine(ParseCommand(response.Value));
-                                    break;
+                                    if (readed.Like(response.Key))
+                                    {
+                                        Logger.Info($"<<{response.Value}");
+                                        _serial.WriteLine(ParseCommand(response.Value));
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -220,7 +221,7 @@ namespace ATSerialEmulator
 
                    
                 }
-                catch (System.TimeoutException timeoutex)
+                catch (System.TimeoutException)
                 {
                     //No readed
                     Logger.Debug($"Timeout reading serial port {_serial.PortName}..");
@@ -235,10 +236,86 @@ namespace ATSerialEmulator
         }
 
 
+
+
+
+        /// <summary>
+        /// Open serial port with default properies
+        /// </summary>
+        /// <param name="serialport"></param>
+        public void Open(string serialport)
+        {
+            try
+            {
+                _serial = new SerialPort(serialport);
+            }
+            catch(System.Exception ex)
+            {
+                Logger.Error("Error open port", ex);
+            }
+
+            if (_serial != null)
+                Open(_serial);
+        }
+
+
+        /// <summary>
+        /// Open serial port with the specified baudrate & default properies 
+        /// </summary>
+        public void Open(string serialport, int baudrate)
+        {
+            try
+            {
+                _serial = new SerialPort(serialport)
+                {
+                    ReadTimeout = TIMEOUT,
+                    WriteTimeout = TIMEOUT*10,
+                    BaudRate = baudrate,
+                };
+            }    
+            catch(System.Exception ex)
+            {
+                Logger.Error("Error open port", ex);
+            }
+
+            if (_serial != null)
+                Open(_serial);
+
+        }
+
+        /// <summary>
+        /// Open serial port with the specified  properies 
+        /// </summary>
+        public void Open(string serialport, int baudrate, int databits, System.IO.Ports.Parity parity, System.IO.Ports.StopBits stopbits, System.IO.Ports.Handshake handshake)
+        {
+            try
+            { 
+                _serial = new SerialPort(serialport)
+                {
+                    ReadTimeout = TIMEOUT,
+                    WriteTimeout = SerialPort.InfiniteTimeout,
+                    BaudRate = baudrate,
+                    DataBits = databits,
+                    Parity = parity,
+                    StopBits = stopbits,
+                    Handshake = handshake
+                };
+            }
+            catch (System.Exception ex)
+            {
+                Logger.Error("Error open port", ex);
+            }
+
+            if (_serial!=null)
+            Open(_serial);
+        }
+
+
+
         /// <summary>
         /// Open serial port
         /// </summary>
-        public  void Open()
+        protected void  Open(SerialPort _serial)
         {
             if (_serial.IsOpen)
                 throw new System.Exception($"The port {_serial.PortName} is in use." );
@@ -297,7 +374,7 @@ namespace ATSerialEmulator
                 cts.Cancel();
             }
 
-            if ( _serial.IsOpen)
+            if (_serial!=null && _serial.IsOpen)
             {
                 _serial.Close();
 

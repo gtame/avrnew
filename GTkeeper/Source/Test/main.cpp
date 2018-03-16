@@ -22,7 +22,13 @@ test(otro)
 	assertNotEqual(x,1);
 }
 
-
+test(executeCommand)
+{
+	strcpy(gtKeeper.config.PasswordSMS,"1111");
+	char str[]="#1111#01";
+	
+	assertTrue(gtKeeper.ExecuteCommand(str));
+}
 
 
 
@@ -307,7 +313,7 @@ int main() {
 	setup();
 
 
-	delay(100);
+	 
 	//Loop
 	while (true)
 	loop();
@@ -364,7 +370,7 @@ void setup()
 
 	 
 
-	return;
+ 
 	//Entorno de TEST
 	/*gtKeeper.Initializate();
 
@@ -468,7 +474,8 @@ void loop() //----( LOOP: RUNS CONSTANTLY )----
 		i++;
 	}
 	
-
+	return;
+	
 	uint8_t index=0;
 	bool blnContinue=true;
 

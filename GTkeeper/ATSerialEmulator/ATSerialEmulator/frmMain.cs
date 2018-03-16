@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -15,8 +16,8 @@ namespace ATSerialEmulator
     public partial class frmMain : Form
     {
 
-        private ATSerial serial = null;
-
+        private ATSerial serial = new ATSerial();
+        private FileSystemWatcher watcher = new FileSystemWatcher();
 
         private ILog _logger = null;
         protected ILog Logger
@@ -95,6 +96,8 @@ namespace ATSerialEmulator
     
         protected override void OnClosed(EventArgs e)
         {
+
+            watcher.EnableRaisingEvents = false;
 
             if (serial != null)
             {
@@ -209,16 +212,14 @@ namespace ATSerialEmulator
 
             try
             {
-                //Open Serial port
-                serial = new ATSerial(cmbSerialPorts.Text, baudrate);
-
+  
                 //Open Serial
-                serial.Open();
+                serial.Open(cmbSerialPorts.Text, baudrate);
 
                 if (serial.CommandDictionary.Count==0)
                     Logger.Warning($"Dictionary is empty!!.");
             }
-            catch(System.Exception ex)
+            catch(System.Exception)
             {
                 Logger.Error($"Can't open port {cmbSerialPorts.Text}");
                 return;
@@ -238,6 +239,33 @@ namespace ATSerialEmulator
         private string GetSuffix()
         {
             return  (chkCR.Checked ? "\r" : "") + (chkLF.Checked ? "\n" : "");
+        }
+
+
+        private void AddFileWatcher(string file)
+        {
+            string path= Path.GetDirectoryName(file); ;
+            string filter= Path.GetFileName(file);
+            if (watcher.Path != path && watcher.Filter != file)
+            {
+                watcher.Path = path;
+                watcher.Filter = filter;
+                watcher.Changed += (s, e) =>
+                {
+                //Reload
+                Logger.Info($"Dictionary file changed , reloading file..");
+                    try
+                    {
+                        LoadDictionary(file);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Logger.Error($"Error mapping file dictionary {file}", ex);
+                    }
+                };
+                watcher.EnableRaisingEvents = true;
+            }
+ 
         }
 
         private void LoadDictionary(string file)
@@ -269,7 +297,8 @@ namespace ATSerialEmulator
                 }
                 Logger.Info($"Dictionary contains {serial.CommandDictionary.Count} entries");
                 txtDictionaryPath.Text = file;
-            }
+                AddFileWatcher(file);
+           }
         }
 
         private void mnuSelectAll_Click(object sender, EventArgs e)
@@ -319,6 +348,11 @@ namespace ATSerialEmulator
                 MessageBox.Show(this, "Unexpected error, more details in monitor", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Logger.Error("An error happens when the file was being saved :(", ex);
             }
+        }
+
+        private void mnuClear_Click(object sender, EventArgs e)
+        {
+            txtLog.Clear();
         }
     }
 }

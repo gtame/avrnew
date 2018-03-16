@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.pnlTop = new System.Windows.Forms.Panel();
             this.btnEditDictionary = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -48,7 +49,7 @@
             this.chkCR = new System.Windows.Forms.CheckBox();
             this.btnSendAscii = new System.Windows.Forms.Button();
             this.btnSendHex = new System.Windows.Forms.Button();
-            this.txtLog = new System.Windows.Forms.TextBox();
+            this.txtLog = new System.Windows.Forms.RichTextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuSelectAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -56,6 +57,8 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.mnuClear = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.pnlTop.SuspendLayout();
             this.pnlBottom.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -284,54 +287,68 @@
             this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtLog.Location = new System.Drawing.Point(0, 90);
             this.txtLog.Margin = new System.Windows.Forms.Padding(4);
-            this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtLog.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.txtLog.Size = new System.Drawing.Size(1059, 386);
             this.txtLog.TabIndex = 4;
+            this.txtLog.Text = "";
             // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuClear,
+            this.toolStripSeparator3,
             this.mnuSelectAll,
             this.toolStripSeparator1,
             this.mnuCopiar,
             this.toolStripSeparator2,
             this.mnuSave});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(141, 82);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 132);
             // 
             // mnuSelectAll
             // 
             this.mnuSelectAll.Name = "mnuSelectAll";
-            this.mnuSelectAll.Size = new System.Drawing.Size(140, 22);
+            this.mnuSelectAll.Size = new System.Drawing.Size(152, 22);
             this.mnuSelectAll.Text = "Select All";
             this.mnuSelectAll.Click += new System.EventHandler(this.mnuSelectAll_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // mnuCopiar
             // 
             this.mnuCopiar.Name = "mnuCopiar";
-            this.mnuCopiar.Size = new System.Drawing.Size(140, 22);
+            this.mnuCopiar.Size = new System.Drawing.Size(152, 22);
             this.mnuCopiar.Text = "Copy";
             this.mnuCopiar.Click += new System.EventHandler(this.mnuCopiar_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(137, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // mnuSave
             // 
             this.mnuSave.Name = "mnuSave";
-            this.mnuSave.Size = new System.Drawing.Size(140, 22);
+            this.mnuSave.Size = new System.Drawing.Size(152, 22);
             this.mnuSave.Text = "Save Log file";
             this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
+            // 
+            // mnuClear
+            // 
+            this.mnuClear.Name = "mnuClear";
+            this.mnuClear.Size = new System.Drawing.Size(152, 22);
+            this.mnuClear.Text = "Clear";
+            this.mnuClear.Click += new System.EventHandler(this.mnuClear_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
             // 
             // frmMain
             // 
@@ -342,6 +359,7 @@
             this.Controls.Add(this.pnlBottom);
             this.Controls.Add(this.pnlTop);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "frmMain";
             this.Text = "AT Serial Emulator";
@@ -354,7 +372,6 @@
             this.grpEOL.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -362,7 +379,7 @@
 
         private System.Windows.Forms.Panel pnlTop;
         private System.Windows.Forms.Panel pnlBottom;
-        private System.Windows.Forms.TextBox txtLog;
+        private System.Windows.Forms.RichTextBox txtLog;
         private System.Windows.Forms.Button btnFile;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -387,6 +404,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Button btnEditDictionary;
+        private System.Windows.Forms.ToolStripMenuItem mnuClear;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     }
 }
 

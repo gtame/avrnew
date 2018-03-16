@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>chip.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
@@ -50,6 +53,7 @@
     <Compile Include="ArgumentParser.cs" />
     <Compile Include="AT\ATSerial.cs" />
     <Compile Include="AT\FakeLog.cs" />
+    <Compile Include="AT\RichTextBoxExtension.cs" />
     <Compile Include="AT\StringExtension.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -83,6 +87,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="chip.ico" />
     <Content Include="dictionary.txt" />
     <None Include="Resources\book_open.png" />
     <None Include="Resources\script_edit.png" />
