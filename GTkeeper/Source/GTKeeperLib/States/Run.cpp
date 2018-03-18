@@ -32,7 +32,7 @@
 
 	   	// Allow wake up pin to trigger interrupt on low.
 	   	attachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT), wakeUpUser, HIGH);
-
+		
 
 	   int_input_user=false;
 	   int_input_gsm=false;
@@ -48,8 +48,10 @@
 			// Do something here
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min
+			
 			//Sleep();	
 			//LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
+
 			//Chequeamos programacion
 			//Chequeamos si debemos realizar el envio Stats via Web
 

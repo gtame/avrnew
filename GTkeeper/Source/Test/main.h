@@ -6,16 +6,18 @@
  */
 //Referencia a la libreria comun de avr
 
-#include <gtkeeper.h>
-#include "gtkeepertest.h"
-#include <ArduinoUnit.h>
-#include <DS1307RTC.h>
-
-
 #ifndef MAINTEST_H_
 #define MAINTEST_H_
 
 
+#include <ArduinoUnit.h>
+#include <DS1307RTC.h>
+#include <gtkeeper.h>
+#include "gtkeepertest.h"
+
+
+
+time_t GetNextEjecucionx();
 
 #define SCREEN_ACTIVE() false
 //definida en ScreenManager.h
@@ -28,10 +30,11 @@ struct definedtest
 	char text[25];
 	void (*Test)();
 };
-definedtest tests[25];
-uint8_t contador=0;
-char buffercommand[25];
-char buffer_test[MAIN_BUFFER_SIZE];
+
+extern definedtest tests[25];
+extern uint8_t contador;
+extern char buffercommand[25];
+extern char buffer_test[MAIN_BUFFER_SIZE];
 
 
 
@@ -60,9 +63,6 @@ void ExecuteTest(uint8_t test);
 void AddTest(char * menu,void (*Test)());
 void PrintMenu();
 
-
-//Funcion necesaria para el compilador
-extern "C" void __cxa_pure_virtual() {}
 
 //Main functions
 int main();

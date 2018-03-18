@@ -115,6 +115,7 @@
       <Value>DEBUG</Value>
       <Value>F_CPU=16000000</Value>
       <Value>ARDUINO=101</Value>
+      <Value>NODELAY</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
@@ -134,6 +135,7 @@
       <Value>DEBUG</Value>
       <Value>F_CPU=16000000</Value>
       <Value>ARDUINO=101</Value>
+      <Value>NODELAY</Value>
     </ListValues>
   </avrgcccpp.compiler.symbols.DefSymbols>
   <avrgcccpp.compiler.directories.IncludePaths>

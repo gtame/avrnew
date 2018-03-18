@@ -470,6 +470,102 @@ bool GTKeeper::CheckSIM()
 	*/
 }
 
+
+///Adaptacion de la libreria de arduino TimeAlarms.h
+time_t GTKeeper::GetNextEjecucion(Programa *programa)
+{
+	 //Si tiene dias programados
+	 if (programa->Dias!=0)
+	 {
+		time_t ahora=now();
+		TimeElements timeAhora;
+		time_t proximaejecucion=0;
+		breakTime(ahora,timeAhora);
+		
+		//La enum de time Sunday=1 si es domingo lo mandamos al final de la semana
+		//NONE =0,
+		//L = (1 << 0),//1
+		//M= (1 << 1),//2
+		//X= (1 << 2),//4
+		//J= (1 << 3),//8
+		//V= (1 << 4),//16
+		//S= (1 << 5),//32
+		//D= (1 << 6)//64
+		int day= dayOfWeek2(ahora);
+ 
+		DiasSemana dia=NONE;
+
+		//Recorremos hacia adelante desde el dia actual hasta el domingo del 0(Lunes) al 6(Domingo)
+		for (uint8_t i=day ;i<=7;i++)
+		{
+				dia= dayToDiasSemana(i) ;
+ 
+			//Si tiene este dia miramos horas
+			if (dia & programa->Dias)
+			{
+				if
+				(
+				   //Si es el dia actual...
+				   //Y tiene programada una hora posterior 
+				   (
+					(i==day) && 
+					(programa->HoraInicio>timeAhora.Hour) || 
+					//Si es la misma hora el minuto programado tiene que ser mayor , si es el mismo busca la siguiente programacion
+					(programa->HoraInicio==timeAhora.Hour && programa->MinutoInicio>timeAhora.Minute) 
+					)  
+					//O Tiene hora programada un dia posterior independientemente del dia
+					|| (i>day)
+				)
+				{
+					// Ya tenemos hora ;)
+					//HAcemos con la combinacion Dia Hora el time;
+					timeAhora.Hour=programa->HoraInicio;
+					timeAhora.Minute=programa->MinutoInicio;
+					// Y le sumamos los dias que han pasado desde hoy
+					proximaejecucion=makeTime(timeAhora) + ((i-day) * SECS_PER_DAY);
+					return proximaejecucion;
+					
+				} 
+		 
+			}
+
+		}
+
+		
+		//Si no hay proxima ejecucion
+		if (proximaejecucion==0)
+		{
+			//Recorremos hacia adelante... hasta el dia de hoy
+			for (uint8_t i=1 ;i<=day;i++)
+			{
+				DiasSemana dia= dayToDiasSemana(i) ;
+				//Si tiene este dia miramos horas
+				if (dia & programa->Dias)
+				{
+					//El que tenga programacion es la primera no hace falta seguir buscando
+					// Ya tenemos hora ;)
+
+					//Sumaremos al tiempo obtenido lo que nos queda de semana hasta el domingo 23:59
+					proximaejecucion =makeTime(timeAhora) + ((i-1)* SECS_PER_DAY) + (SECS_PER_WEEK - elapsedSecsThisWeek2(ahora))+
+					//Ahora estamos en el dia a las 00:00 , le ponemos la hora //minuto correcto
+					(programa->HoraInicio * SECS_PER_HOUR )+ (programa->MinutoInicio * SECS_PER_MIN);
+
+					return proximaejecucion;
+				}
+			}		
+		}
+		
+
+
+		 return proximaejecucion;
+	 }
+	 else
+		return 0;
+		
+}
+
+
+
 void GTKeeper::CheckRiegos(bool sendWeb)
 {
 	//Comprobamos si hay que lanzar-parar algun riego (Lo hacemos cuando cambia cada minuto)
@@ -1574,22 +1670,16 @@ bool error	=false;
 memset(buff_parse,0,MAIN_BUFFER_PARSE);
 sprintf(buff_parse,"#%s#",config.PasswordSMS);
 
-volatile char buffvolatile [MAIN_BUFFER_PARSE];
-memcpy((char*)buffvolatile, buff_parse,MAIN_BUFFER_PARSE);
-
-LOG_DEBUG("PWD CORRECTA! ");
 	
 //Comprobamos que contiene la pwd correcta
 if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 {
 	
-	//Comprobamos el comando
+	//Puntero al comando
 	char* command =commandstr+strlen(buff_parse);
-	//lanzar Sector!!!
-	 char * sectorptr=command+1;
+	//Puntero al Sector
+	char * sectorptr=command;
 
- 
-	
 	//Si es comando de arrancar sector-- Mays or Min
 	if (command[0]=='P' || command[0]=='p')
 	{
@@ -1764,6 +1854,9 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			error=true;
 	}
 }
+else
+	error=true; // No password
+	
 	return !error;
 }
 

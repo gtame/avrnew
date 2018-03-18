@@ -57,9 +57,8 @@
 
 
 //Defines para operar con puertos
-#define APAGA_RELE(x)  LOG_INFO_ARGS_B("RELE OFF %i",x); digitalWrite(x,LOW);
-#define ENCIENDE_RELE(x) LOG_INFO_ARGS_B("RELE ON %i",x);  digitalWrite(x,HIGH);
-
+	#define APAGA_RELE(x)  LOG_INFO_ARGS_B("RELE OFF %i",x); digitalWrite(x,LOW);
+	#define ENCIENDE_RELE(x) LOG_INFO_ARGS_B("RELE ON %i",x);  digitalWrite(x,HIGH);
 
 /*
 
@@ -73,6 +72,14 @@
 						APAGA_RELE(X);*/
 
 
+//dayToDiasSemana(dayOfWeek(_time))
+
+//El Lunes es 1 y el domingo 7
+#define dayOfWeek2(_time)  (dayOfWeek((_time))==1?7:dayOfWeek((_time))-1) 
+//Si pasas el dia lunes 1 -domingo7 te devuelve la enum DiasSemana
+#define dayToDiasSemana(_day_)   (DiasSemana)(pow(2,(_day_-1))+0.5)
+// note that week starts on day 1
+#define elapsedSecsThisWeek2(_time_)  (elapsedSecsToday((_time_)) +  ((dayOfWeek2((_time_))-1) * SECS_PER_DAY) )   
 
 #define GET_ADDRES_PROGRAM(X) (LEN_PROGRAMA_STRING*X)+sizeof(Configuracion)
 #define GET_ADDRES_ESTADISTICA(X) ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(Configuracion))+ (sizeof(Estadistica)*(X-1))
@@ -209,7 +216,7 @@ public:
 
     Programa programas[MAX_PROGRAMAS];
 
-
+	time_t GetNextEjecucion(Programa *programa);
     bool GrabarProgramaAEEPROM(uint8_t posicion,Programa* programa);
     bool CargarProgramaDesdeEEPROM(uint8_t posicion,Programa* programa);
 
@@ -316,6 +323,8 @@ public:
      static const uint8_t ports_abono[PORTS_ABONO] ;
  
 	 bool ExecuteCommand(char* commandstr);//Ejecuta un comando desde string , bien sea desde SMS o desde CALL
+
+	 time_t getNextTrigger();
 
 protected:
 

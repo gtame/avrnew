@@ -42,7 +42,6 @@ int main() {
 	setup();
 
 
-	delay(100);
 	//Loop
 	while (true)
  		loop();
