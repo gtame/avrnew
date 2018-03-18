@@ -27,27 +27,26 @@ int main() {
 
 void setup()
 {
-	Serial.begin(9600);
-	Serial1.begin(9600);
-	
 	//Inicializamos puerto serie
-	 
-			
-			
+	Serial.begin(9600);
+	while (!Serial);
+	
+	Serial1.begin(9600);
+	while (!Serial1);
+
 
 	Test::out = &Serial;
-	Test::exclude("*e");
-	Test::exclude("*");
+	//Test::exclude("*");
 	//Test::include("dayToDiasSemana");
 	//Test::include("elapsedSecsThisWeek2");
 	//Test::include("dayOfWeek2*");
-	Test::include("getnextEjecucion*");
+	//Test::include("getnextEjecucion*");
 	
 }
 
 void loop()
 { 
-
+	SDCheck();
 	Test::run();
  
 }

@@ -16,8 +16,7 @@
 #include "gtkeepertest.h"
 
 
-
-time_t GetNextEjecucionx();
+ 
 
 #define SCREEN_ACTIVE() false
 //definida en ScreenManager.h

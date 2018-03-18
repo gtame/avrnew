@@ -43,27 +43,6 @@ bool Check(bool (*checkfuntion)(),PGM_P txt ,uint8_t linenum,int delayms=0,uint8
 	return result;
 
 }
- 
-bool SDInitializate()
-{
-	static bool isInitializated=false;
-
-	if (!isInitializated)
-	{
-		LOG_DEBUG_ARGS("PIN SELECT %i",SD_CHIP_SELECT_PIN);
-
-		if ( SD.begin(SPI_QUARTER_SPEED, SD_CHIP_SELECT_PIN))
-		//if ( SD.begin( SD_CHIP_SELECT_PIN))
-			isInitializated=true;
-		return isInitializated;
-	}
-	else
-	{
-		if (!SD.exists("log"))
-			SD.mkdir("log");
-		return SD.exists("log");
-	}
-}
 
  //ACCION
 void GTKeeper::OnInit()
@@ -147,7 +126,7 @@ void GTKeeper::OnInit()
 		LOG_DEBUG("Error fijando hora RTC");
 	 
 	 //Chequeamos SD
-	if (!Check(SDInitializate,TXT_SD,line_num++))
+	if (!Check([](){return gtKeeper.SDInitializate();},TXT_SD,line_num++))
 	{
 		LOG_DEBUG("No se pudo inicializar SD");
 		error_code=ERROR_NO_SDCARD;

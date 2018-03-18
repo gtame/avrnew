@@ -18,6 +18,7 @@
  void GTKeeper::OnUser()
  {
 
+	int_input_user=false;
 	LOG_DEBUG("OnUser");
 
 	if (!screenManager.IsActive())

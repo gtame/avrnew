@@ -154,11 +154,11 @@ bool GSMMenu::isReady()
 		 screenManager.PrintTextLine_P(0,TXT_MOD_GSM, TXT_OK);
 
 		 delay(100);
-		 if (gtKeeper.CheckSIM())
+		 if (gtKeeper.SIMEstaLista())
 		 {
 			 screenManager.PrintTextLine_P(1,TXT_SIM,  TXT_OK);
 			 delay(100);
-			 if (gtKeeper.EstaRegistradoGSM())
+			 if (gtKeeper.EstaRegistrado())
 			 {
 				 screenManager.PrintTextLine_P(2,TXT_CONECTIVIDAD,  TXT_OK);
 				 delay(100);

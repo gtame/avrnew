@@ -1,4 +1,4 @@
-
+ 
 /*
  * Run.cpp
  *
@@ -7,19 +7,27 @@
  */ 
    #include <gtkeeper.h>
 
-   bool GTKeeper::CheckRun()
-   {
- 	 //Si hemos arrancado, no toca tecla usuario, ni recibimos SMS ó Calls
-	 return !CheckUser() && !CheckSMS() && !CheckCall();
-   }
+
+
+    //Interrupcion lanzada cuando el usuario pulsa una tecla y esta en modo Run 
+	//PAra que despierte
+    void wakeUpUser()
+    {
+	    int_input_user=true;
+    }
+
+	//Chequea si vamos a realizar el envio pendiente Web
+ 
 
    
-   
-   void wakeUpUser()
-   {
-     int_input_user=true;
-   }
-   
+
+	bool GTKeeper::CheckRun()
+	{
+		//Si hemos arrancado, no toca tecla usuario, ni recibimos SMS ó Calls
+		return !CheckUser() && !CheckSMS() && !CheckCall();
+	}
+
+
    void GTKeeper::OnRun()
    {
 	   
@@ -37,7 +45,7 @@
 	   int_input_user=false;
 	   int_input_gsm=false;
 		//Mientras no haya UserInput ó Call ó SMS
-		while(!int_input_user && !int_input_gsm)
+		while(!int_input_user && !int_input_gsm && !CheckWeb())
 		{
 			//LOG_DEBUG("A DORMIR COOO!");
 			// Enter power down state with ADC and BOD module disabled.
@@ -49,12 +57,11 @@
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min
 			
+
 			//Sleep();	
 			//LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
 
-			//Chequeamos programacion
-			//Chequeamos si debemos realizar el envio Stats via Web
-
+		 
 		
 		}
 		// Disable external pin interrupt on wake up pin.

@@ -109,18 +109,19 @@ test(getnextEjecucion)
 	TimeElements telements;
 	//Ponemos hora 1/01/2018- LUNES
 	PonerHora();
+
 	//Ponemos programa
 	gtKeeper.programas[0].Dias =  M;
 	gtKeeper.programas[0].HoraInicio=8;
 	
-	time_t nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	time_t nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	//Ejecucion del prog deberia ser el 02-01 a las 8:00
 	assertTrue(nextexecution== GetTime(8,0,0,2,1,2018));
 
 	//Si estamos el martes a las 7:59 aun debemos tener como proxima ejecucion ese dia a las 08:00
 	setTime(7,59,0,2,1,2018);
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(8,0,0,2,1,2018));
 
@@ -128,7 +129,7 @@ test(getnextEjecucion)
 	//Ahora si hemos llegado al martes a las 8 su programacion se tiene que ir a la semana siguiente
 	setTime(8,0,0,2,1,2018);
 	printTime(now());
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(8,0,0,9,1,2018));
 
@@ -137,7 +138,7 @@ test(getnextEjecucion)
 	gtKeeper.programas[0].Dias =  J;
 	gtKeeper.programas[0].HoraInicio=23;
 	gtKeeper.programas[0].MinutoInicio=59;	
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(23,59,0,4,1,2018));
 
@@ -145,7 +146,7 @@ test(getnextEjecucion)
 	gtKeeper.programas[0].Dias =  J;
 	gtKeeper.programas[0].HoraInicio=6;
 	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,4,1,2018));
 		
@@ -155,7 +156,7 @@ test(getnextEjecucion)
 	gtKeeper.programas[0].Dias =  L | M  | X | J | V;
 	gtKeeper.programas[0].HoraInicio=6;
 	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,3,1,2018));
 
@@ -164,7 +165,7 @@ test(getnextEjecucion)
 	gtKeeper.programas[0].Dias =  NONE;
 	gtKeeper.programas[0].HoraInicio=6;
 	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== 0);
 
@@ -172,7 +173,7 @@ test(getnextEjecucion)
 	gtKeeper.programas[0].Dias =  L | D | S;
 	gtKeeper.programas[0].HoraInicio=6;
 	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(&gtKeeper.programas[0]);
+	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,6,1,2018));
 	

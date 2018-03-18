@@ -4,7 +4,7 @@
  * Created: 12/03/2018 21:24:41
  *  Author: Gabi
  */ 
-
+ #include <Time.h>
 
 #ifndef TYPES_H_
 #define TYPES_H_
@@ -49,20 +49,9 @@ typedef struct  {
 
 	char flag_check; //Este flag es para comprobar que la configuracion se lee correctamnete, siempre que se lee debe ir a 'X';
 
-} 	tConfiguracion_t , Configuracion, *tmConfiguracionPtr_t;
+} 	tConfiguracion_t , tConfiguracion, *tmConfiguracionPtr_t;
 
 
-//Sumatorio total 126 para todos los dias
-typedef enum {
-	 NONE =0,
-    L = (1 << 0),//1
-    M= (1 << 1),//2
-    X= (1 << 2),//4
-    J= (1 << 3),//8
-    V= (1 << 4),//16
-    S= (1 << 5),//32
-    D= (1 << 6)//64
-} DiasSemana;
 
 //SSDDDHHMMRRRRAAAA
 //SS   -> Sector
@@ -87,8 +76,7 @@ typedef struct  {
   uint32_t TiempoRiego; //Tiempo de riego , en segundos
   uint32_t TiempoAbono; //Tiempo de abono,  en segundos
 
-
-} 	tPrograma_t, Programa, *tmProgramaPtr_t;
+} 	tPrograma_t, tPrograma, *tmProgramaPtr_t;
 
 
 ///Definimos el peso para que la ordenacion tenga efecto
@@ -110,7 +98,7 @@ typedef struct {
   time_t Desde; //Indica cuando se activo la salida ;)
   time_t Hasta;//Indica hasta cuando va a estar 'encendido el programa', si esta parado valor 0;
 
-} SalidasActivas;
+}  tSalidas, *tmSalidasPtr_t, SalidasActivas;
 
 /*
 typedef struct {

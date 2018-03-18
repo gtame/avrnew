@@ -55,11 +55,11 @@ void GTKeeper::OnON()
 		salidas_activas=0;//Al arrancar no hay salidas activas ;)
 
 		bSetupCompleted=false; //Flag para indicar que ya esta dentro del bloquee loop, y el terminal esta configurado
-		bWebInProcess=false;//Flag para indicar que estamos actualmente refrescando desde la web
+		//bWebInProcess=false;//Flag para indicar que estamos actualmente refrescando desde la web
 		bpendingWeb=false;//Flag para indicar que es necesario el update de web
 		bRebootSIM=false;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
 		isHourSet=false;//Flag para saber si se ha fijado la hora
-		salidas_web=0; //Numero de salidas pendientes de ser enviadas x WEB
+		//salidas_web=0; //Numero de salidas pendientes de ser enviadas x WEB
 
 		//Limpiamos buffer
 		memset(buffer,0,MAIN_BUFFER_SIZE);

@@ -40,7 +40,7 @@ private:
 	void SetVisibleFields(bool visible);
 	bool showed;
 	uint8_t currentprograma;
-	Programa *program;
+	tPrograma *program;
 };
 
 

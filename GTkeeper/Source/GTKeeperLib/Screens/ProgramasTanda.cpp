@@ -257,7 +257,7 @@ void ProgramasTandaScreen::OnClickButton(uint8_t field)
 					{
 
 
-						gtKeeper.ResetPrograma(&gtKeeper.programas[program-1]);
+						gtKeeper.ResetPrograma(program-1);
 
 						gtKeeper.programas[program-1].Sector=sector;
 						//Si no es el primer programa de la primera tanda ponemos el programa anterior
@@ -270,7 +270,7 @@ void ProgramasTandaScreen::OnClickButton(uint8_t field)
 						gtKeeper.programas[program-1].TiempoRiego= (_tanda.riegohora*SECS_PER_HOUR)+(_tanda.riegomin*SECS_PER_MIN);
 						gtKeeper.programas[program-1].TiempoAbono=(_tanda.abonohora*SECS_PER_HOUR)+(_tanda.abonomin*SECS_PER_MIN);
 
-						gtKeeper.GrabarProgramaAEEPROM(program-1,&gtKeeper.programas[program-1]);
+						gtKeeper.GrabarProgramaAEEPROM(program-1);
 						program++;
 					}
 

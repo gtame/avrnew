@@ -247,7 +247,7 @@ void ProgramasScreen::OnFieldChange(uint8_t field)
   }
 
 
-  gtKeeper.GrabarProgramaAEEPROM(currentprograma,program);
+  gtKeeper.GrabarProgramaAEEPROM(currentprograma);
 }
 
 
@@ -277,7 +277,7 @@ void ProgramasScreen::setPrograma(int8_t programa)
 
 
 	memset(buffer,0,sizeof(SC_BUFFER_SIZE));
-	gtKeeper.ProgramaToString(buffer,program);
+	gtKeeper.ProgramaToDisplay(currentprograma,buffer);
 	LOG_DEBUG_ARGS("Programa-> %s",buffer);
 
 
@@ -600,7 +600,7 @@ void ProgramasScreen::OnClickButton(uint8_t field)
 		//ACtualiza el valor
 		gtKeeper.programas[currentprograma].Dias=dias;
 
-		gtKeeper.GrabarProgramaAEEPROM(currentprograma,program);
+		gtKeeper.GrabarProgramaAEEPROM(currentprograma);
 
 		setPrograma(currentprograma);
 	}

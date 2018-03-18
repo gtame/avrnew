@@ -4,9 +4,29 @@
  *  Created on: 06/01/2016
  *      Author: Admin
  */
+ #include "types.h"
 
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
+
+//Longitud de la eeprom
+#define EEPROM_LENGTH E2END + 1
+
+//Posiciones eeprom
+#define GET_ADDRES_CONFIG 0
+#define GET_ADDRES_PROGRAM(X) (LEN_PROGRAMA_STRING*X)+sizeof(tConfiguracion)
+#define GET_ADDRES_ESTADISTICA(X) ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(Configuracion))+ (sizeof(Estadistica)*(X-1))
+//EMPIEZAN LAS SALIDAS WEB EN -> PROGRAMAS + CONFIGURACION + ESTADISTICA
+#define GET_ADDRES_SALIDAS_WEB ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(tConfiguracion))+ (sizeof(Estadistica)*PORTS_NUM)
+
+#define LEN_CONFIG_STRING 20
+#define LEN_PROGRAMA_STRING 17
+#define LEN_SALIDA_STRING 22
+#define LEN_PROGRAMA_STRING_CR_LF LEN_PROGRAMA_STRING+2
+
+
+#define PARSE_TO_SECONDS(a) ((a)/1000)
+#define MAX_SECONDS_ELAPSED 120
 
 
 #ifdef PROTEUS
@@ -24,7 +44,20 @@
 #endif
 
 
+//WEB
+#define MAX_ERROR_WEB 20 //Numero de errores Máx para intentar realizar la comprobación Web
+#define SETTING_URL_PROGRAMACION "http://clubciclistautebo.es/custom/programas.php?id=%s"
+#define SETTING_URL_CONFIG "http://clubciclistautebo.es/custom/config.txt"
+#define URL_SEND_SALIDAS "http://posttestserver.com/post.php?dir=example"
+//#define URL_SEND_SALIDAS "http://clubciclistautebo.es/custom/post.php?SN=%s"
+#define TIME_CHECK_WEB_SECONDS 300 //Tiempo que indica que estara en el estado WEB
+#define WEB_NOACTIVITY_SECONDS 600 // Segundos  que no debe a ver actividad a la vista para realizar el envio web.
+
+
+//CALL
 #define MAX_SECONDS_DTMF_TONE SECONDS_DELAY(10)
+
+//ON
 #define HOLD_TO_RESET 10 //Al arrancar numero de segundos que hay que mantener la tecla A-D pulsadas para entrar en RESET
 
 
@@ -44,7 +77,6 @@
 
 
 
-#define MAX_ERROR_WEB 20 //Numero de errores Máx para intentar realizar la comprobación Web
 
 
 #define MAIN_BUFFER_PARSE 50
@@ -63,14 +95,6 @@ char * P2B(const __FlashStringHelper * __fmt,...);
 #include "errors.h"
 
 
-
-
-//PROGRAMACION WEB
-#define SETTING_URL_PROGRAMACION "http://clubciclistautebo.es/custom/programas.php"
-#define SETTING_URL_CONFIG "http://clubciclistautebo.es/custom/config.txt"
-//#define URL_SEND_SALIDAS "http://posttestserver.com/post.php?dir=example"
-#define URL_SEND_SALIDAS "http://clubciclistautebo.es/custom/post.php?SN=%s"
-#define TIME_CHECK_WEB_SECONDS 300 //Tiempo que indica que estara en el estado WEB
 
 
 

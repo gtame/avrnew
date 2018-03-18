@@ -226,11 +226,11 @@ void Consulta::OnDrawFields()
 			for (uint8_t i=0;i<num_activos;i++)
 			{
 
-				switch(gtKeeper.salidas[i].Tipo)
+				switch( gtKeeper.salidas[i].Tipo)
 				{
 
 				case	actPrograma:
-					sprintf_P(buffer +strlen(buffer),PSTR("P%02i S%02i "), gtKeeper.salidas[i].Ident+1,gtKeeper.salidas[i].Sector);
+					sprintf_P(buffer +strlen(buffer),PSTR("P%02i S%02i "),gtKeeper.salidas[i].Ident+1,gtKeeper.salidas[i].Sector);
 					break;
 				case 	actSector:
 					sprintf_P(buffer +strlen(buffer),PSTR("S%02i "), gtKeeper.salidas[i].Sector);
