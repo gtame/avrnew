@@ -230,6 +230,9 @@
     <Compile Include="gtkeeper\getnextEjecucion.cpp">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="gtkeeper\sdlog.cpp">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.cpp">
       <SubType>compile</SubType>
     </Compile>

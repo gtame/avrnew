@@ -1,15 +1,15 @@
  
 #include "main.h"
  
-GTKeeper gtKeeper;  
-definedtest tests[25];
+char buffapp [ MAIN_BUFFER_SIZE];
 uint8_t contador;
 char buffercommand[25];
 char buffer_test[MAIN_BUFFER_SIZE];
 
+GTKeeper gtKeeper(buffapp,MAIN_BUFFER_SIZE);  
+
+
 FakeStream myStream;
-
-
 
 //Funcion necesaria para el compilador
 extern "C" void __cxa_pure_virtual() {}
@@ -36,18 +36,19 @@ void setup()
 
 
 	Test::out = &Serial;
-	//Test::exclude("*");
+	Test::exclude("*");
+	Test::include("sdlog");
 	//Test::include("dayToDiasSemana");
 	//Test::include("elapsedSecsThisWeek2");
 	//Test::include("dayOfWeek2*");
 	//Test::include("getnextEjecucion*");
+ 
 	
 }
 
 void loop()
 { 
-	SDCheck();
-	Test::run();
+		Test::run();
  
 }
  

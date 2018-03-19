@@ -78,7 +78,7 @@ void Salida::ShowInfoSalidas()
 
 		}
 
-		LOG_DEBUG_ARGS("%s %i %02d:%02d hasta %02d:%02d",buffer,salidas[i].Ident, hour(salidas[i].Desde),minute(salidas[i].Desde),hour(salidas[i].Hasta),minute(salidas[i].Hasta));
+		LOG_DEBUG_ARGS("%s %i %02d:%02d hasta %02d:%02d",internalbuffer,salidas[i].Ident, hour(salidas[i].Desde),minute(salidas[i].Desde),hour(salidas[i].Hasta),minute(salidas[i].Hasta));
 	}
 }
 

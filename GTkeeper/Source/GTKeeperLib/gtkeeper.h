@@ -76,6 +76,8 @@ public:
      //struct para almacenar estadisticas
      Estadistica estadistica;
 protected:
+
+
 private:
 	TimeElements timeEl;
 	time_t t_last_web; //Tiempo para controlar los tiempos de la web.
@@ -88,15 +90,22 @@ private:
 	bool bpendingWeb;//Flag para indicar que es necesario el update de web
 	bool isHourSet;//Flag para saber si se ha fijado la hora
 	bool isGSMOn;//Flag para saber si el modem esta presente... (Responde)
-	char buffer[MAIN_BUFFER_SIZE];
 	bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
 	uint16_t error_code;
+	
+	char  * buffer;	  //buffer
+	uint8_t buffersize; //buffer size
+	
+	char buff_parse[MAIN_BUFFER_PARSE]; //Parser para Comandos desde MemoryPrograms
+	static const uint8_t ports[PORTS_NUM] ;
+	static const uint8_t ports_abono[PORTS_ABONO] ;
+
 
 //functions
 public:
 
 //CONSTRUCTOR & DESTRUCTOR
-	GTKeeper();
+	GTKeeper(char *buff,uint8_t sizebuff);
 //END CONSTRUCTOR & DESTRUCTOR
 
 ///ESTADOS
@@ -205,10 +214,6 @@ public:
      void EEPROMLeerEstadistica(uint8_t sector,Estadistica * stat);
      void ResetearEstadisticas();
 
-     char buff_parse[MAIN_BUFFER_PARSE]; //Parser para Comandos desde MemoryPrograms
-     static const uint8_t ports[PORTS_NUM] ;
-     static const uint8_t ports_abono[PORTS_ABONO] ;
- 	 
 
 protected:
 private:
@@ -218,6 +223,9 @@ private:
 
 };
 
+
+//Variables
+extern char bufferapp[MAIN_BUFFER_SIZE];
 
 //extern variables
 extern	Keypad keypad;

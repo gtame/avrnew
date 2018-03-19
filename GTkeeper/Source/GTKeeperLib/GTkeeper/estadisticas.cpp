@@ -52,7 +52,7 @@
 				 estadistica.tiempo_abono+=60;//60seg
 
 
-				 LOG_DEBUG_ARGS_B ("Registrando S%i A%i",Salidas.salidas[salida].Sector,bAbono1);
+				 LOG_DEBUG_ARGS_B ("Registrando S%i A%i",salidas[salida].Sector,bAbono1);
 
 				 EEPROMGuardarEstadistica(&estadistica);
 

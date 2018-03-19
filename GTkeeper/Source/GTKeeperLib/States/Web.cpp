@@ -7,9 +7,6 @@
 #include <gtkeeper.h>
 
 
- 
-
-
 bool PostHttpParametersCallback()
 {
 
@@ -78,35 +75,28 @@ bool PostHttpParametersCallback()
 			//t+=SendRawData("abcd\r\n");
 			 
 			 //Config
-			 memset(gtKeeper.buffer,0,MAIN_BUFFER_SIZE);
-			 gtKeeper.ConfiguracionToString(gtKeeper.buffer);
-			 t+=gtKeeper.SendRawData(gtKeeper.buffer);
+			 memset(bufferapp,0,MAIN_BUFFER_SIZE);
+			 gtKeeper.ConfiguracionToString(bufferapp);
+			 t+=gtKeeper.SendRawData(bufferapp);
 
 			 //Programas
 			 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 			 {
-				memset(gtKeeper.buffer,0,MAIN_BUFFER_SIZE);
-				gtKeeper.ProgramaToString(i,gtKeeper.buffer);
-				t+=gtKeeper.SendRawData(gtKeeper.buffer);
+				memset(bufferapp,0,MAIN_BUFFER_SIZE);
+				gtKeeper.ProgramaToString(i,bufferapp);
+				t+=gtKeeper.SendRawData(bufferapp);
 			 }
 
 			 //Salidas
 			 for (uint8_t i=0;i<numsalidas;i++)
 			 {
-				 memset(gtKeeper.buffer,0,MAIN_BUFFER_SIZE);
-				 gtKeeper.SalidaToString(i,gtKeeper.buffer);
-				 t+=gtKeeper.SendRawData(gtKeeper.buffer);
+				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
+				 gtKeeper.SalidaToString(i,bufferapp);
+				 t+=gtKeeper.SendRawData(bufferapp);
 			 }
-
 
 			 //Log
 			 //El archivo de log se lee de la SD... 'si esta disponible'
-			 File filelog=SD.open("log\log.txt",FILE_READ);
-			 if (filelog.size()>(8*1024*3))
-			 { 
-			 }
-			 filelog.close();
-			
 
 			//Boundary
 			t+=gtKeeper.SendRawData("\r\n--");
@@ -169,7 +159,6 @@ void wakeUpUserWeb()
 	int_input_user=true;
 }
 
-
 //CHECK
 bool GTKeeper::CheckWeb()
 {
@@ -197,7 +186,6 @@ bool GTKeeper::CheckWeb()
 
 	return result;
 }
-
 
 
 //ACCION
@@ -252,14 +240,6 @@ void GTKeeper::OnLeaveWeb()
 	LOG_DEBUG("Salimos de User");
 	
 }
-
-
-
-
-
-
-
-
 
 
 //Carga los parametros de configuración web para que el modulo pueda conectar a internet

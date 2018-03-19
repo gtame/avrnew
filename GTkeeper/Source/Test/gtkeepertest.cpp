@@ -15,7 +15,6 @@
 	 {
 		 if (!SD.begin(SPI_QUARTER_SPEED, SD_CHIP_SELECT_PIN))
 		 {
-			 
 			 LOG_DEBUG("No se pudo inicializar SD");
 			 return;
 		 }
@@ -48,7 +47,8 @@
 		 logFile.close();
 		 LOG_DEBUG("Grabado log..");
 	 }
-	 else {
+	 else 
+	 {
 		 LOG_DEBUG("Error al abrir el archivo");
 	 }
 	 
