@@ -19,10 +19,23 @@
 //EMPIEZAN LAS SALIDAS WEB EN -> PROGRAMAS + CONFIGURACION + ESTADISTICA
 #define GET_ADDRES_SALIDAS_WEB ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(tConfiguracion))+ (sizeof(Estadistica)*PORTS_NUM)
 
+
+
+#define LEN_SEPARATOR_WEB_ITEM 3  //Separador para el archivo web
+//+C:CONFIG
+//+P:PROGRAM
+//+S:SALIDA
+//+L:LOG
+
 #define LEN_CONFIG_STRING 20
+#define LEN_CONFIG_STRING_CR_LF 22
+
 #define LEN_PROGRAMA_STRING 17
-#define LEN_SALIDA_STRING 22
 #define LEN_PROGRAMA_STRING_CR_LF LEN_PROGRAMA_STRING+2
+
+#define LEN_SALIDA_STRING 22
+#define LEN_SALIDA_STRING_CR_LF 24
+
 
 
 #define PARSE_TO_SECONDS(a) ((a)/1000)
@@ -45,13 +58,18 @@
 
 
 //WEB
+#define WEB_LOG_SEND_TIME   (SECS_PER_DAY-SECS_PER_HOUR) //23horas
+#define WEB_ERROR_SEND_TIME   (SECS_PER_MIN	*15 ) //5 min * Numerrores
+#define WEB_NOACTIVITY_TIME 600 // Segundos  que no debe a ver actividad a la vista para realizar el envio web.
+
+
 #define MAX_ERROR_WEB 20 //Numero de errores Máx para intentar realizar la comprobación Web
 #define SETTING_URL_PROGRAMACION "http://clubciclistautebo.es/custom/programas.php?id=%s"
 #define SETTING_URL_CONFIG "http://clubciclistautebo.es/custom/config.txt"
 #define URL_SEND_SALIDAS "http://posttestserver.com/post.php?dir=example"
 //#define URL_SEND_SALIDAS "http://clubciclistautebo.es/custom/post.php?SN=%s"
-#define TIME_CHECK_WEB_SECONDS 300 //Tiempo que indica que estara en el estado WEB
-#define WEB_NOACTIVITY_SECONDS 600 // Segundos  que no debe a ver actividad a la vista para realizar el envio web.
+//#define TIME_CHECK_WEB_SECONDS 300 //Tiempo que indica que estara en el estado WEB
+
 
 
 //CALL

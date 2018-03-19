@@ -57,6 +57,9 @@
 			// Example: Read sensor, data logging, data transmission.
 			//Lo dormimos durante 1 min
 			
+			//Chequeamos programacion
+			CheckRiegos(false);
+
 
 			//Sleep();	
 			//LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");

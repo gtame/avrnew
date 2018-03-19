@@ -81,6 +81,7 @@ protected:
 private:
 	TimeElements timeEl;
 	time_t t_last_web; //Tiempo para controlar los tiempos de la web.
+	time_t t_last_error_web; //Tiempo para controlar los tiempos de la web.
 	time_t last_RiegosCheck;
 	time_t stop_abono;
 	uint8_t error_web;//Numero de errores que se producen al intentar acceder al dispositivo
@@ -162,6 +163,14 @@ public:
 	void setupStateMachine();
 
 	//Funciones de clase WEB
+	void UpdateWebSuccess(); // Se llama cuando se actualiza la web correctamente
+	inline void ClearErrorWebs() { error_web=0;} //Limpia Contador de errores en sincronizacion web
+	inline uint8_t	 GetErroresWeb() { return error_web;} //Nº de errores web
+	inline time_t GetLastTimeWebError() {return t_last_error_web; }
+	inline void AddErrorWeb() { error_web++;}  //Contador de errores en sincronizacion web
+	inline time_t GetLastWebSync() { return t_last_web;} //Retorna ultima vez que la web fue actualiza satisfactoriamente
+	inline void SetLastWebSync() { t_last_web=now();} //Actualiza la fecha de actualizacion de la web
+
 	void CargaConfigWeb();//Carga los parametros de configuración web para que el modulo pueda conectar a internet
     void GetURL(const char * url,int length);
 	bool GetURL(char *url);

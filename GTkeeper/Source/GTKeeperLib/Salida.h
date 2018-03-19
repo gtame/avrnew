@@ -30,7 +30,7 @@ protected:
 private:
  	char * internalbuffer;
  	uint8_t sizebuffer;
-
+	bool changed;//Flag si indica que cambio algun programa
 //functions
 public:
 	Salida(char * internalbuffer,uint8_t sizebuffer);
@@ -51,8 +51,9 @@ public:
 	void PostHttpResultCallback(const char* url,int length);
 	
 	*/
-	
+	inline bool GetChangedSalidas() { return changed;}
 protected:
+	inline void SetChangedSalidas(bool value) { changed=value;}
 private:
 }; //Salida
  

@@ -2,6 +2,8 @@
 #ifndef TEXTOS_H_
 #define TEXTOS_H_
 
+
+const static char CRLF[]  PROGMEM="\r\n";
 const static char TXT_UNKNOW[] PROGMEM= "**";;
 const static char TXT_OK[] PROGMEM= "OK";;
 const static char TXT_ERROR[] PROGMEM="ERROR";

@@ -43,9 +43,12 @@ class Programa
 public:
 	tPrograma programas[MAX_PROGRAMAS];
 protected:
+
 private:
+	bool changed;//Flag si indica que cambio algun programa
  	char * internalbuffer;
  	uint8_t sizebuffer;
+	time_t nexaction=0;
 //functions
 public:
 	Programa(char * internalbuffer,uint8_t sizebuffer);
@@ -56,16 +59,19 @@ public:
 	void ResetPrograma(uint8_t progIndex);
 	void ProgramaToDisplay(uint8_t progIndex,char *text);
 	void ProgramaToString(uint8_t progIndex,char *text);
-	time_t GetNextEjecucion(uint8_t progIndex);
-	
 	
 	//Metodos para toda la coleccion
+	inline time_t GetNextAction() { return nexaction;}//Devuelve la fecha de la proxima accion programada a ejecutar CalculateNextAction
+
 	bool EEPROMCargaProgramas();
 	void ResetProgramas();
 	void ShowInfoProgramas();
-
+	inline bool GetChangedProgramas() { return changed;}
 protected:
+	inline void SetChangedProgramas(bool value) { changed=value;}
+	void CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
 private:
+	time_t GetNextEjecucion(uint8_t progIndex);//Calcula la siguiente fecha de ejecucion para un programa dado
 
 }; //Programa
 

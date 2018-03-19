@@ -8,6 +8,8 @@
 
 #include "LogSD.h"
 
+static const char LOG_FILE_PATTERN [] PROGMEM ="/log%i.txt";
+
 // default constructor
 LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 {
@@ -23,8 +25,9 @@ LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 	 int8_t result=-1;
 	
 	 
-	if (isInitializated || SDInitializate())
+	if (SDInitializate())
 	{
+
  		if (dataFile && dataFile.size()>MAX_FILE_LOG_SIZE)
 			dataFile.close();
 		
@@ -36,7 +39,7 @@ LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 			do
 			{	
 				memset(internalbuffer,0,sizebuffer);
-				sprintf_P(internalbuffer,PSTR("datalog%i.txt"),fileid);
+				sprintf_P(internalbuffer,LOG_FILE_PATTERN,fileid);
 				fileid++;
 			}
 			while (SD.exists(internalbuffer) && fileid<100);
@@ -45,11 +48,9 @@ LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 			
 			if (!SD.exists(internalbuffer))
 			{
-				 
-				
 				dataFile=SD.open(internalbuffer,FILE_WRITE);
 				if (dataFile)
-					LOG_DEBUG("Abierto archivo data");				
+					LOG_DEBUG_ARGS("Abierto archivo %s",internalbuffer);				
 				else
 					LOG_DEBUG_ARGS("Error creando file %s",internalbuffer);
 				
@@ -59,7 +60,10 @@ LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 		}
 			
 		if (dataFile)
+		{
 			result=	dataFile.println(txt); 
+			LOG_DEBUG_ARGS("Write Log %s",txt);	
+		}
 		else
 			LOG_DEBUG("No se pudo escribir el log");	
 				 
@@ -78,15 +82,14 @@ LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 	 if (!isInitializated)
 	 {
 		 LOG_DEBUG_ARGS("PIN SELECT %i",SD_CHIP_SELECT_PIN);
-
 		 if ( SD.begin(SPI_QUARTER_SPEED, SD_CHIP_SELECT_PIN))
 		 {
 				isInitializated=true;	 
 				LOG_DEBUG("Inicializada SD");
-		 }
-		 
-		 return isInitializated;
+		 } 
 	 }
+	 
+	return isInitializated;
 	 //else
 	 //{
 		 //if (!SD.exists("log"))
@@ -98,29 +101,54 @@ LogSD::LogSD(char * ibuffer,uint8_t isizebuffer)
 
 uint32_t LogSD::SizeLogs()
 {
-	bool result=true;
+	uint32_t result=0;
 	bool blnexit=false;
-	if (isInitializated)
+	if (SDInitializate())
 	{
+
+		FlushLog();
+
 		uint8_t fileid=1;
 		do
 		{
-			fileid++;
+			
 			memset(internalbuffer,0,sizebuffer);
-			sprintf_P(internalbuffer,"datalog%i.log",fileid);
+			sprintf_P(internalbuffer,LOG_FILE_PATTERN,fileid);
 
 			if (SD.exists(internalbuffer))
 			{
-				if (!SD.remove(internalbuffer))
-				result=false;
+				File filelog=SD.open(internalbuffer, FILE_READ);
+				if (filelog)
+				{
+					result+=filelog.size();
+					filelog.close();
+				}
+				else
+				{					
+					LOG_DEBUG_ARGS("No se pudo abrir %s",internalbuffer);
+					result=-1;
+				}
+
 			}
 			else
-			blnexit=true;
+				blnexit=true;
+
+			 fileid++;
 		}
 		while (!blnexit && fileid<255);
 	}
 	else
-	result=false;
+		result=-1;
+
+	return result;
+}
+
+
+void LogSD::FlushLog()
+{
+
+if (dataFile)
+	dataFile.close();
 }
 
 bool  LogSD::ClearLogs()
@@ -128,69 +156,91 @@ bool  LogSD::ClearLogs()
 	
 	bool result=true;
 	bool blnexit=false;
-	if (isInitializated)
+	if (SDInitializate())
 	{
+
+		FlushLog();
+
 		uint8_t fileid=1;
 		do
 		{
-			fileid++;
+		
 			memset(internalbuffer,0,sizebuffer);
-			sprintf_P(internalbuffer,"datalog%i.log",fileid);
-
+			sprintf_P(internalbuffer,LOG_FILE_PATTERN,fileid);
+			//LOG_DEBUG_ARGS("ARchivo %s",internalbuffer);
 			if (SD.exists(internalbuffer))
 			{
+				//LOG_DEBUG_ARGS("Eliminando %s",internalbuffer);
 				if (!SD.remove(internalbuffer))
+				{
+					//LOG_DEBUG_ARGS("No pudo eliminarse %s",internalbuffer);
 					result=false;
+				}
+
 			}
 			else
+			{
+				//LOG_DEBUG_ARGS("No existe %s",internalbuffer);
 				blnexit=true;
+			}
+
+			fileid++;
 		}
 		while (!blnexit && fileid<255);
 	}
 	else
 		result=false;
 	
+
+	return result;
 	
 }
 
 
-uint32_t LogSD::WriteToStream(Stream *stream)
+uint32_t LogSD::WriteLogToStream(Stream *stream)
 {
 	uint32_t result=0;
 	uint16_t readed=0;
 	
-	if (isInitializated)
+	if (SDInitializate())
 	{	
 		if (stream!=NULL)
 		{
-			if (dataFile && dataFile.available())
-				dataFile.close();
+			FlushLog();
 			
 			//Recorremos todos los archivos de log
 			bool blnexit=false;
 			uint8_t fileid=1;
 			do
 			{
-				fileid++;
+				
 				memset(internalbuffer,0,sizebuffer);
-				sprintf_P(internalbuffer,"datalog%i.log",fileid);
+				sprintf_P(internalbuffer,LOG_FILE_PATTERN,fileid);
 
 				if (SD.exists(internalbuffer))
 				{
 					File logFile=SD.open(internalbuffer,FILE_READ);
-					do 
-					{			
-						memset(internalbuffer,0,sizebuffer);
-						readed=logFile.read(internalbuffer,sizebuffer);
-						if (readed!=0)
-							stream->write(internalbuffer,result);
-						else					
+					if (logFile)
+					{					
+						do
+						{
+							memset(internalbuffer,0,sizebuffer);
+							readed=logFile.read(internalbuffer,sizebuffer);
+							if (readed!=0)
+								result+=stream->write(internalbuffer,readed);
+							else
 							logFile.close();
+						}
+						while(readed>0);
+
+						logFile.close();
 					}
-					while(readed>0);
+
 				}
 				else
 					blnexit=true;
+
+				fileid++;
 			}
 			while (!blnexit && fileid<255);
 		

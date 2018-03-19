@@ -40,8 +40,6 @@ Salida::Salida( char * ibuffer,uint8_t isizebuffer)
 
 
 
-
-
 void Salida::ShowInfoSalidas()
 {
 
@@ -147,8 +145,6 @@ void Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva ti
 		qsort (salidas, salidas_activas, sizeof(SalidasActivas),sortmethod);
 	}
 }
-
-
 
 
 //Elimina la salida

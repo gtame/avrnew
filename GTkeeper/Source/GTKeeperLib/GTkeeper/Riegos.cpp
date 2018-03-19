@@ -24,11 +24,7 @@
 	 )
 	 )
 	 {
-
-
 		 current_minute=GetTimeWithoutSeconds(current_minute);
-
-
 
 		 //Si cambia el minuto registramos estadisticas
 		 RegistrarEstadisticas();
@@ -60,26 +56,14 @@
 		 }
 
 
-
 		 last_RiegosCheck = current_minute; // convert time elements into time_t
 
 
-		 if (sendWeb)
-		 {
-			 LOG_DEBUG_B("Send salidas web");
-			 //Si procede enviamos a web ;)
-			 if (!RegistrarSalidaEnWeb())
-			 error_web_salidas++;
-			 else
-			 error_web_salidas=0;
-
-
-			 LOG_DEBUG_ARGS_B("Salidas web %i",error_web_salidas);
-		 }
 	 }
 
  }
-
+ 
+ 
  void GTKeeper::LanzaRiego(uint8_t contador,bool sendsms=false) {
 
 	 //Si esta entre los sectores activos :)

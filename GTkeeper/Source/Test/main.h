@@ -15,7 +15,9 @@
 #include <gtkeeper.h>
 #include "gtkeepertest.h"
 
-
+#ifndef MAX_FILE_LOG_SIZE
+	#define MAX_FILE_LOG_SIZE 100 //MAX log size for SD
+#endif
  
 
 #define SCREEN_ACTIVE() false

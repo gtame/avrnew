@@ -27,30 +27,38 @@ bool PostHttpParametersCallback()
 
 	//http://www.raviyp.com/embedded/194
 
-	const char  boundary[] = "---------------------------8278697928671";
+	const char  boundary[] PROGMEM= "---------------------------8278697928671";
+	const char  guion_post[] PROGMEM= "--";
 
+	memset(bufferapp,0,MAIN_BUFFER_SIZE);
+	strcpy_P(bufferapp,boundary);
 
-	if (gtKeeper.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,boundary)==RX_CHECK_OK)
+	if (gtKeeper.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,bufferapp)==RX_CHECK_OK)
 	{
 		//Cambios de configuracion¿?
 		//Cambios de programacion ¿?
 		//Cambios en salidas activas
 		//Logs..¿?
-
-		
-
-
 		uint8_t numsalidas= gtKeeper.GetSalidasActivas();
-		
+		uint32_t logsize=gtKeeper.SizeLogs();
  
+		//191 es el constante, boundarys etc etc
  		int16_t totalLen=191 + 
-		LEN_CONFIG_STRING +//CONFIGURACION
-		(LEN_PROGRAMA_STRING * MAX_PROGRAMAS)+ //PROGRAMAS
-		(LEN_SALIDA_STRING * numsalidas)+ //SALIDAS
-		0 ;//Logfile
+		LEN_CONFIG_STRING_CR_LF +LEN_SEPARATOR_WEB_ITEM +//CONFIGURACION
+		(LEN_PROGRAMA_STRING_CR_LF * MAX_PROGRAMAS)+LEN_SEPARATOR_WEB_ITEM + //PROGRAMAS
+		(numsalidas==0?0:(LEN_SALIDA_STRING_CR_LF * numsalidas)+LEN_SEPARATOR_WEB_ITEM)+ //SALIDAS
+		(logsize==0?0:logsize+LEN_SEPARATOR_WEB_ITEM);
 
+		//El formato del envio del fichero es con este formato
+		//+C:CONFIG<CR><LF>
+		//+P:PROGRAM1<CR><LF>
+		//PROGRAM2<CR><LF>
+		//+S:SALIDA1<CR><LF>
+		//SALIDA2<CR><LF>
+		//+L:LOG1<CR><LF>
+		//LOG2<CR><LF>
 
-		 //191 es el constante, boundarys etc etc
+		 
 
 		LOG_DEBUG_ARGS_B("totalLen %i",totalLen);
 
@@ -63,13 +71,17 @@ bool PostHttpParametersCallback()
 			//t+=SendRawData("Accept-Encoding: deflate");
 			//Vomitamos lo que hayamos registrado
 			//Boundary
-			t=gtKeeper.SendRawData("--");
+			t=gtKeeper.SendRawData(guion_post);
 			t+=gtKeeper.SendRawData(boundary);
-			t+=gtKeeper.SendRawData("\r\n");
+			t+=gtKeeper.SendRawData(CRLF);
 
 			//Cabecera
-			t+=gtKeeper.SendRawData("Content-Disposition: form-data; name=\"submitted\"; filename=\"abcd.txt\"\r\n");
-			t+=gtKeeper.SendRawData("Content-Type: text/plain\r\n\r\n");
+			t+=gtKeeper.SendRawData_P(PSTR("Content-Disposition: form-data; name=\"submitted\"; filename=\"abcd.txt\""));
+			t+=gtKeeper.SendRawData(CRLF);
+
+			t+=gtKeeper.SendRawData_P(PSTR("Content-Type: text/plain"));
+			t+=gtKeeper.SendRawData_P(CRLF);
+			t+=gtKeeper.SendRawData_P(CRLF);
 
 			//Ahora enviamos todo lo que haya en estadisticas
 			//t+=SendRawData("abcd\r\n");
@@ -78,6 +90,7 @@ bool PostHttpParametersCallback()
 			 memset(bufferapp,0,MAIN_BUFFER_SIZE);
 			 gtKeeper.ConfiguracionToString(bufferapp);
 			 t+=gtKeeper.SendRawData(bufferapp);
+			 t+=gtKeeper.SendRawData_P(CRLF);
 
 			 //Programas
 			 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
@@ -85,6 +98,7 @@ bool PostHttpParametersCallback()
 				memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				gtKeeper.ProgramaToString(i,bufferapp);
 				t+=gtKeeper.SendRawData(bufferapp);
+				t+=gtKeeper.SendRawData_P(CRLF);
 			 }
 
 			 //Salidas
@@ -93,15 +107,19 @@ bool PostHttpParametersCallback()
 				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				 gtKeeper.SalidaToString(i,bufferapp);
 				 t+=gtKeeper.SendRawData(bufferapp);
+				 t+=gtKeeper.SendRawData_P(CRLF);
 			 }
 
 			 //Log
 			 //El archivo de log se lee de la SD... 'si esta disponible'
 
 			//Boundary
-			t+=gtKeeper.SendRawData("\r\n--");
-			t+=gtKeeper.SendRawData(boundary);
-			t+=gtKeeper.SendRawData("--\r\n");
+			t+=gtKeeper.SendRawData_P(CRLF);
+			t+=gtKeeper.SendRawData_P(guion_post);
+			t+=gtKeeper.SendRawData_P(boundary);
+			t+=gtKeeper.SendRawData_P(guion_post);
+			t+=gtKeeper.SendRawData_P(CRLF);
+
 
 			LOG_DEBUG_ARGS_B("Enviado x post--> %i",t);
 			delay(500);
@@ -142,9 +160,8 @@ void PostHttpResultCallback(const char* url,int length)
 
 			if (readResult==RX_OK_READ && strcmp_P(line,PSTR("OK"))==0 ) //Mientras no haya errores de procesamiento
 			{
-				result =LOAD_WEB_OK;
-				//Si es ok.. inicializamos contador .. :)
-				 
+				 //Todo OK!!;)
+				 gtKeeper.UpdateWebSuccess();			 
 			}
 
 
@@ -162,54 +179,39 @@ void wakeUpUserWeb()
 //CHECK
 bool GTKeeper::CheckWeb()
 {
-	bool result=false;
-	time_t nextejecucion=0;
 	//Para enviar datos a web debemos chequear
-	//1º Que haya datos pendientes de envio
-	//2º Que no hay que ejecutar acciones programadas o riegos en XXX minutos
+	//1º Que no hayamos tenido un error de envio hace menos de XXX
+	//2º Que haya datos pendientes de envio (De config, programas o  salidas ) ó se cumpla leadtime envios de logs, tb se conectara si el usuario ha forzado la conexion
+	//3º Que no hay que ejecutar acciones programadas o riegos en XXX minutos
 
-	//Obtenemos las siguientes ejecuciones
-	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	if (ELAPSED_SECONDS(GetLastTimeWebError())> (WEB_ERROR_SEND_TIME * GetErroresWeb()))
 	{
-		if (programas[i].Dias != NONE)
-		{
-			time_t nextejecucion= GetNextEjecucion(i);
-		}
-	}
-	
-	//Comprobamos que estamos en el rango de seguridad
-	//Es más importante el riego que el envio de datos
-	if (nextejecucion==0 || nextejecucion>(now()+WEB_NOACTIVITY_SECONDS))
-	{
-		
-	}
 
-	return result;
+		//Cambios pdtes.
+		if (GetChangedConfig() || GetChangedProgramas() || GetChangedSalidas() || ELAPSED_SECONDS(GetLastWebSync())> WEB_LOG_SEND_TIME )
+			//Comprobamos que estamos en el rango de seguridad
+			//Es más importante el riego que el envio de datos
+			return ( ELAPSED_SECONDS(GetNextAction()) > -WEB_NOACTIVITY_TIME);//Debe ser negativo ya que GEtNextAction() estara en el futuro o 0
+	}
+	 
+	return false;
 }
 
 
 //ACCION
 void GTKeeper::OnWeb()
 {
-	//MArca de tiempo
-	time_t time=now();
-
+ 
 	// Allow wake up pin to trigger interrupt on low.
 	attachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT), wakeUpUserWeb, HIGH);
 		 
-	//A enviar ..
+	//URL con imei como parameter
   	memset(buffer,0,MAIN_BUFFER_SIZE);
 	sprintf(buffer,SETTING_URL_PROGRAMACION,config.Imei);
-	//Si ok
-	if (URLRequest(buffer,false,PostHttpParametersCallback,PostHttpResultCallback))
-	{
-			//reiniciamos contador
-			t_last_web = now();
-			error_web=0;
-	}
-	else
-		error_web++;
- 
+
+	//Enviamos POST reques
+	if (!URLRequest(buffer,false,PostHttpParametersCallback,PostHttpResultCallback))
+		AddErrorWeb();//Logeamos el error web
 
 	#ifdef SMS
 	//Si se producen más errores de la cuenta
@@ -229,6 +231,7 @@ void GTKeeper::OnWeb()
 
 	// Disable external pin interrupt on wake up pin.
 	detachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT));
+
 }
 
 //SALE
@@ -239,6 +242,21 @@ void GTKeeper::OnLeaveWeb()
 	//REseteamos todo, config, programas y estadisticas.
 	LOG_DEBUG("Salimos de User");
 	
+}
+
+//Metodo para la actualizacion OK
+void GTKeeper::UpdateWebSuccess()
+{
+	//Reset Contadores, Flags  y Logs
+	//Contadores
+	SetLastWebSync();
+	ClearErrorWebs();
+	//Flags
+	SetChangedConfig(false);
+	SetChangedProgramas(false);
+	SetChangedSalidas(false);
+	//Logs
+	ClearLogs();
 }
 
 
@@ -264,6 +282,9 @@ void GTKeeper::CargaConfigWeb()
 
 
 }
+
+
+//Hay que revisar estos metodos
 
 void GTKeeper::CheckWebConfig()
 {

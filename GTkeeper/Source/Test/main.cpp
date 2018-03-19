@@ -37,7 +37,7 @@ void setup()
 
 	Test::out = &Serial;
 	Test::exclude("*");
-	Test::include("sdlog");
+	Test::include("sdlog*");
 	//Test::include("dayToDiasSemana");
 	//Test::include("elapsedSecsThisWeek2");
 	//Test::include("dayOfWeek2*");

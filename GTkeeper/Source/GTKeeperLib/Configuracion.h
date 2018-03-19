@@ -20,6 +20,10 @@ class Configuracion
 public:
 protected:
 private:
+	bool changed;//Flag si indica que cambio la configuracion 
+  	char * internalbuffer;
+  	uint8_t sizebuffer;
+
 
 //functions
 public:
@@ -27,7 +31,7 @@ public:
 
 	tConfiguracion config;
 
-
+		
 	void ShowConfigInfo();
 	void ResetConfig();
 	void ConfiguracionToString(char *text);
@@ -38,10 +42,11 @@ public:
 
 	//Indica si Gtkeeper esta configurado con modulo gsm
 	inline bool IsGSMEnable(){	return config.GSMAvailable;}
+	inline bool GetChangedConfig() { return changed;}
 protected:
+	inline void SetChangedConfig(bool value) { changed=value;}
 private:
-  	char * internalbuffer;
-  	uint8_t sizebuffer;
+
 
 }; //Configuracion
 
