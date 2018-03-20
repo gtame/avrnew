@@ -10,7 +10,7 @@
 #define TYPES_H_
 
 
-//Sumatorio total 126 para todos los dias
+//Sumatorio total 127 para todos los dias
 typedef enum {
 	SMSNone =0,//
 	SMSInicioSector = (1 << 0),//1

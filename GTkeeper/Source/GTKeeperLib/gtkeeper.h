@@ -27,6 +27,8 @@
 #include "settings.h"
 #include "textos.h"
 
+#include "Utils/util.h"
+
 
 
 //Referencia al core de arduino
@@ -166,7 +168,7 @@ public:
 	void UpdateWebSuccess(); // Se llama cuando se actualiza la web correctamente
 	inline void ClearErrorWebs() { error_web=0;} //Limpia Contador de errores en sincronizacion web
 	inline uint8_t	 GetErroresWeb() { return error_web;} //Nº de errores web
-	inline time_t GetLastTimeWebError() {return t_last_error_web; }
+	inline time_t GetLastTimeWebError() {return t_last_error_web; } //Utlima vez que la sincronizacion dio error
 	inline void AddErrorWeb() { error_web++;}  //Contador de errores en sincronizacion web
 	inline time_t GetLastWebSync() { return t_last_web;} //Retorna ultima vez que la web fue actualiza satisfactoriamente
 	inline void SetLastWebSync() { t_last_web=now();} //Actualiza la fecha de actualizacion de la web

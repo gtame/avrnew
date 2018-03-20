@@ -10,6 +10,19 @@ GTKeeper gtKeeper(buffapp,MAIN_BUFFER_SIZE);
 
 
 FakeStream myStream;
+FakeStream logger;
+
+
+//Stream *streamLog=&logger;
+Stream *streamLog=&Serial;
+
+//Instanciamos Logger
+//&Serial;
+
+
+Logger Log(streamLog);
+//Logger Log(&Serial);
+
 
 //Funcion necesaria para el compilador
 extern "C" void __cxa_pure_virtual() {}
@@ -33,17 +46,19 @@ void setup()
 	
 	Serial1.begin(9600);
 	while (!Serial1);
-
-
-	Test::out = &Serial;
+ 
+	Test::out = streamLog;
 	Test::exclude("*");
-	Test::include("sdlog*");
+	
+	//Test::include("sdlog*"); //Test de sd & Logs
+	//Test::include("config*"); //Test de configuracion
+	Test::include("prog*"); //Test de programas
+	
 	//Test::include("dayToDiasSemana");
 	//Test::include("elapsedSecsThisWeek2");
 	//Test::include("dayOfWeek2*");
-	//Test::include("getnextEjecucion*");
+	//Test::include("getnextEjecucion*");*/
  
-	
 }
 
 void loop()

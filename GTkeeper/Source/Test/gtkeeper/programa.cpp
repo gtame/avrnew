@@ -1,16 +1,23 @@
 ////
-/////*
- ////* getnextEjecucion.cpp
- ////*
- ////* Created: 17/03/2018 15:50:58
- ////*  Author: Gabi
- ////*/ 
+////*
+////* getnextEjecucion.cpp
+////*
+////* Created: 17/03/2018 15:50:58
+////*  Author: Gabi
+////*
+////*/ 
 
 
 #include <ArduinoUnit.h>
 #include <main.h>
 
-
+//03101010120001200000
+//03->Sector
+//127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
+//1200 -> Ejecucion * Hora que se ejecutara a las 12:00
+//0120 -> Tiempo de riego
+//0000 -> Tiempo de abono
+char programa[]="03127120001200000";
 
 void printTime(time_t hora)
 {
@@ -50,7 +57,9 @@ void PonerHora()
 	printTime(now());
 }
 
-test (dayToDiasSemana)
+
+///TEST para macros
+test (prog_dayToDiasSemana)
 {
 	PonerHora();
 	assertTrue(dayToDiasSemana(1)==L);
@@ -63,7 +72,7 @@ test (dayToDiasSemana)
 
 }
 
-test (dayOfWeek2)
+test (prog_dayOfWeek2)
 {
 	//Fijamos hora a 01-01-2018 -LUNES
 	PonerHora();
@@ -78,7 +87,7 @@ test (dayOfWeek2)
 	}
 }
 
-test (elapsedSecsThisWeek2)
+test (prog_elapsedSecsThisWeek2)
 {
 	//Fijamos hora a 01-01-2018 -LUNES
 	PonerHora();
@@ -103,8 +112,71 @@ test (elapsedSecsThisWeek2)
 
 }
 
+///ENDTESTS
 
-test(getnextEjecucion)
+///TEST para metodos
+
+test(prog_CargaProgramaDesdeString)
+{
+	
+	gtKeeper.ResetPrograma(0);
+	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	
+	memset(buffer_test,0, MAIN_BUFFER_SIZE);
+	gtKeeper.ProgramaToString(0,buffer_test);
+	
+	LOG_DEBUG_ARGS("%s vs %s",programa, buffer_test);
+	assertTrue(strcmp(buffer_test,programa)==0);
+
+	pass();	
+}
+
+test(prog_GrabarProgramaAEEPROM)
+{
+	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	assertTrue(gtKeeper.GrabarProgramaAEEPROM(0));
+	gtKeeper.ResetPrograma(0);
+	assertTrue(gtKeeper.programas[0].Sector==0);
+	assertTrue(gtKeeper.CargarProgramaDesdeEEPROM(0));
+	assertTrue(gtKeeper.programas[0].Sector==3);
+}
+
+test (prog_CargarProgramaDesdeEEPROM)
+{
+	//Ya se cubre en  prog_GrabarProgramaAEEPROM
+	skip();
+}
+
+test(prog_ResetPrograma)
+{
+	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	assertTrue(gtKeeper.programas[0].Sector==3);
+	gtKeeper.ResetPrograma(0);
+	assertTrue(gtKeeper.programas[0].Sector==0);
+}
+
+test(prog_ProgramaToDisplay)
+{
+	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	memset(buffer_test,0, MAIN_BUFFER_SIZE);
+	gtKeeper.ProgramaToDisplay(0,buffer_test);
+	assertTrue(strlen(buffer_test)>0);
+	LOG_DEBUG_B(buffer_test);
+}
+
+test(prog_ProgramaToString)
+{
+	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+
+	memset(buffer_test,0, MAIN_BUFFER_SIZE);
+	gtKeeper.ProgramaToString(0,buffer_test);
+		
+	LOG_DEBUG_ARGS("%s vs %s",programa, buffer_test);
+	assertTrue(strcmp(buffer_test,programa)==0);
+}
+
+
+test(xprog_GetNextEjecucion)
 {
 	TimeElements telements;
 	//Ponemos hora 1/01/2018- LUNES
@@ -137,7 +209,7 @@ test(getnextEjecucion)
 	//Ponemos el jueves y vemos que fecha propone
 	gtKeeper.programas[0].Dias =  J;
 	gtKeeper.programas[0].HoraInicio=23;
-	gtKeeper.programas[0].MinutoInicio=59;	
+	gtKeeper.programas[0].MinutoInicio=59;
 	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(23,59,0,4,1,2018));
@@ -149,9 +221,9 @@ test(getnextEjecucion)
 	nextexecution=gtKeeper.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,4,1,2018));
-		
+	
 
-		
+	
 	//Programamos dias de la semana y vemos que fecha propone
 	gtKeeper.programas[0].Dias =  L | M  | X | J | V;
 	gtKeeper.programas[0].HoraInicio=6;
@@ -179,7 +251,38 @@ test(getnextEjecucion)
 	
 }
 
- 
+test(prog_EEPROMCargaProgramas)
+{
+	assertTrue(gtKeeper.EEPROMCargaProgramas());
+	
+}
+
+/*
+	Programa(char * internalbuffer,uint8_t sizebuffer);
+	
+	bool CargaProgramaDesdeString(uint8_t progIndex,char *programa);
+	bool GrabarProgramaAEEPROM(uint8_t progIndex);
+	bool CargarProgramaDesdeEEPROM(uint8_t progIndex);
+	void ResetPrograma(uint8_t progIndex);
+	void ProgramaToDisplay(uint8_t progIndex,char *text);
+	void ProgramaToString(uint8_t progIndex,char *text);
+	time_t GetNextEjecucion(uint8_t progIndex);//Calcula la siguiente fecha de ejecucion para un programa dado
+	
+	
+	//Metodos para toda la coleccion
+	inline time_t GetNextAction() { return nexaction;}//Devuelve la fecha de la proxima accion programada a ejecutar CalculateNextAction
+	bool EEPROMCargaProgramas();
+	void ResetProgramas();
+	void ShowInfoProgramas();
+	inline bool GetChangedProgramas() { return changed;}
+	protected:
+	inline void SetChangedProgramas(bool value) { changed=value;}
+	void CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
+	private:
+*/
+
+
+//ENDTESTS
 
 
 

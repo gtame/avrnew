@@ -15,7 +15,6 @@ Configuracion::Configuracion(char * ibuffer,uint8_t isizebuffer)
 	sizebuffer=isizebuffer;
 } //Programa
 
- 
 
 void Configuracion::ShowConfigInfo()
 {
@@ -45,13 +44,8 @@ void Configuracion::ShowConfigInfo()
 
 void Configuracion::ResetConfig()
 {
-
-
 	memset(&config,0,sizeof(tConfiguracion));
 	config.motor_diesel=false;
-
-
-
 
 	strcpy_P(config.PasswordSMS,PSTR("1111"));
 	config.numabono=0;
@@ -82,11 +76,21 @@ bool Configuracion::CargaConfigDesdeSim()
 bool Configuracion::CargaConfigDesdeString(char* configstr)
 {
 
-		if (configstr==internalbuffer)
-			return false;
+////// VALIDACIONES
+	//El internalbuffer es usado
+	if (configstr==internalbuffer)
+		return false;
+		
+	if (strlen(configstr)!= LEN_CONFIG_STRING)
+		return false;
 
-	//12665331679911111215
-
+	//Todos objetos deben ser numericos
+	if (!isValidNumber(configstr))
+		return false;
+		
+	//12765331679911111215
+////// ENDVALIDACIONES
+	 
 	//3 para AvisosSMS
 	memset(internalbuffer,0,sizebuffer);
 	strncpy(internalbuffer,configstr,3);
@@ -116,8 +120,7 @@ bool Configuracion::CargaConfigDesdeString(char* configstr)
 	return true;
 }
 
-
-//12665331679911111215
+//12765331679911111215
 //3 para AvisosSMS
 //6 siguientes para movil
 //NUM 4 password sms
@@ -126,9 +129,8 @@ bool Configuracion::CargaConfigDesdeString(char* configstr)
 //NUM 2 para puertos
 void Configuracion::ConfiguracionToString(char *text)
 {
-	sprintf_P(text, PSTR("%03i%s%s%c%i%02i"), config.AvisosSMS, config.MovilAviso, config.PasswordSMS,(config.motor_diesel?'X':' '),config.numabono,config.numpuertos);
+	sprintf_P(text, PSTR("%03i%s%s%c%i%02i"), config.AvisosSMS, config.MovilAviso, config.PasswordSMS,(config.motor_diesel?'1':'0'),config.numabono,config.numpuertos);
 }
-
 
 void Configuracion::EEPROMGuardaConfig()
 {

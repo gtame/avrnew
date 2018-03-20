@@ -23,8 +23,7 @@ byte rowPins[KEYPAD_ROWS] = {KEYBOARD_ROW1_PIN, KEYBOARD_ROW2_PIN, KEYBOARD_ROW3
 LiquidCrystal_I2C lcd(0x20, 20, 4);//Display LCD I2C
 //Instanciamos Keypad
 Keypad keypad(makeKeymap(keys), rowPins, colPins, KEYPAD_ROWS, KEYPAD_COLUMNS);
-//Instanciamos Logger
-Logger Log(&Serial);
+
 const uint8_t GTKeeper::ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
 const uint8_t GTKeeper::ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
  

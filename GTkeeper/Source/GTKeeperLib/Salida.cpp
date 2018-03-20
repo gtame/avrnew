@@ -7,7 +7,7 @@
 
 
 #include "Salida.h"
-
+#include "Utils\util.h"
 
 //Negativo A>B
 //Cero =

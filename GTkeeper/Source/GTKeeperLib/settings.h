@@ -14,7 +14,7 @@
 
 //Posiciones eeprom
 #define GET_ADDRES_CONFIG 0
-#define GET_ADDRES_PROGRAM(X) (LEN_PROGRAMA_STRING*X)+sizeof(tConfiguracion)
+#define GET_ADDRES_PROGRAM(X) (sizeof(tPrograma)*X)+sizeof(tConfiguracion)
 #define GET_ADDRES_ESTADISTICA(X) ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(Configuracion))+ (sizeof(Estadistica)*(X-1))
 //EMPIEZAN LAS SALIDAS WEB EN -> PROGRAMAS + CONFIGURACION + ESTADISTICA
 #define GET_ADDRES_SALIDAS_WEB ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(tConfiguracion))+ (sizeof(Estadistica)*PORTS_NUM)
@@ -28,7 +28,7 @@
 //+L:LOG
 
 #define LEN_CONFIG_STRING 20
-#define LEN_CONFIG_STRING_CR_LF 22
+#define LEN_CONFIG_STRING_CR_LF LEN_CONFIG_STRING+2
 
 #define LEN_PROGRAMA_STRING 17
 #define LEN_PROGRAMA_STRING_CR_LF LEN_PROGRAMA_STRING+2

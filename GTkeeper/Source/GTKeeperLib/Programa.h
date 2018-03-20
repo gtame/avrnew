@@ -9,7 +9,7 @@
 #include <Logger.h>
 #include <types.h>
 #include "settings.h"
-
+#include "Utils\util.h"
 
 #ifndef __PROGRAMA_H__
 #define __PROGRAMA_H__
@@ -20,7 +20,7 @@
 
 
 
-//Sumatorio total 126 para todos los dias
+//Sumatorio total 127 para todos los dias
 typedef enum {
 	NONE =0,
 	L = (1 << 0),//1
@@ -59,10 +59,11 @@ public:
 	void ResetPrograma(uint8_t progIndex);
 	void ProgramaToDisplay(uint8_t progIndex,char *text);
 	void ProgramaToString(uint8_t progIndex,char *text);
+	time_t GetNextEjecucion(uint8_t progIndex);//Calcula la siguiente fecha de ejecucion para un programa dado
+	
 	
 	//Metodos para toda la coleccion
 	inline time_t GetNextAction() { return nexaction;}//Devuelve la fecha de la proxima accion programada a ejecutar CalculateNextAction
-
 	bool EEPROMCargaProgramas();
 	void ResetProgramas();
 	void ShowInfoProgramas();
@@ -71,8 +72,6 @@ protected:
 	inline void SetChangedProgramas(bool value) { changed=value;}
 	void CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
 private:
-	time_t GetNextEjecucion(uint8_t progIndex);//Calcula la siguiente fecha de ejecucion para un programa dado
-
 }; //Programa
 
 #endif //__PROGRAMA_H__

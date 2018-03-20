@@ -55,8 +55,7 @@ void CheckReles();
 void LanzaRiego();
 void ShowInfoSalidas();
 
-
-
+ 
 
 
 //Testing Functions

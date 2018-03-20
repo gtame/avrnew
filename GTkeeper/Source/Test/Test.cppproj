@@ -218,19 +218,16 @@
     </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="gtkeepertest.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeepertest.h">
+    <Compile Include="gtkeeper\configuracion.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="gtkeeper\executecommand.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="gtkeeper\getnextEjecucion.cpp">
+    <Compile Include="gtkeeper\programa.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="gtkeeper\sdlog.cpp">
+    <Compile Include="gtkeeper\logsd.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.cpp">

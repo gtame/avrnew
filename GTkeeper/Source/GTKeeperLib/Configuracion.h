@@ -9,6 +9,7 @@
 #include <Logger.h>
 #include "types.h"
 #include "settings.h"
+#include "Utils/util.h"
 
 #ifndef __CONFIGURACION_H__
 #define __CONFIGURACION_H__

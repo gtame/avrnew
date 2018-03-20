@@ -19,8 +19,6 @@ Programa::Programa(  char * ibuffer,uint8_t isizebuffer)
 	sizebuffer=isizebuffer;
 } //Programa
 
-
-
 //03101010120001200000
 //03->Sector
 //0101010-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
@@ -29,66 +27,84 @@ Programa::Programa(  char * ibuffer,uint8_t isizebuffer)
 //0000 -> Tiempo de abono
 bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 {
+	//Validaciones
 	if (progstr==internalbuffer)
 		return false;
-
+	
+	if (strlen(progstr)!=LEN_PROGRAMA_STRING)
+		return false;
+		
+		
+	if (!isValidNumber(progstr))
+		return false;
+		
+		
 	tPrograma* programa=&programas[progIndex];
 
 	LOG_DEBUG_ARGS("CArga desde string %s",progstr);
 
 	//01127125000010000
-	if (strlen(progstr)==LEN_PROGRAMA_STRING)
-	{
-		memset(internalbuffer,0,sizebuffer);
-		strncpy (internalbuffer,progstr,2);
-		programa->Sector=atoi(internalbuffer);
+ 
+	memset(internalbuffer,0,sizebuffer);
+	strncpy (internalbuffer,progstr,2);
+	programa->Sector=atoi(internalbuffer);
 
 
-		//Ejecucion de progstr -- Hora de inicio o sector
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+2,3);
-		programa->Dias= atoi(internalbuffer);
+	//Ejecucion de progstr -- Hora de inicio o sector
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+2,3);
+	programa->Dias= atoi(internalbuffer);
 
-		//Ejecucion de progstr -- Hora de inicio o sector
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+5,2);
-		programa->HoraInicio= atoi(internalbuffer);
+	//Ejecucion de progstr -- Hora de inicio o sector
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+5,2);
+	programa->HoraInicio= atoi(internalbuffer);
 
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+7,2);
-		programa->MinutoInicio=atoi(internalbuffer);
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+7,2);
+	programa->MinutoInicio=atoi(internalbuffer);
 
 		
-		//Tiempo riego
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+9,2);
-		programa->TiempoRiego= atoi(internalbuffer) * SECS_PER_HOUR;
+	//Tiempo riego
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+9,2);
+	programa->TiempoRiego= atoi(internalbuffer) * SECS_PER_HOUR;
 
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+11,2);
-		programa->TiempoRiego+=atoi(internalbuffer) * SECS_PER_MIN;
-
-
-		//Tiempo abono
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+13,2);
-		programa->TiempoAbono=atoi(internalbuffer) * SECS_PER_HOUR;; //Tiempo de abono
-
-		memset(internalbuffer,0,sizebuffer);
-		strncpy(internalbuffer,progstr+15,2);
-		programa->TiempoAbono+=atoi(internalbuffer) * SECS_PER_MIN; //Tiempo de abono
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+11,2);
+	programa->TiempoRiego+=atoi(internalbuffer) * SECS_PER_MIN;
 
 
+	//Tiempo abono
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+13,2);
+	programa->TiempoAbono=atoi(internalbuffer) * SECS_PER_HOUR;; //Tiempo de abono
 
-		return true;
-	}
-	else
-	return false;
+	memset(internalbuffer,0,sizebuffer);
+	strncpy(internalbuffer,progstr+15,2);
+	programa->TiempoAbono+=atoi(internalbuffer) * SECS_PER_MIN; //Tiempo de abono
+
+
+
+	return true;
+ 
 
 }
 
 bool Programa::GrabarProgramaAEEPROM(uint8_t progIndex)
 {
+	
+	if (progIndex>=MAX_PROGRAMAS)
+		return false;
+		
+		
+	//Cargamos la configuracion
+	while (!eeprom_is_ready());
+	eeprom_write_block((void*)&programas[progIndex], ( void*) GET_ADDRES_PROGRAM(progIndex), sizeof(tConfiguracion));
+	
+	//Quiza hay que implementar un metodo para check - Ver metodo EPPROMCargaConfig
+	return true;
+	/*
 	memset(internalbuffer,0, sizebuffer);
 	ProgramaToString(progIndex,internalbuffer);
 	
@@ -117,32 +133,26 @@ bool Programa::GrabarProgramaAEEPROM(uint8_t progIndex)
 		}
 
 		return true;
-	}
+	}*/
 }
 
 bool Programa::CargarProgramaDesdeEEPROM(uint8_t progIndex)
 {
+	if (progIndex>=MAX_PROGRAMAS)
+		return false;
+	//config.flag_check='\0';//Lo ponemos a false para comprobar que carga bien la config
 
-	tPrograma* programa=&programas[progIndex];
-	memset(internalbuffer,0,sizebuffer);
-	uint16_t ee_addr=GET_ADDRES_PROGRAM(progIndex);
-	eeprom_read_block((void *)internalbuffer,(void *)ee_addr,LEN_PROGRAMA_STRING);
-
-	if (strlen(internalbuffer)==0)
-	{
-		ResetPrograma(progIndex);
-		return true;
-	}
-	else
-	{
-		LOG_DEBUG_ARGS("Cargando.. %s",internalbuffer);
-		return  CargaProgramaDesdeString(progIndex, internalbuffer);
-	}
-
+	//Cargamos la configuracion
+	eeprom_read_block((void*)&programas[progIndex], (const void*) GET_ADDRES_PROGRAM(progIndex), sizeof(tPrograma));
+	//return (config.flag_check=='X');
+	return true;
 }
 
 void Programa::ResetPrograma(uint8_t progIndex)
 {
+	if (progIndex>=MAX_PROGRAMAS)
+		return;
+		
 	tPrograma* programa=&programas[progIndex];
 	programa->Dias=0;
 	programa->Sector=0;
@@ -155,6 +165,9 @@ void Programa::ResetPrograma(uint8_t progIndex)
 //Podria ser eliminada - solo es usada a modo debug
 void Programa::ProgramaToDisplay(uint8_t progIndex, char *text) {
 
+	if (progIndex>=MAX_PROGRAMAS)
+		return;
+		
 	tPrograma* programa=&programas[progIndex];
 
 	if (programa->HoraInicio == 88) {
@@ -184,6 +197,9 @@ void Programa::ProgramaToDisplay(uint8_t progIndex, char *text) {
 
 void Programa::ProgramaToString(uint8_t progIndex, char *text) {
 
+	if (progIndex>=MAX_PROGRAMAS)
+	return;
+	
  tPrograma* programa=&programas[progIndex];
 
  sprintf_P(text,
@@ -201,6 +217,9 @@ void Programa::ProgramaToString(uint8_t progIndex, char *text) {
 ///Adaptacion de la libreria de arduino TimeAlarms.h
 time_t Programa::GetNextEjecucion(uint8_t progIndex)
 {
+		if (progIndex>=MAX_PROGRAMAS)
+		return -1;
+		
 	tPrograma* programa=&programas[progIndex];
 
 	//Si tiene dias programados
@@ -293,10 +312,10 @@ time_t Programa::GetNextEjecucion(uint8_t progIndex)
 	
 }
 
-
-
 bool Programa::EEPROMCargaProgramas()
 {
+ 
+		
 	bool bresult=true;
 	for (uint8_t program=0;program<MAX_PROGRAMAS;program++)
 	{
@@ -320,7 +339,6 @@ void Programa::ResetProgramas()
 		GrabarProgramaAEEPROM(program);
 	}
 }
-
 
 void Programa::ShowInfoProgramas()
 {
