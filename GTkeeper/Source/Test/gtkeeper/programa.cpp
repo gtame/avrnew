@@ -176,7 +176,7 @@ test(prog_ProgramaToString)
 }
 
 
-test(xprog_GetNextEjecucion)
+test(prog_GetNextEjecucion)
 {
 	TimeElements telements;
 	//Ponemos hora 1/01/2018- LUNES
@@ -253,10 +253,72 @@ test(xprog_GetNextEjecucion)
 
 test(prog_EEPROMCargaProgramas)
 {
+
+	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	{
+		assertTrue(gtKeeper.CargaProgramaDesdeString(i,programa));
+		gtKeeper.programas[i].Sector= i;
+		assertTrue(gtKeeper.GrabarProgramaAEEPROM(i));
+		assertTrue(gtKeeper.CargarProgramaDesdeEEPROM(i));
+		assertTrue(gtKeeper.programas[i].Sector== i);
+
+	}
+
+	//Si llamamos a gtKeeper.ResetPRogramas(); //soon guardados en eeprom
+	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	{	
+		gtKeeper.ResetPrograma(i);
+	}
+ 
+
 	assertTrue(gtKeeper.EEPROMCargaProgramas());
+
+	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	{
+		assertTrue(gtKeeper.programas[i].Sector== i);
+	}
 	
 }
 
+
+//REsetea todos los programas y los graba en la eeprom
+test(prog_ResetProgramas)
+{
+	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	{
+		assertTrue(gtKeeper.CargaProgramaDesdeString(i,programa));
+		gtKeeper.programas[i].Sector= i;
+		assertTrue(gtKeeper.GrabarProgramaAEEPROM(i));
+		assertTrue(gtKeeper.CargarProgramaDesdeEEPROM(i));
+		assertTrue(gtKeeper.programas[i].Sector== i);
+
+	}
+
+	//Si llamamos a gtKeeper.ResetPRogramas(); //soon guardados en eeprom
+	gtKeeper.ResetProgramas();
+
+	assertTrue(gtKeeper.EEPROMCargaProgramas());
+
+	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	{
+		assertTrue(gtKeeper.programas[i].Sector== 0);
+	}
+	
+}
+
+test(prog_ShowInfoProgramas)
+{
+		for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
+		{
+			assertTrue(gtKeeper.CargaProgramaDesdeString(i,programa));
+			gtKeeper.programas[i].Sector= i;
+			gtKeeper.programas[i].TiempoRiego=i*60;//Incrementamos 1' a cada sector
+			}
+	
+		gtKeeper.ShowInfoProgramas();
+		pass();
+
+}
 /*
 	Programa(char * internalbuffer,uint8_t sizebuffer);
 	

@@ -28,19 +28,19 @@ void EstadisticasDetalleScreen::OnDrawFields()
 
 	memset(buffer,0,SC_BUFFER_SIZE);
 	screenManager.m_lcd->setCursor(0,0);
-	sprintf_P(buffer,PSTR("Sector: %02i"),estadistica.sector);
+	sprintf_P(buffer,PSTR("Sector: %02i"),estadistica->sector);
 	screenManager.m_lcd->print(buffer);
 
 
 	memset(buffer,0,SC_BUFFER_SIZE);
 	screenManager.m_lcd->setCursor(0,1);
-	sprintf_P(buffer,PSTR("Riego:  %lu H %02i M"),NUMERO_HORAS(estadistica.tiempo_riego),NUMERO_MINUTOS(estadistica.tiempo_riego));
+	sprintf_P(buffer,PSTR("Riego:  %lu H %02i M"),NUMERO_HORAS(estadistica->tiempo_riego),NUMERO_MINUTOS(estadistica->tiempo_riego));
 	screenManager.m_lcd->print(buffer);
 
 
 	memset(buffer,0,SC_BUFFER_SIZE);
 	screenManager.m_lcd->setCursor(0,2);
-	sprintf_P(buffer,PSTR("Abono:  %lu H %02i M"),NUMERO_HORAS(estadistica.tiempo_abono),NUMERO_MINUTOS(estadistica.tiempo_abono));
+	sprintf_P(buffer,PSTR("Abono:  %lu H %02i M"),NUMERO_HORAS(estadistica->tiempo_abono),NUMERO_MINUTOS(estadistica->tiempo_abono));
 
 	screenManager.m_lcd->print(buffer);
 
@@ -49,7 +49,10 @@ void EstadisticasDetalleScreen::OnDrawFields()
 
 void EstadisticasDetalleScreen::setSector(uint8_t sector)
 {
-	gtKeeper.EEPROMLeerEstadistica(sector,&estadistica);
+	if (sector==0)
+		sector=1;
+
+	estadistica = &gtKeeper.estadisticas[sector-1];
 	currentsector=sector;
 	screenManager.needrefresh=true;
 

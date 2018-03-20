@@ -64,8 +64,8 @@ public:
 	
 	//Metodos para toda la coleccion
 	inline time_t GetNextAction() { return nexaction;}//Devuelve la fecha de la proxima accion programada a ejecutar CalculateNextAction
-	bool EEPROMCargaProgramas();
-	void ResetProgramas();
+	bool EEPROMCargaProgramas();//Carga los programas desde la eeprom
+	void ResetProgramas();//Resetea todos los programas y los graba en la eeprom
 	void ShowInfoProgramas();
 	inline bool GetChangedProgramas() { return changed;}
 protected:

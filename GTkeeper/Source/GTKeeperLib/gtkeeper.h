@@ -42,9 +42,11 @@
 #include <SD.h>
 #include <DS1307RTC.h>
 #include <LowPower.h>
+
 #include  "Configuracion.h"
 #include  "Programa.h"
 #include  "Salida.h"
+#include  "Estadistica.h"
 
 //Screens
 #include "Screens\Screens.h"
@@ -71,12 +73,11 @@ enum MachineStates
 };
 
 
-class GTKeeper : public SIM900, public StateMachine, public Configuracion,public Salida,public Programa,public LogSD {
+class GTKeeper : public SIM900, public StateMachine, public Configuracion,public Salida,public Estadistica,public Programa,public LogSD {
 
 //variables
 public:
-     //struct para almacenar estadisticas
-     Estadistica estadistica;
+
 protected:
 
 
@@ -218,19 +219,12 @@ public:
 	void SendSmsHora();
 
 
-	 //Estadisticas
-     //Suma 1 min a los sectores que estan en ejecucion
-     void RegistrarEstadisticas();
-     void EEPROMGuardarEstadistica(Estadistica * stat);
-     void EEPROMLeerEstadistica(uint8_t sector,Estadistica * stat);
-     void ResetearEstadisticas();
-
+	
 
 protected:
 private:
  	//Utils ..   
     char * PBB (const __FlashStringHelper * p1,...);
-    time_t GetTimeWithoutSeconds(time_t tiempo);
 
 };
 

@@ -113,7 +113,7 @@ uint8_t Salida::RiegosActivosEnSector(uint8_t sector)
 }
 
 //Registra la salida
-void Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva tipo)
+int8_t Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva tipo)
 {
 	int8_t pos=GetPosicion(salida,tipo);
 	if (pos==-1)
@@ -139,11 +139,14 @@ void Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva ti
 		else
 		salidas[i].Sector=0;
 
-		RegistrarSalidaEnEEPROM(&salidas[i],false);
 
 		salidas_activas++;
 		qsort (salidas, salidas_activas, sizeof(SalidasActivas),sortmethod);
+
+		pos =GetPosicion(salida,tipo);
 	}
+
+	return pos;
 }
 
 
@@ -155,8 +158,6 @@ void Salida::EliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
 	{
 		salidas[pos].Hasta=now();
 
-		//Lo registramos en la güeb :)
-		RegistrarSalidaEnEEPROM(&salidas[pos],true);
 
 		//if (salidas[pos].Tipo==)
 		//if (RiegosActivosEnSector(salidas[pos].Sector))
@@ -188,32 +189,6 @@ void Salida::SalidaToString(uint8_t salidaIndex, char *text) {
 }
 
 
-void  Salida::RegistrarSalidaEnEEPROM(SalidasActivas * stat,bool finaliza)
-{
-	//Su es 0 inicializamos
-	/*if (salidas_web==0)
-		salidas_web=GET_ADDRES_SALIDAS_WEB;
-
-	memset(internalbuffer,0,sizebuffer);
-	if (finaliza)
-		sprintf_P(internalbuffer,PSTR("%i;%i;%lu;%lu;%i;1\n"),stat->Tipo,stat->Ident,stat->Desde,stat->Hasta,stat->Sector);
-	else
-		sprintf_P(internalbuffer,PSTR("%i;%i;%lu;%lu;%i;0\n"),stat->Tipo,stat->Ident,stat->Desde,stat->Hasta,stat->Sector);
-
-	//Lo guardamos en la EEPROM  e incrementamos contador
-	if ((salidas_web + strlen(internalbuffer))>=EEPROM_LENGTH)
-	{
-		LOG_DEBUG_B("Eeprom llena");
-	}
-	else
-	{
-		//Guardamos la salida e incrementamos el contador de memoria :)
-		while (!eeprom_is_ready());
-
-		eeprom_write_block((void*)internalbuffer, ( void*)salidas_web, strlen(internalbuffer));
-		salidas_web+=strlen(internalbuffer);
-	}*/
-}
 
 /*
 bool Salida::PostHttpParametersCallback()

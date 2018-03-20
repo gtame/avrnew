@@ -47,13 +47,21 @@ void setup()
 	Serial1.begin(9600);
 	while (!Serial1);
  
+
+ 
+
 	Test::out = streamLog;
 	Test::exclude("*");
 	
 	//Test::include("sdlog*"); //Test de sd & Logs
 	//Test::include("config*"); //Test de configuracion
-	Test::include("prog*"); //Test de programas
+	//Test::include("prog*"); //Test de programas
+	//Test::include("esta*"); //Test de estadisticas
+	Test::include("sali*"); //Test de estadisticas
+
 	
+	//Test::include("sali_GetPosicion");
+
 	//Test::include("dayToDiasSemana");
 	//Test::include("elapsedSecsThisWeek2");
 	//Test::include("dayOfWeek2*");

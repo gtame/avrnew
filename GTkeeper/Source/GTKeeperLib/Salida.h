@@ -40,9 +40,10 @@ public:
 	int8_t GetPosicion(uint8_t salida , TipoSalidaActiva tipo);
 	bool SalidaRegistrada(uint8_t salida , TipoSalidaActiva tipo);
 	uint8_t RiegosActivosEnSector(uint8_t sector);
-	void RegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo);
+
+	int8_t RegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo);
 	void EliminarSalida(uint8_t salida , TipoSalidaActiva tipo);
-	void  RegistrarSalidaEnEEPROM(SalidasActivas * stat,bool finaliza);
+
 	inline uint8_t GetSalidasActivas() { return salidas_activas;}
 	void SalidaToString(uint8_t salidaIndex, char *text) ;
 	bool RegistrarSalidaEnWeb();

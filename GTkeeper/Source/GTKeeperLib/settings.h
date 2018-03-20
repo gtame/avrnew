@@ -15,9 +15,9 @@
 //Posiciones eeprom
 #define GET_ADDRES_CONFIG 0
 #define GET_ADDRES_PROGRAM(X) (sizeof(tPrograma)*X)+sizeof(tConfiguracion)
-#define GET_ADDRES_ESTADISTICA(X) ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(Configuracion))+ (sizeof(Estadistica)*(X-1))
+#define GET_ADDRES_ESTADISTICA(X) ((sizeof(tPrograma)*MAX_PROGRAMAS)+sizeof(tConfiguracion))+ (sizeof(tEstadistica)*X)
 //EMPIEZAN LAS SALIDAS WEB EN -> PROGRAMAS + CONFIGURACION + ESTADISTICA
-#define GET_ADDRES_SALIDAS_WEB ((LEN_PROGRAMA_STRING*MAX_PROGRAMAS)+sizeof(tConfiguracion))+ (sizeof(Estadistica)*PORTS_NUM)
+//#define GET_ADDRES_SALIDAS_WEB (sizeof(tPrograma)*MAX_PROGRAMAS)+sizeof(tConfiguracion))+ (sizeof(tEstadistica)*PORTS_NUM)
 
 
 
@@ -87,7 +87,7 @@
 
 //Numero de programas , sectores 
 #define MAX_PROGRAMAS 5//Numero máximo de programas
-
+#define MAX_PORTS 24//Numero maximo de sectores a manejar por el programador
 
 //Define de constantes  depuertos
 #define PORTS_NUM 1//15 Numero max de puertos:)

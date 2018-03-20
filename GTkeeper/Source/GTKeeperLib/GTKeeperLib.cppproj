@@ -190,13 +190,16 @@
     <Compile Include="errors.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Estadistica.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Estadistica.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="gtkeeper.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="gtkeeper.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="GTkeeper\estadisticas.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="GTkeeper\hora.cpp">
@@ -403,12 +406,12 @@
     <Compile Include="Utils\util.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Utils\memdebug.c">
+    <None Include="Utils\memdebug.c">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Utils\memdebug.h">
+    </None>
+    <None Include="Utils\memdebug.h">
       <SubType>compile</SubType>
-    </Compile>
+    </None>
     <Compile Include="Utils\util.h">
       <SubType>compile</SubType>
     </Compile>

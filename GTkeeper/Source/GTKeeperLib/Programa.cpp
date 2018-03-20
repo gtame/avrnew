@@ -141,7 +141,7 @@ bool Programa::CargarProgramaDesdeEEPROM(uint8_t progIndex)
 	if (progIndex>=MAX_PROGRAMAS)
 		return false;
 	//config.flag_check='\0';//Lo ponemos a false para comprobar que carga bien la config
-
+	ResetPrograma(progIndex);
 	//Cargamos la configuracion
 	eeprom_read_block((void*)&programas[progIndex], (const void*) GET_ADDRES_PROGRAM(progIndex), sizeof(tPrograma));
 	//return (config.flag_check=='X');
@@ -324,6 +324,8 @@ bool Programa::EEPROMCargaProgramas()
 
 			memset(internalbuffer,0,sizebuffer);
 			ProgramaToDisplay(program,internalbuffer);
+			LOG_DEBUG_ARGS("%s",internalbuffer);
+
 		}
 		else
 		bresult=false;//LOG_ERROR_ARGS("Cargando programa %i",program);

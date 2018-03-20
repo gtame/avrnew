@@ -19,9 +19,3 @@ char * GTKeeper::PBB (const __FlashStringHelper * p1,...)
 	return buffer;
 }
 
-time_t GTKeeper::GetTimeWithoutSeconds(time_t tiempo)
-{
-	breakTime(tiempo, timeEl); // break time_t into elements
-	timeEl.Second = 0; //Quitamos los segundos para que sea hora exacta..
-	return makeTime(timeEl); // convert time elements into time_
-}

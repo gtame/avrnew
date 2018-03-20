@@ -116,7 +116,7 @@ typedef struct
 	time_t tiempo_riego;
 	time_t tiempo_abono;
 
-} Estadistica;
+} tEstadistica;
 
 
 #endif /* TYPES_H_ */

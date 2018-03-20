@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+//Valida si la entrada es un numero
 bool isValidNumber(char* inputstr){
 	uint8_t strl=strlen(inputstr);
 	
@@ -18,3 +19,4 @@ bool isValidNumber(char* inputstr){
 	
 	return true;
 }
+

@@ -218,16 +218,22 @@
     </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="gtkeeper\configuracion.cpp">
+    <None Include="gtkeeper\configuracion.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\executecommand.cpp">
+    </None>
+    <None Include="gtkeeper\estadistica.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\programa.cpp">
+    </None>
+    <None Include="gtkeeper\executecommand.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\logsd.cpp">
+    </None>
+    <None Include="gtkeeper\programa.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="gtkeeper\logsd.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="gtkeeper\salidas.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.cpp">

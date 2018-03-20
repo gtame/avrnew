@@ -24,10 +24,10 @@
 	 )
 	 )
 	 {
-		 current_minute=GetTimeWithoutSeconds(current_minute);
+		 current_minute=TIME_WITHOUT_SECONDS(current_minute);
 
 		 //Si cambia el minuto registramos estadisticas
-		 RegistrarEstadisticas();
+		// RegistrarEstadisticas();
 
 		 //actualizamos la hora de arduino
 		 //time_t hora_actual=GetTime(timeEl);
@@ -89,7 +89,7 @@
 		 //Actualizamos la fecha Hasta
 		 uint8_t pos=GetPosicion(contador,actPrograma);
 		 if (pos!=-1)
-		 salidas[pos].Hasta= GetTimeWithoutSeconds(now()) + programas[contador].TiempoRiego;
+		 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + programas[contador].TiempoRiego;
 
 
 
@@ -102,7 +102,7 @@
 			 {
 				 //Actualizamos la fecha de abono si es mas posterior
 				 if (salidas[pos].Hasta<(now() + programas[contador].TiempoAbono))
-				 salidas[pos].Hasta= GetTimeWithoutSeconds(now()) + programas[contador].TiempoAbono;
+				 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + programas[contador].TiempoAbono;
 			 }
 
 		 }

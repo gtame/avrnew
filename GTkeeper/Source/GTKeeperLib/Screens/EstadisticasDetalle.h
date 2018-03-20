@@ -36,7 +36,7 @@ public:
 private:
 	void setSector(uint8_t sector);
 	uint8_t currentsector;
-	Estadistica estadistica;
+	tEstadistica* estadistica;
 };
 
 
