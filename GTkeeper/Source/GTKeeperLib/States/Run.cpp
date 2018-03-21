@@ -58,7 +58,7 @@
 			//Lo dormimos durante 1 min
 			
 			//Chequeamos programacion
-			CheckRiegos(false);
+			CheckRiegos();
 
 
 			//Sleep();	

@@ -4,10 +4,12 @@
  *  Created on: 11/06/2010
  *      Author: gabi
  */
+
+
 #ifdef PANTALLA_TECLADO
 
-#ifndef LANZAPROGRAMASCREEN_H_
-#define LANZAPROGRAMASCREEN_H_
+#ifndef LANZASECTORSCREEN_H_
+#define LANZASECTORSCREEN_H_
 
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -18,26 +20,27 @@
 
 #include <ScreenBase.h>
 #include <ScreenManager.h>
-
-#include "..\gtkeeper.h"
-#include "LanzarBase.h"
 #include "ManualMenu.h"
+#include <gtkeeper.h>
+#include "LanzarBase.h"
 
-class LanzaProgramasScreen:public LanzarBaseScreen {
+
+class LanzaSectorScreen:LanzarBaseScreen {
 public:
-	LanzaProgramasScreen();
+	LanzaSectorScreen();
 
 	virtual void OnDrawFields();
-
 	virtual void  OnSelection ();
-	virtual uint8_t MaxValue () {return  MAX_PROGRAMAS;}
+	virtual uint8_t MaxValue () {return  PORTS_NUM;}
+
 	virtual void  OnGotoMenu();
+private:
+	void  SetValor (uint8_t valor);
+	uint8_t _currentValor;
 };
 
-extern LanzaProgramasScreen lanzaprogramasScreen;
+extern LanzaSectorScreen lanzasectorScreen;
 
 #endif /* LANZAPROGRAMAS_H_ */
 #endif
-
-
 

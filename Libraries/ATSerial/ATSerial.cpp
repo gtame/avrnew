@@ -18,18 +18,11 @@ const char ATSerial::AT_ALL_ERRORS[] PROGMEM ="X";
 
 
 
-	ATSerial::ATSerial(Stream *stream) {
-		mSerial=stream;
-		ATSerial::setTimeout(AT_DEFAULT_TIMEOUT);
-	}
-
-
-
-
-ATSerial::~ATSerial() {
-	// TODO Auto-generated destructor stub
+ATSerial::ATSerial(Stream *stream) {
+	mSerial=stream;
+	ATSerial::setTimeout(AT_DEFAULT_TIMEOUT);
 }
-
+ 
 
 //SimComm
 char * ATSerial::GetToken(char *respuesta,uint8_t tokenNum,const char* splitchar)
@@ -60,11 +53,6 @@ char * ATSerial::GetLastCommand()
 {
 	return buff_comando;
 }
-
-
-
-
-
 
 
 
@@ -197,30 +185,20 @@ uint8_t ATSerial::SendCommandCheckError( const __FlashStringHelper * __fmt,const
 
 }
 
-
-
-
 size_t ATSerial::SendRawData(char  data)
 {
-
-	Serial.print(data);
 	return mSerial->print(data);
 }
-
-
 
 size_t ATSerial::SendRawData(const char * data)
 {
 	return mSerial->print(data);
 }
 
-
-
 size_t ATSerial::SendRawData_P(PGM_P data)
 {
 	return mSerial->print((__FlashStringHelper *)data);
 }
-
 
 uint8_t ATSerial::_SendCommandCheck(const char * command,const char *expectedResult)
 {
@@ -255,8 +233,6 @@ uint8_t ATSerial::_SendCommandCheck(const char * command,const char *expectedRes
 	return result;
 }
 
-
-
 void ATSerial::ProcessResults(uint16_t wait)
 {
  	uint8_t result=RX_NO_DATA;
@@ -273,10 +249,6 @@ void ATSerial::ProcessResults(uint16_t wait)
 
 }
 
-
-
-
-
 bool ATSerial::OnProcessResult( char * respuesta)
 {
 
@@ -286,7 +258,6 @@ bool ATSerial::OnProcessResult( char * respuesta)
 		return true;
 
 }
-
 
 uint8_t ATSerial::ExpectedResult (const char *resultado,const char * expectedResult)
 {
@@ -302,7 +273,6 @@ uint8_t ATSerial::ExpectedResult (const char *resultado,const char * expectedRes
 	else
 		return RX_CHECK_KO;
 }
-
 
 uint8_t ATSerial::WaitResponseResult(char * resultado,const char *expectedResult, const char *errorResult,uint16_t wait)
 {
@@ -359,7 +329,6 @@ uint8_t ATSerial::WaitResponseResult(char * resultado,const char *expectedResult
 		return WaitResponseResult(resultado,expectedResult,NULL,wait);
 }
 
-
 void ATSerial::WaitResponse( uint16_t wait)
 {
 	unsigned long t_inicial = millis();
@@ -367,12 +336,11 @@ void ATSerial::WaitResponse( uint16_t wait)
 	while ((millis() - t_inicial) < wait && mSerial->available() == 0) {	delay(1);	}
 }
 
-
-
 uint8_t ATSerial::ReadSerialLine()
 {
 	return ATSerial::ReadSerialLine(buff_response,AT_BUFFER_SIZE_RX);
 }
+
 //Lee una linea del puerto serie
 //Returns
 //0 OK

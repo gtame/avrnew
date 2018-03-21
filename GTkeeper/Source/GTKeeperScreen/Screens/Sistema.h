@@ -7,8 +7,9 @@
 
 
 #ifdef PANTALLA_TECLADO
-#ifndef PROGRAMASCREEN_H_
-#define PROGRAMASCREEN_H_
+#ifndef SISTEMASSCREEN_H_
+#define SISTEMASSCREEN_H_
+
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -16,36 +17,31 @@
 #include "WProgram.h"
 #endif
 
+
+
+#include <gtkeeper.h>
 #include <ScreenBase.h>
 #include <ScreenManager.h>
-#include "ProgramasMenu.h"
+#include "ParametrosMenu.h"
 
-#include "..\gtkeeper.h"
 
-class ProgramasScreen:ScreenBase {
+
+class SistemasScreen: public ScreenBase {
 public:
-	ProgramasScreen();
+	SistemasScreen();
 
 	virtual void OnDrawFields();
 	virtual void OnClickButton(uint8_t field);
 	virtual void OnEnter();
-	virtual void OnSetFocus(uint8_t* field,uint8_t* selpos);
 	virtual void OnFieldChange(uint8_t field);
 	virtual bool SetKey(unsigned char c);
-	virtual void OnPaint();
 	virtual bool ShowBlink() { return false;}
 private:
-	void ShowHoraInicio(bool show);
-	void setPrograma(int8_t programa);
-	void SetVisibleFields(bool visible);
-	bool showed;
-	uint8_t currentprograma;
-	tPrograma *program;
+	void setData();
+
+
 };
 
-
-extern ProgramasScreen programasScreen;
-
-
+extern SistemasScreen sistemasScreen;
 #endif
 #endif

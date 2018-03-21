@@ -20,7 +20,7 @@
 #include <WString.h>
 #include <Arduino.h>
 #include <Time.h>
-#include "LogSD.h"
+#include <LogSD.h>
 
 #include "types.h"
 #include "pinout.h"
@@ -42,14 +42,16 @@
 #include <SD.h>
 #include <DS1307RTC.h>
 #include <LowPower.h>
-
+#include <Hora.h>
 #include  "Configuracion.h"
 #include  "Programa.h"
 #include  "Salida.h"
 #include  "Estadistica.h"
 
 //Screens
-#include "Screens\Screens.h"
+#ifdef PANTALLA_TECLADO
+	#include <GTKeeperScreens.h>
+#endif
 
 #define SCREEN_ACTIVE() screenManager.IsActive()
 //Defines para operar con puertos
@@ -73,7 +75,7 @@ enum MachineStates
 };
 
 
-class GTKeeper : public SIM900, public StateMachine, public Configuracion,public Salida,public Estadistica,public Programa,public LogSD {
+class GTKeeper : public SIM900, public StateMachine, public Configuracion,public Salida,public Estadistica,public Programa,public LogSD,public Hora {
 
 //variables
 public:
@@ -85,14 +87,13 @@ private:
 	TimeElements timeEl;
 	time_t t_last_web; //Tiempo para controlar los tiempos de la web.
 	time_t t_last_error_web; //Tiempo para controlar los tiempos de la web.
-	time_t last_RiegosCheck;
-	time_t stop_abono;
+	time_t last_RiegosCheck; //Ultima vez que se realizo el control 
+	time_t stop_abono; 
 	uint8_t error_web;//Numero de errores que se producen al intentar acceder al dispositivo
 	uint8_t error_web_salidas;//Numero de intentos erroneos de subida web de salidas
 	bool bSetupCompleted; //Flag para indicar que ya esta dentro del bloquee loop, y el terminal esta configurado
 	//bool bWebInProcess;//Flag para indicar que estamos actualmente refrescando desde la web
 	bool bpendingWeb;//Flag para indicar que es necesario el update de web
-	bool isHourSet;//Flag para saber si se ha fijado la hora
 	bool isGSMOn;//Flag para saber si el modem esta presente... (Responde)
 	bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
 	uint16_t error_code;
@@ -163,7 +164,7 @@ public:
 	virtual bool OnProcessResult( char * ) override;//overrides
 	void setLed(uint8_t led );
 	bool ExecuteCommand(char* commandstr);//Ejecuta un comando desde string , bien sea desde SMS o desde CALL
-	void setupStateMachine();
+	
 
 	//Funciones de clase WEB
 	void UpdateWebSuccess(); // Se llama cuando se actualiza la web correctamente
@@ -187,7 +188,7 @@ public:
 	static void PostHttpResultCallback(const char* url,int len);
 	
 	//Riegos Arranca-para...
-    void CheckRiegos(bool sendWeb);
+    void CheckRiegos();
     void AbrirValvulaLatch(uint8_t sector);
     void CerrarValvulaLatch(uint8_t sector);
     void LanzaRiego(uint8_t contador,bool sendsms) ;
@@ -205,11 +206,7 @@ public:
 	void ChequearRiegos(time_t tiempo);
 
 
-	//Hora
-    void SetHora(time_t time);
-    bool EstaEnHora();
-    bool FijarHoraGSM();
-	bool FijarHoraRTC();
+
 
      //SMS
     void SendSmsFinReinicio();
@@ -222,6 +219,7 @@ public:
 	
 
 protected:
+	void setupStateMachine();
 private:
  	//Utils ..   
     char * PBB (const __FlashStringHelper * p1,...);
@@ -233,9 +231,9 @@ private:
 extern char bufferapp[MAIN_BUFFER_SIZE];
 
 //extern variables
-extern	Keypad keypad;
+extern Keypad keypad;
 extern LiquidCrystal_I2C lcd;
-extern GTKeeper gtKeeper;
+extern GTKeeper gtKeeper; //Machine
 
 //Interrupciones variables
 extern volatile bool int_input_user;//El user pulso una key

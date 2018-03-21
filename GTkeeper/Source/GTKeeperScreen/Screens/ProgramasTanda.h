@@ -7,8 +7,8 @@
 
 
 #ifdef PANTALLA_TECLADO
-#ifndef SISTEMASSCREEN_H_
-#define SISTEMASSCREEN_H_
+#ifndef PROGRAMASTANDA_H_
+#define PROGRAMASTANDA_H_
 
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -19,16 +19,29 @@
 
 
 
-#include "..\gtkeeper.h"
+#include <gtkeeper.h>
 #include <ScreenBase.h>
 #include <ScreenManager.h>
-#include "ParametrosMenu.h"
+#include "ProgramasMenu.h"
+
+typedef struct  {
+
+	uint8_t program;
+	uint8_t sector_desde;
+	uint8_t sector_hasta;
+	uint8_t riegohora;
+	uint8_t riegomin;
+	uint8_t abonohora;
+	uint8_t abonomin;
+	uint8_t tanda;
+
+} 	tTandaProg, TandaProg;
 
 
 
-class SistemasScreen: public ScreenBase {
+class ProgramasTandaScreen: public ScreenBase {
 public:
-	SistemasScreen();
+	ProgramasTandaScreen();
 
 	virtual void OnDrawFields();
 	virtual void OnClickButton(uint8_t field);
@@ -36,12 +49,14 @@ public:
 	virtual void OnFieldChange(uint8_t field);
 	virtual bool SetKey(unsigned char c);
 	virtual bool ShowBlink() { return false;}
+	static void  GotoMenu( uint8_t result,uint8_t codefunc );
 private:
 	void setData();
+	TandaProg _tanda;
 
 
 };
 
-extern SistemasScreen sistemasScreen;
+extern ProgramasTandaScreen programastandaScreen;
 #endif
 #endif

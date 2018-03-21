@@ -5,10 +5,10 @@
  *      Author: gabi
  */
 
-
 #ifdef PANTALLA_TECLADO
-#ifndef GSMUSERAPN_H_
-#define GSMUSERAPN_H_
+
+#ifndef GSMAPN_H_
+#define GSMAPN_H_
 
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -16,16 +16,16 @@
 #else
 #include "WProgram.h"
 #endif
-#include "../gtkeeper.h"
+#include <gtkeeper.h>
 #include "LongTextBase.h"
 #include <ScreenBase.h>
 #include <ScreenManager.h>
 
 #include "GSMMenu.h"
 
-class GSMUserAPNScreen: public LongTextBaseScreen {
+class GSMAPNScreen: public LongTextBaseScreen {
 public:
-	GSMUserAPNScreen();
+	GSMAPNScreen();
 
 
 	virtual void  OnSave ();
@@ -36,7 +36,7 @@ public:
 
 
 };
-extern GSMUserAPNScreen gsmuserapnScreen;
+extern GSMAPNScreen gsmapnScreen;
 
 #endif
 #endif

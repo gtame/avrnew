@@ -5,15 +5,12 @@
  *  Author: Gabi
  */ 
  #include "../gtkeeper.h"
-
-
  
  ///////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////
 
-
- void GTKeeper::CheckRiegos(bool sendWeb)
+ void GTKeeper::CheckRiegos()
  {
 	 //Comprobamos si hay que lanzar-parar algun riego (Lo hacemos cuando cambia cada minuto)
 	 time_t current_minute=now();
@@ -62,7 +59,6 @@
 	 }
 
  }
- 
  
  void GTKeeper::LanzaRiego(uint8_t contador,bool sendsms=false) {
 
@@ -497,7 +493,6 @@
  void GTKeeper::ApagarRiegos()
  {
 
-
 	 //Si hacemos un for, como lo reordena, nos hace la pirula y se quedan activos
 	 while (GetSalidasActivas()>0)
 	 {
@@ -538,7 +533,3 @@
 	 }
 
  }
-
-
-
-

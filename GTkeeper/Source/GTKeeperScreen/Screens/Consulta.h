@@ -18,8 +18,7 @@
 #include <ScreenBase.h>
 #include <ScreenManager.h>
 #include "Menu.h"
-#include <gtKeeper.h>
-#include <GTKeeper.h>
+#include <gtkeeper.h>
 
 class Consulta:ScreenBase {
 public:

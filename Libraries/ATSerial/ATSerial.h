@@ -61,8 +61,7 @@ class ATSerial {
 public:
 
 	ATSerial(Stream *stream);
-	virtual ~ATSerial();
-
+ 
 
 	//Ultimo comando AT lanzado
 	char * GetLastCommand();

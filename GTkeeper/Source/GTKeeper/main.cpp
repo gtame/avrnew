@@ -21,8 +21,7 @@ GTKeeper gtKeeper;
 void setup() {
 
 	gtKeeper.Setup();
-
-
+	
 } 
 
 void loop() //----( LOOP: RUNS CONSTANTLY )----

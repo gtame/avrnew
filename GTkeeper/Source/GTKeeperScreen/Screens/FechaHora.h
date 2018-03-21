@@ -5,6 +5,8 @@
  *      Author: gabi
  */
 
+
+
 #ifdef PANTALLA_TECLADO
 
 
@@ -12,18 +14,19 @@
 #define _FECHAHORA_H_
 
 
+
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #else
-#include "WProgram.h"
+#include <WProgram.h>
 #endif
 
-
+#include <Time.h>
+#include <gtkeeper.h>
 #include <ScreenBase.h>
 #include <ScreenManager.h>
 #include "ProgramasMenu.h"
-#include <Time.h>
-
+ 
 class FechaHoraScreen: public ScreenBase {
 public:
 	FechaHoraScreen();

@@ -1,5 +1,5 @@
 #include "gtkeeper.h"
-#include "callbacks.h"
+
 /*
  * gtkeeper.c
  *
@@ -79,7 +79,7 @@ void GTKeeper::setLed(uint8_t led )
 void GTKeeper::setupStateMachine()
 {
 	
-	//Fijamos las transiciones de estados
+ 	//Fijamos las transiciones de estados
 	
 	//ON
 	AddTransition(ON, Init, []() {  return gtKeeper.CheckInit() ;});
@@ -152,7 +152,6 @@ void GTKeeper::setupStateMachine()
 	SetOnLeaving(Web,  []() { gtKeeper.OnLeaveWeb();});
 	SetOnLeaving(Call,  []() { gtKeeper.OnLeaveCall();});
 	
- 
 }
 
 bool GTKeeper::ExecuteCommand(char* commandstr)

@@ -1,13 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "GTKeeper", "Source\GTKeeper\GTKeeper.cppproj", "{DD08F12C-2C6C-47E6-BF12-764121127F14}"
 EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "GTKeeperLib", "Source\GTKeeperLib\GTKeeperLib.cppproj", "{1D2B7A22-3D7F-4C7E-BD7F-848116B82BB6}"
 EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Test", "Source\Test\Test.cppproj", "{DCE6C7E3-EE26-4D79-826B-08594B9AD897}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Hora", "Source\Hora\Hora.cppproj", "{A3310FD5-AD2E-4DCC-B1C9-D405E9E1ED5F}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "LogSD", "Source\LogSD\LogSD.cppproj", "{B602C9B4-FF5B-4D57-8699-C6FA36085A60}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "GTKeeperScreens", "Source\GTKeeperScreen\GTKeeperScreens.cppproj", "{4249AF58-207A-4AB3-83F6-8B280B62CB0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +33,18 @@ Global
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Debug|AVR.Build.0 = Debug|AVR
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.ActiveCfg = Release|AVR
 		{DCE6C7E3-EE26-4D79-826B-08594B9AD897}.Release|AVR.Build.0 = Release|AVR
+		{A3310FD5-AD2E-4DCC-B1C9-D405E9E1ED5F}.Debug|AVR.ActiveCfg = Debug|AVR
+		{A3310FD5-AD2E-4DCC-B1C9-D405E9E1ED5F}.Debug|AVR.Build.0 = Debug|AVR
+		{A3310FD5-AD2E-4DCC-B1C9-D405E9E1ED5F}.Release|AVR.ActiveCfg = Release|AVR
+		{A3310FD5-AD2E-4DCC-B1C9-D405E9E1ED5F}.Release|AVR.Build.0 = Release|AVR
+		{B602C9B4-FF5B-4D57-8699-C6FA36085A60}.Debug|AVR.ActiveCfg = Debug|AVR
+		{B602C9B4-FF5B-4D57-8699-C6FA36085A60}.Debug|AVR.Build.0 = Debug|AVR
+		{B602C9B4-FF5B-4D57-8699-C6FA36085A60}.Release|AVR.ActiveCfg = Release|AVR
+		{B602C9B4-FF5B-4D57-8699-C6FA36085A60}.Release|AVR.Build.0 = Release|AVR
+		{4249AF58-207A-4AB3-83F6-8B280B62CB0F}.Debug|AVR.ActiveCfg = Debug|AVR
+		{4249AF58-207A-4AB3-83F6-8B280B62CB0F}.Debug|AVR.Build.0 = Debug|AVR
+		{4249AF58-207A-4AB3-83F6-8B280B62CB0F}.Release|AVR.ActiveCfg = Release|AVR
+		{4249AF58-207A-4AB3-83F6-8B280B62CB0F}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

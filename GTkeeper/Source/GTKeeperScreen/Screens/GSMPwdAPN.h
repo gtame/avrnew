@@ -15,7 +15,7 @@
 #else
 #include "WProgram.h"
 #endif
-#include "../gtkeeper.h"
+#include <gtkeeper.h>
 #include "LongTextBase.h"
 #include <ScreenBase.h>
 #include <ScreenManager.h>
