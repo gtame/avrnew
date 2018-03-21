@@ -1,27 +1,60 @@
  
 #include "main.h"
  
-char buffapp [ MAIN_BUFFER_SIZE];
+//Variables
+ char bufferapp[MAIN_BUFFER_SIZE];
+
 uint8_t contador;
 char buffercommand[25];
 char buffer_test[MAIN_BUFFER_SIZE];
 
-GTKeeper gtKeeper(buffapp,MAIN_BUFFER_SIZE);  
+ 
 
 
-FakeStream myStream;
-FakeStream logger;
+ 
+ EEMEM tConfiguracion eevars = {
+	 "653316799",
+	 "1111",
+	 127,
+	 "xxxxx",
+	 "gprs.utebo.com",
+	 "gprs.utebo.com",
+	 "gprs.utebo.com",
+	 1,
+	 15,
+	 1,
+	 1,
+	 0,
+	 0,
+	 0,
+	 'X'
+ };
+
+//Creamos FakeStreams
+FakeStream FakeGSMStream; //Fake Stream para GSM
+FakeStream FakeloggerStream; //Fake Stream para Logger
+
+ //Creamos objetos
+LogSD SDCard(bufferapp,MAIN_BUFFER_SIZE );
+Configuracion Config(bufferapp,MAIN_BUFFER_SIZE);
+Riegos Riego(&Config.config,bufferapp,MAIN_BUFFER_SIZE );
+GSM GSMModem (&Config.config,&FakeGSMStream,bufferapp,MAIN_BUFFER_SIZE );
+GTKeeper gtKeeper(&Config,&GSMModem, &Riego,&SDCard, bufferapp,MAIN_BUFFER_SIZE);  
+
+///puertos
+const uint8_t ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
+const uint8_t ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
+
+//Interrupciones variables (Volatile)
+volatile bool int_input_user=false; //User interaccion
+volatile bool int_input_gsm=false;//GSM interaccion
 
 
-//Stream *streamLog=&logger;
+//Creamos Logger ;)
+//Stream *streamLog=&FakeloggerStream;
 Stream *streamLog=&Serial;
-
-//Instanciamos Logger
-//&Serial;
-
-
 Logger Log(streamLog);
-//Logger Log(&Serial);
+
 
 
 //Funcion necesaria para el compilador
@@ -46,14 +79,20 @@ void setup()
 	
 	Serial1.begin(9600);
 	while (!Serial1);
- 
+
+
+	 
+  
 	Test::out = streamLog;
 	Test::exclude("*");
-	
-	//Test::include("sdlog*"); //Test de sd & Logs
-	//Test::include("config*"); //Test de configuracion
-	//Test::include("prog*"); //Test de programas
-	//Test::include("esta*"); //Test de estadisticas
+ 
+ 
+	//gtKeeper.Setup();
+ 
+	Test::include("sdlog*"); //Test de sd & Logs
+	Test::include("config*"); //Test de configuracion
+	Test::include("prog*"); //Test de programas
+	Test::include("esta*"); //Test de estadisticas
 	Test::include("sali*"); //Test de estadisticas
 
 	

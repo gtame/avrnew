@@ -5,17 +5,13 @@
  *      Author: Admin
  */
  #include "types.h"
+ #include "errors.h"
 
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
 
 
  
-
-
-
-
-
 
 const static char CRLF[] PROGMEM= "\r\n";;
 
@@ -96,7 +92,7 @@ const static char CRLF[] PROGMEM= "\r\n";;
 
 
 //Numero de programas , sectores 
-#define MAX_PROGRAMAS 5//Numero máximo de programas
+#define MAX_PROGRAMAS 60//Numero máximo de programas
 #define MAX_PORTS 24//Numero maximo de sectores a manejar por el programador
 
 //Define de constantes  depuertos
@@ -118,11 +114,6 @@ const static char CRLF[] PROGMEM= "\r\n";;
 char * PBB (char * p1);
 char * P2B(const __FlashStringHelper * __fmt,...);
 */
-
-#include <Logger.h>
-#include "errors.h"
-
-
 
 
 

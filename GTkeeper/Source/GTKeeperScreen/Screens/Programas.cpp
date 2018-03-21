@@ -106,7 +106,7 @@ void ProgramasScreen::OnFieldChange(uint8_t field)
 {
   uint8_t valor_num=0;
   char* value=screenManager.GetValueField(field);
-  program=&gtKeeper.programas[currentprograma];
+  program=&Riego.programas[currentprograma];
 
 
   LOG_DEBUG_ARGS("VAlor de campo %i->%s",field,value);
@@ -247,7 +247,7 @@ void ProgramasScreen::OnFieldChange(uint8_t field)
   }
 
 
-  gtKeeper.GrabarProgramaAEEPROM(currentprograma);
+  Riego.GrabarProgramaAEEPROM(currentprograma);
 }
 
 
@@ -269,7 +269,7 @@ void ProgramasScreen::setPrograma(int8_t programa)
 		currentprograma=programa;
 
 	//Apuntamos al programa actual
-	program=&gtKeeper.programas[currentprograma];
+	program=&Riego.programas[currentprograma];
 
 
 	//Pasamos al buffer de la screen los datos ;)
@@ -277,7 +277,7 @@ void ProgramasScreen::setPrograma(int8_t programa)
 
 
 	memset(buffer,0,sizeof(SC_BUFFER_SIZE));
-	gtKeeper.ProgramaToDisplay(currentprograma,buffer);
+	Riego.ProgramaToDisplay(currentprograma,buffer);
 	LOG_DEBUG_ARGS("Programa-> %s",buffer);
 
 
@@ -533,7 +533,7 @@ void ProgramasScreen::OnClickButton(uint8_t field)
 	if (field>=9 && field<=15 && program->HoraInicio!=88)
 	{
 
-		uint8_t dias =  gtKeeper.programas[currentprograma].Dias;
+		uint8_t dias =  Riego.programas[currentprograma].Dias;
 		switch (field)
 		{
 
@@ -598,9 +598,9 @@ void ProgramasScreen::OnClickButton(uint8_t field)
 
 
 		//ACtualiza el valor
-		gtKeeper.programas[currentprograma].Dias=dias;
+		Riego.programas[currentprograma].Dias=dias;
 
-		gtKeeper.GrabarProgramaAEEPROM(currentprograma);
+		Riego.GrabarProgramaAEEPROM(currentprograma);
 
 		setPrograma(currentprograma);
 	}

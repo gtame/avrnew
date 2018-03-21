@@ -87,6 +87,8 @@ public:
 	
 	///Metodos de llamada
 	bool TieneLlamadas();
+	bool DescolgarLlamada();
+	bool RechazarLlamada();
 	bool LlamarDesdeSim(uint8_t entrySim);
 	bool LlamarTelefono(const char *telefono);
 

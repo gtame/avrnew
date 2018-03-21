@@ -9,12 +9,34 @@
 #include "Riegos.h"
 
 // default constructor
-Riegos::Riegos(char * ibuffer,uint8_t isizebuffer):Salida(ibuffer,isizebuffer),Estadistica(ibuffer,isizebuffer), Programa(ibuffer,isizebuffer)
+Riegos::Riegos(tConfiguracion *configuracion ,char * ibuffer,uint8_t isizebuffer):Salida(ibuffer,isizebuffer),Estadistica(ibuffer,isizebuffer), Programa(ibuffer,isizebuffer)
 {
+	config=configuracion;
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
+	last_RiegosCheck =0;
 
 } //Riegos
+
+
+void Riegos::Initializate()
+{
+	for (uint8_t i = 0; i < MAX_PROGRAMAS; i++)
+	{
+		salidas[i].Tipo=actNone;
+	}
+	last_RiegosCheck =0;
+
+}
+
+
+void Riegos::UpdateWebSuccess()
+{
+
+	SetChangedProgramas(false);
+	SetChangedSalidas(false);
+
+}
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -345,7 +367,7 @@ Riegos::Riegos(char * ibuffer,uint8_t isizebuffer):Salida(ibuffer,isizebuffer),E
 			 this->AbrirValvulaLatch(sector);
 
 			 RegistrarSalida(sector,sector,actSector);
-			 if (config.motor_diesel)
+			 if (config->motor_diesel)
 			 EnciendeMotor();
 
 			 return true;
@@ -418,7 +440,7 @@ Riegos::Riegos(char * ibuffer,uint8_t isizebuffer):Salida(ibuffer,isizebuffer),E
 
 		 RegistrarSalida(program,programas[0].Sector,actPrograma);
 
-		 if (config.motor_diesel)
+		 if (config->motor_diesel)
 		 {
 			 EnciendeMotor();
 		 }

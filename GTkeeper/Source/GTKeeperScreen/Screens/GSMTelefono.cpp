@@ -32,7 +32,7 @@ void GsmTelefonoScreen::OnEnter()
 
 	//Inicializa campos de dia de la semana
 
- 	strncpy(screenManager.strings,gtKeeper.config.MovilAviso,strlen(gtKeeper.config.MovilAviso));
+ 	strncpy(screenManager.strings,Config.config.MovilAviso,strlen(Config.config.MovilAviso));
 
 
 	//Pongo el cursor sobre el programa
@@ -98,10 +98,10 @@ void GsmTelefonoScreen::OnClickButton(uint8_t field)
 			LOG_DEBUG_ARGS("N %s",phone);
 			if (strlen(phone)==9)
 			{
-				strcpy(gtKeeper.config.MovilAviso,phone);
+				strcpy(Config.config.MovilAviso,phone);
 
-				gtKeeper.SetDefaultSMSNum(gtKeeper.config.MovilAviso);
-				gtKeeper.EEPROMGuardaConfig();
+				GSMModem.SetDefaultSMSNum(Config.config.MovilAviso);
+				Config.EEPROMGuardaConfig();
 				screenManager.SetPantallaActual((ScreenBase *)&gsmMenuScreen);
 			}
 			else

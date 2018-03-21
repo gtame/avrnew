@@ -72,13 +72,13 @@ uint32_t totalwrite=0;
 test (sdlog_WriteLog)
 {
 	
-	assertTrue(gtKeeper.ClearLogs());
-	assertTrue(gtKeeper.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.ClearLogs());
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
 	uint8_t numfiles= CountFilesDir("/");
-	assertTrue(gtKeeper.WriteLog("claro que hace")!=-1);
-	assertTrue(gtKeeper.WriteLog("claro que hace")!=-1);
-	assertTrue(gtKeeper.WriteLog("claro que hace")!=-1);
-	assertTrue(gtKeeper.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
 	uint8_t numfiles2= CountFilesDir("/");
 	//Chequeamos que pese a grabar varios logs se graban en el mismo file
 	assertTrue(numfiles==numfiles2);
@@ -89,14 +89,14 @@ test (sdlog_WriteLog)
 test (sdlog_ClearLogs)
 {
 	//ASeguramos que al menos hay un file 
-	assertTrue(gtKeeper.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
 	
 
 	//Check en SD >=1 files
 	assertTrue(CountFilesDir("/")>=1);
 
 	//Limpiamos
-	assertTrue(gtKeeper.ClearLogs());
+	assertTrue(SDCard.ClearLogs());
 
 	//Check en SD 0 files
 	assertTrue(CountFilesDir("/")==0);
@@ -111,7 +111,7 @@ test (sdlog_WriteLog_Massive)
 
 	
 	//Limpiamos
-	assertTrue(gtKeeper.ClearLogs());
+	assertTrue(SDCard.ClearLogs());
 
 	//Check en SD 0 files
 	assertTrue(CountFilesDir("/")==0);
@@ -121,19 +121,19 @@ test (sdlog_WriteLog_Massive)
 
 	for(int i=0;i<=(((MAX_FILE_LOG_SIZE * 2 ) / 12) +3);i++)
 	{
-		uint8_t writed= gtKeeper.WriteLog("0123456789");
+		uint8_t writed= SDCard.WriteLog("0123456789");
 		
 		totalwrite+=writed;
 		
 		assertTrue(writed!=-1);
 	}
 	
-	gtKeeper.FlushLog();
+	SDCard.FlushLog();
 
 	assertTrue(CountFilesDir("/")==3);
 	
 	pass();
-	//assertTrue(gtKeeper.ClearLogs());
+	//assertTrue(SDCard.ClearLogs());
 
 	}
 
@@ -146,7 +146,7 @@ testing  (sdlog_FileSize)
 
   if (checkTestPass(sdlog_WriteLog_Massive)) {
 
-	uint32_t size2=gtKeeper.SizeLogs();
+	uint32_t size2=SDCard.SizeLogs();
 	LOG_DEBUG_ARGS_B("totalsizes FileSize %lu - %lu",totalwrite,size2);
 	//Tiene que coincidir el tamaño guardado
 	assertTrue(size2==totalwrite);
@@ -165,11 +165,11 @@ testing  (sdlog_WriteToStream)
 
 		 
 
-			uint32_t size2=gtKeeper.SizeLogs();
+			uint32_t size2=SDCard.SizeLogs();
 	
 			FakeStream mystream;
 			//Ahora escribimos sobre el stream
-			uint32_t  sizetostream= gtKeeper.WriteLogToStream(&mystream);
+			uint32_t  sizetostream= SDCard.WriteLogToStream(&mystream);
 			LOG_DEBUG_ARGS_B("totalsizes WriteToStream %lu - %lu ",size2,sizetostream);
 			
 			//Tiene que coincidir el tamaño guardado

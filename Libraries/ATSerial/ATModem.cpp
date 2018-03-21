@@ -224,6 +224,16 @@ bool ATModem::TieneLlamadas()
 
 }
 
+bool ATModem::DescolgarLlamada()
+{
+	return (SendCommandCheckError(F("ATA"),(__FlashStringHelper*) AT_OK,F("NO CARRIER"))==RX_CHECK_OK);
+}
+
+bool ATModem::RechazarLlamada()
+{
+	return (SendCommandCheck(F("ATH"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*) AT_ERROR)==RX_CHECK_OK);
+ }
+
 /*
  *
 bool ATModem::Llamar(GSMCallType tipo,const char *telefono)

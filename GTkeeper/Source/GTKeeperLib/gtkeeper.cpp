@@ -7,10 +7,15 @@
  *      Author: gtame
  */
 
-GTKeeper::GTKeeper(char * ibuffer,uint8_t isize):SIM900(&Serial1), StateMachine(9,13),Configuracion(ibuffer,MAIN_BUFFER_SIZE),LogSD(ibuffer,MAIN_BUFFER_SIZE)
+GTKeeper::GTKeeper(Configuracion *iconfiguracion,	GSM* gsmmodem,Riegos * iriegos,LogSD* ilogsd,char * ibuffer,uint8_t isize) :StateMachine(9,13),Hora()
 {
 	buffer=ibuffer;
 	buffersize=isize;
+	config=&configuracion->config;
+	configuracion=iconfiguracion;
+	gsm=gsmmodem;
+	riegos=iriegos;
+	logsd=ilogsd;
 }
 
 void GTKeeper::Setup()
@@ -21,51 +26,11 @@ void GTKeeper::Setup()
 	SetState(ON, false, true);
 }
 
-bool GTKeeper::OnProcessResult( char * msg)
-{
-	
-	return false;
-
-	if (msg!=NULL)
-	{
-
-
-		//LLamadas
-		//		if (strcmp_P(msg,(char *)F("RING"))==0)
-		//		{
-		//			//Log.Info("LLamada entrante");
-		//
-		//		}
-		//		//Messages
-		//		else if (strcmp_P(msg,(char *)F("NO CARRIER"))==0)
-		//		{
-		//			//Log.Info("fin de llamada");
-		//
-		//		}
-		//SMS
-		if (strncmp_P(msg,(char *)F("+CMT"),4)==0)
-		{
-
-			//uint8_t contador=0;
-			memset(buffer,0,MAIN_BUFFER_SIZE);
-
-			//Esperamos medio seg, para que reciba las siguientes lineas
-			delay(400);
-			if (ReadSerialLine(buffer,MAIN_BUFFER_SIZE)==RX_OK_READ)
-			{
-				
-			}
-		}
-
-		LOG_INFO_ARGS("MSG => %s",msg);
-
-	}
-	return true;
-}
 
 void GTKeeper::Sleep()
 {
 	//Se duerme el micro y el modulo gsm
+
 }
 
 void GTKeeper::setLed(uint8_t led )
@@ -161,7 +126,7 @@ bool error	=false;
 
 //La password debera ir entre corchetes #1111#
 memset(buff_parse,0,MAIN_BUFFER_PARSE);
-sprintf(buff_parse,"#%s#",config.PasswordSMS);
+sprintf(buff_parse,"#%s#",config->PasswordSMS);
 
 	
 //Comprobamos que contiene la pwd correcta
@@ -182,12 +147,12 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 		if (programa>0 && programa<=MAX_PROGRAMAS)
 		{
 			#ifdef SMS
-			SmsOpen(config.MovilAviso);
+			gsm->SmsOpen(config->MovilAviso);
 			#endif
-			LanzaRiego(programa-1,true);
+			riegos->LanzaRiego(programa-1,true);
 			#ifdef SMS
-			SendSmsHora();
-			SmsSend();
+			gsm->SendSmsHora();
+			gsm->SmsSend();
 			#endif
 			
 		}
@@ -196,36 +161,40 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 	}
 	else if (strncmp(sectorptr,"APN:",4)==0)
 	{
+		bool bresult=false;
 		sectorptr=sectorptr+4;
 		if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
 		{
-			strcpy(config.APN,sectorptr);
-			EEPROMGuardaConfig();
-			CargaConfigWeb();
-			Sms(config.MovilAviso,PBB(F("APN Configurado %s"),config.APN));
-		}
-		else
-		{
-			Sms(config.MovilAviso,PBB(F("Incorrecto APN: %s"),sectorptr));
-			error=true;
+			strcpy(config->APN,sectorptr);
+			configuracion->EEPROMGuardaConfig();
+			if (gsm->CargaConfigWeb())
+			{
+				gsm->Sms(config->MovilAviso,PBB(buffer,buffersize, F("APN Configurado %s"),config->APN));
+				bresult=true;
+			}
 		}
 		
-
-
+		
+		if (!bresult)
+		{
+			gsm->Sms(config->MovilAviso,PBB(buffer,buffersize,F("Incorrecto APN: %s"),sectorptr));
+			error=true;
+		}
+	
 	}
 	else if (strncmp(sectorptr,"USERAPN:",8)==0)
 	{
 		sectorptr=sectorptr+8;
 		if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
 		{
-			strcpy(config.userAPN,sectorptr);
-			EEPROMGuardaConfig();
-			CargaConfigWeb();
-			Sms(config.MovilAviso,PBB(F("User APN Configurado %s"),sectorptr));
+			strcpy(config->userAPN,sectorptr);
+			configuracion->EEPROMGuardaConfig();
+			gsm->CargaConfigWeb();
+			gsm->Sms(config->MovilAviso,PBB(buffer,buffersize,F("User APN Configurado %s"),sectorptr));
 		}
 		else
 		{
-			Sms(config.MovilAviso,PBB(F("Incorrecto User APN: %s"),sectorptr));
+			gsm->Sms(config->MovilAviso,PBB(buffer,buffersize,F("Incorrecto User APN: %s"),sectorptr));
 			error=true;
 		}
 		
@@ -237,15 +206,15 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 		sectorptr=sectorptr+7;
 		if (strlen(sectorptr)<25 && strlen(sectorptr)>0)
 		{
-			strcpy(config.pwdAPN,sectorptr);
-			EEPROMGuardaConfig();
-			CargaConfigWeb();
-			Sms(config.MovilAviso,PBB(F("Pwd APN Configurado %s"),sectorptr));
+			strcpy(config->pwdAPN,sectorptr);
+			configuracion->EEPROMGuardaConfig();
+			gsm->CargaConfigWeb();
+			gsm->Sms(config->MovilAviso,PBB(buffer,buffersize,F("Pwd APN Configurado %s"),sectorptr));
 		}
 		else
 		{
 			error=true;
-			Sms(config.MovilAviso,PBB(F("Incorrecto PWd APN: %s"),sectorptr));
+			gsm->Sms(config->MovilAviso,PBB(buffer,buffersize,F("Incorrecto PWd APN: %s"),sectorptr));
 		}
 		
 
@@ -263,12 +232,12 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 
 			#ifdef SMS
 
-			SmsOpen(config.MovilAviso);
-			SmsMessage_P(PSTR("Estoy preparado!\n"));
-			SendSmsHora();
-			SendSmsProgramacion();
+			gsm->SmsOpen(config->MovilAviso);
+			gsm->SmsMessage_P(PSTR("Estoy preparado!\n"));
+			gsm->SendSmsHora();
+			gsm->SendSmsProgramacion();
+			gsm->SmsSend();
 
-			SmsSend();
 			#endif
 						
 
@@ -279,28 +248,22 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 		{
 
 			bpendingWeb=true; //Ponemos pendiente
-			delay(300);
-			//Reseteamos la fecha de ultimo refresco para forzarlo, en caso que estemos actualizando cada x tiempo;
-			t_last_web=0;
-
-			CheckWeb();
-		}
-
-		else if (sector==89)
-		{
-			this->CheckWebConfig();
-
-		}
+	 	}
+		//else if (sector==89)
+		//{
+			//this->CheckWebConfig();
+//
+		//}
 		//Si el comando es 99 quiere decir que apague todos sectores
 		//Y si esta ejecutandose la programacion que la cancele
 		else if ( sector==99)
 		{
-			ApagarRiegos();
+			riegos->ApagarRiegos();
 			#ifdef SMS
-			if (config.AvisosSMS & SMSFinSector)
+			if (config->AvisosSMS & SMSFinSector)
 			{
 
-				Sms_P(config.MovilAviso,PSTR("Parados todos programas"));
+				Sms_P(config->MovilAviso,PSTR("Parados todos programas"));
 			}
 			#endif
 		}
@@ -311,20 +274,20 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 			//Dependiendo si esta encendido o no
 			//OJO!!!NOTAR QUE ENCENDIDO ES ESTADO LOW, SI ES HIGH LA BOMBA NO FUNCIONA
 
-			if (GetPosicion(1,actAbono)!=-1)
+			if (riegos->GetPosicion(1,actAbono)!=-1)
 			{
-				ApagaAbono(1);
+				riegos->ApagaAbono(1);
 				#ifdef SMS
-				if (config.AvisosSMS & SMSFinSector)
-				Sms_P(config.MovilAviso,PSTR("Apagada bomba de abono por SMS"));
+				if (config->AvisosSMS & SMSFinSector)
+				gsm->Sms_P(config->MovilAviso,PSTR("Apagada bomba de abono por SMS"));
 				#endif
 			}
 			else
 			{
-				EnciendeAbono(1);
+				riegos->EnciendeAbono(1);
 				#ifdef SMS
-				if (config.AvisosSMS & SMSInicioSector)
-				Sms_P(config.MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
+				if (config->AvisosSMS & SMSInicioSector)
+					gsm->Sms_P(config->MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
 				#endif
 			}
 
@@ -332,15 +295,17 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 		//Comando para mostrar la información de estado del reiego
 		else if (sector==100)
 		{
-			SendSmsSectoresEjecucion();
+			gsm->SendSmsSectoresEjecucion(riegos);
 
 		}
 		//Si el comando esta dentro del rango de sectores lo arrancamos
 		else if (sector>0 && sector<=PORTS_NUM )
 		{
-
+			//Apaga todos riegos
+			riegos->ApagarRiegos();
+			//Arranca el sector indicado
 			LOG_INFO_ARGS("Arrancar sector %i",sector);
-			EnciendeSectorSMS(sector);
+			riegos->EnciendeSector(sector);
 
 		}
 		else

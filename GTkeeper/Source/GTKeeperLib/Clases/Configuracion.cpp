@@ -134,22 +134,39 @@ void Configuracion::ConfiguracionToString(char *text)
 
 void Configuracion::EEPROMGuardaConfig()
 {
-	config.flag_check='X';
-	//Cargamos la configuracion
-	while (!eeprom_is_ready());
-	eeprom_write_block((void*)&config, ( void*) GET_ADDRES_CONFIG, sizeof(tConfiguracion));
+	
+	tConfiguracion configEeprom;
 
+	 if (EEPROMCargaConfig(&configEeprom))
+	 {
+		//La lectura de la eeprom es mucha mas rapida que la escritura, ademas el nº de escrituras en una eeprom es limitado
+		//Por lo que comprobaremos antes de escribir que ha cambiado (memcmp)
+		if (memcmp((void *)&config,(void *)&configEeprom,sizeof(tConfiguracion)) !=0)
+		{	
+
+			uint16_t address=GET_ADDRES_CONFIG;
+			config.flag_check='X';
+			//Cargamos la configuracion
+			while (!eeprom_is_ready());
+			eeprom_write_block((void*)&config, ( void*)address , sizeof(tConfiguracion));
+		}
+	}
+
+}
+
+bool Configuracion::EEPROMCargaConfig(tConfiguracion* configload)
+{
+	configload->flag_check='\0';//Lo ponemos a false para comprobar que carga bien la config
+
+	//Cargamos la configuracion
+	eeprom_read_block((void*)configload, (const void*) GET_ADDRES_CONFIG, sizeof(tConfiguracion));
+
+	return (configload->flag_check=='X');
 }
 
 bool Configuracion::EEPROMCargaConfig()
 {
-
-	config.flag_check='\0';//Lo ponemos a false para comprobar que carga bien la config
-
-	//Cargamos la configuracion
-	eeprom_read_block((void*)&config, (const void*) GET_ADDRES_CONFIG, sizeof(tConfiguracion));
-
-	return (config.flag_check=='X');
+	return EEPROMCargaConfig(&config);
 
 }
  

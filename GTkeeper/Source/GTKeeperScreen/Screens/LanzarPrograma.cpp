@@ -34,7 +34,7 @@ void  LanzaProgramasScreen::OnGotoMenu()
 void  LanzaProgramasScreen::OnSelection ()
 {
 	LOG_DEBUG_ARGS("LANZANDO PROGRAMA %i",currentvalue);
-	gtKeeper.LanzaRiego(currentvalue-1,false);
+	Riego.LanzaRiego(currentvalue-1,false);
 	OnGotoMenu();
 
 }

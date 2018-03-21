@@ -9,25 +9,78 @@
 #include "GSM.h"
 
 // default constructor
-GSM::GSM(char *ibuffer,uint8_t isizebuff, Stream * stream):SIM900(stream)
+GSM::GSM(tConfiguracion *configuracion, Stream * stream,char *ibuffer,uint8_t isizebuff):SIM900(stream)
 {
 		internalbuffer=ibuffer;
 		sizebuffer=isizebuff;
+		config=configuracion;
 		
 } //GSM
 
-char * GSM::PBB (const __FlashStringHelper * p1,...)
-{
 
-	va_list ap;
-	va_start(ap,p1);
-	memset(internalbuffer,0,sizebuffer);
-	vsnprintf_P(internalbuffer, sizebuffer,(char*)p1, ap);
-	va_end(ap);
-	return internalbuffer;
+
+bool GSM::OnProcessResult( char * msg)
+{
+	
+	return false;
+
+	if (msg!=NULL)
+	{
+
+
+		//LLamadas
+		//		if (strcmp_P(msg,(char *)F("RING"))==0)
+		//		{
+		//			//Log.Info("LLamada entrante");
+		//
+		//		}
+		//		//Messages
+		//		else if (strcmp_P(msg,(char *)F("NO CARRIER"))==0)
+		//		{
+		//			//Log.Info("fin de llamada");
+		//
+		//		}
+		//SMS
+		if (strncmp_P(msg,(char *)F("+CMT"),4)==0)
+		{
+
+			//uint8_t contador=0;
+			memset(internalbuffer,0,sizebuffer);
+			//Esperamos medio seg, para que reciba las siguientes lineas
+			WaitResponse(400);
+			if (ReadSerialLine(internalbuffer,sizebuffer)==RX_OK_READ)
+			{
+				///What do I do?
+			}
+		}
+
+		LOG_INFO_ARGS("MSG => %s",msg);
+
+	}
+	return true;
 }
 
 
+bool GSM::CargaConfigWeb()
+{
+	bool result=false;
+	ConfigAPN(F("CONTYPE"),"GPRS");
+	SendCommandCheckError(F("AT+CSTT=\"%s\",\"%s\",\"%s\""),(const __FlashStringHelper*)ATSerial::AT_OK,(const __FlashStringHelper*)ATSerial::AT_ALL_ERRORS,config->APN,config->userAPN,config->pwdAPN);
+
+	if (strlen(config->APN)>0)
+		result=ConfigAPN(F("APN"),config->APN);
+
+	//--Configuracion APN
+	if (strlen(config->userAPN)>0)
+		result=ConfigAPN(F("USER"),config->userAPN);
+
+	//--UserAPN
+	if (strlen(config->pwdAPN)>0)
+		result=ConfigAPN(F("PWD"),config->pwdAPN);
+
+
+	return result;
+}
 
 
 void GSM::SendSmsHora()
@@ -40,34 +93,34 @@ void GSM::SendSmsHora()
 }
 
 //Envia info con los sectores en ejecucion
-void GSM::SendSmsSectoresEjecucion()
+void GSM::SendSmsSectoresEjecucion(Salida *salida)
 {
 	//#ifdef SMS
 	LOG_INFO("Enviando SMS Sectores en ejecucion!!");
 
 
-	if (config.MovilAviso!=NULL && strlen(config.MovilAviso)>0)
+	if (config->MovilAviso!=NULL && strlen(config->MovilAviso)>0)
 	{
-		SmsOpen(config.MovilAviso);
+		SmsOpen(config->MovilAviso);
 
 
-		if (GetSalidasActivas()>0)
+		if (salida->GetSalidasActivas()>0)
 		{
 			SmsMessage_P(PSTR("Sectores con riegos activos:\n"));
 
 			//Hacemos un bucle para recorrer todos los programas iremos agregandolos a los sms.
 			for(uint8_t i=0;i< MAX_PROGRAMAS;i++)
 			{
-				switch (salidas[i].Tipo)
+				switch (salida->salidas[i].Tipo)
 				{
 					case actPrograma:
 					{
-						SmsMessage(PBB(F("Programa %i Sector %i\n"),salidas[i].Ident,salidas[i].Sector));
+						SmsMessage(PBB(internalbuffer,sizebuffer, F("Programa %i Sector %i\n"),salida->salidas[i].Ident,salida->salidas[i].Sector));
 					}
 					break;
 					case actSector:
 					{
-						SmsMessage(PBB(F("Sector %i\n"),salidas[i].Ident));
+						SmsMessage(PBB(internalbuffer,sizebuffer,F("Sector %i\n"),salida->salidas[i].Ident));
 					}
 					break;
 					case actAbono:
@@ -91,7 +144,7 @@ void GSM::SendSmsSectoresEjecucion()
 		}
 		else
 		//Si no hay en ejecucion . lo indicamos
-		SmsMessage(PBB(F("No hay ningun riego activado")));
+		SmsMessage_P(PSTR("No hay ningun riego activado"));
 
 		SmsSend();
 	}
@@ -99,7 +152,7 @@ void GSM::SendSmsSectoresEjecucion()
 }
 
 //Envia alerta cuando se completo el reinicio
-void GSM::SendSmsFinReinicio()
+void GSM::SendSmsFinReinicio(Programa* programa)
 {
 	#ifdef SMS
 
@@ -110,10 +163,12 @@ void GSM::SendSmsFinReinicio()
 
 		SmsMessage_P(PSTR("Reiniciado GTKeeper con exito\n"));
 		SendSmsHora();
-		SmsMessage(PBB(F("Password SMS: %s\n"),config.PasswordSMS));
-		SmsMessage(PBB(F("Aviso SMS: %i\n"),config.AvisosSMS));
-		SmsMessage(PBB(F("Imei: %s\n"),config.Imei));
-		SendSmsProgramacion();
+		SmsMessage(PBB(internalbuffer,sizebuffer,F("Password SMS: %s\n"),config.PasswordSMS));
+		SmsMessage(PBB(internalbuffer,sizebuffer,F("Aviso SMS: %i\n"),config.AvisosSMS));
+		SmsMessage(PBB(internalbuffer,sizebuffer,F("Imei: %s\n"),config.Imei));
+		SendSmsProgramacion(riegos);
+
+
 		SmsSend();
 
 	}
@@ -138,7 +193,7 @@ void GSM::SendSmsIniReinicio()
 }
 
 //Envia por SMS la programacion, logicamente ha de estar  GSM enable
-void GSM::SendSmsProgramacion()
+void GSM::SendSmsProgramacion(Programa *prog)
 {
 	#ifdef SMS
 	if (IsGSMEnable())
@@ -150,12 +205,12 @@ void GSM::SendSmsProgramacion()
 		for(uint8_t program=0;program< MAX_PROGRAMAS;program++)
 		{
 
-			if (programas[program].TiempoRiego>0)
+			if (prog->programas[program].TiempoRiego>0)
 			{
 				LOG_DEBUG_ARGS_B("Enviando programa %i",program);
 
 				tiene_programas=true;
-				memset(buffer,0,MAIN_BUFFER_SIZE);
+				memset(internalbuffer,0,sizebuffer);
 				ProgramaToString(internalbuffer,&programas[program]);
 				internalbuffer[strlen(internalbuffer)]='\n'; //Salto linea por programa
 				SmsMessage(internalbuffer);

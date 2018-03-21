@@ -62,8 +62,8 @@ void SistemasScreen::OnFieldChange(uint8_t field)
 	   {
 	 	   if (valor_num>0 && valor_num<=PORTS_NUM)
 	 	   {
-	 		  gtKeeper.config.numpuertos=valor_num;
-	 		  gtKeeper.EEPROMGuardaConfig();
+	 		  Config.config.numpuertos=valor_num;
+	 		  Config.EEPROMGuardaConfig();
 	 	   }
 
 	    }
@@ -72,8 +72,8 @@ void SistemasScreen::OnFieldChange(uint8_t field)
 	   {
 	 	   if (valor_num>=0 && valor_num<=2)
 	 	   {
-	 		   gtKeeper.config.numabono=valor_num;
-	 		  gtKeeper.EEPROMGuardaConfig();
+	 		   Config.config.numabono=valor_num;
+	 		  Config.EEPROMGuardaConfig();
 	 	   }
 
 	    }
@@ -88,7 +88,7 @@ void SistemasScreen::setData()
 {
 	char* buffer=screenManager.BufferScreen;
 	memset(buffer,0,sizeof(SC_BUFFER_SIZE));
-	sprintf_P(buffer,PSTR("%c%c%02i%02i"), (gtKeeper.config.GSMAvailable?'X':'_'),(gtKeeper.config.motor_diesel?'X':'_'),gtKeeper.config.numpuertos,gtKeeper.config.numabono);
+	sprintf_P(buffer,PSTR("%c%c%02i%02i"), (Config.config.GSMAvailable?'X':'_'),(Config.config.motor_diesel?'X':'_'),Config.config.numpuertos,Config.config.numabono);
  	strncpy(screenManager.strings,buffer,strlen(buffer));
 }
 
@@ -148,16 +148,16 @@ void SistemasScreen::OnClickButton(uint8_t field)
 	if (field==0) //GSM
 	{
 		//Hacemos el proceso
-		gtKeeper.config.GSMAvailable=!gtKeeper.config.GSMAvailable;
+		Config.config.GSMAvailable=!Config.config.GSMAvailable;
 
 	}
 	else if (field==1 )//MOTOR
 	{
-		gtKeeper.config.motor_diesel=!gtKeeper.config.motor_diesel;
+		Config.config.motor_diesel=!Config.config.motor_diesel;
 	}
 
 	setData();
-	gtKeeper.EEPROMGuardaConfig();
+	Config.EEPROMGuardaConfig();
 
 }
 #endif

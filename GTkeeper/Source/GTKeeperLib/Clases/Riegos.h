@@ -11,13 +11,16 @@
 #include "../settings.h"
 #include "../pinout.h"
 #include "../Utils/util.h"
+
 #include "Salida.h"
 #include "Estadistica.h"
 #include "Programa.h"
-#include "../variables.h"
+#include "Configuracion.h"
 
 #ifndef __RIEGOS_H__
 #define __RIEGOS_H__
+
+
 
 
 //Defines para operar con puertos
@@ -34,13 +37,18 @@ protected:
 private:
 	char * internalbuffer;
 	uint8_t sizebuffer;
-	bool changed;//Flag si indica que cambio algun programa
 	time_t last_RiegosCheck; //Ultima vez que se realizo el control 
+	tConfiguracion* config;
 	
 //functions
 public:
-	Riegos(char * ibuffer,uint8_t isizebuffer);
+	Riegos(tConfiguracion *configuracion ,char * ibuffer,uint8_t isizebuffer);
 	
+
+	void Initializate();
+	void UpdateWebSuccess();//Indica que los cambios fueron actualizados en Web
+
+
 	void CheckRiegos();
 	void ChequearRiegos(time_t tiempo);
 		
@@ -68,12 +76,21 @@ public:
 	bool EnciendeMotor ();
 	
 	
-
+	 inline bool GetChangedRiegos() { return GetChangedSalidas();} // Indica si se activo o desactivo algun riego ;)
 protected:
 	void AbrirValvulaLatch(uint8_t sector);
 	void CerrarValvulaLatch(uint8_t sector);
+
+
 private:
 
 }; //Riegos
+
+
+//Constantes
+extern const uint8_t ports[PORTS_NUM] ;
+extern  const uint8_t ports_abono[PORTS_ABONO];
+
+
 
 #endif //__RIEGOS_H__

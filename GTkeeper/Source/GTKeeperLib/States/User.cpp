@@ -35,7 +35,7 @@
 	{
 		screenManager.Loop();
 		//Chequeamos programacion
-		CheckRiegos();
+		riegos->CheckRiegos();
 	}
 
 	LOG_DEBUG("End OnUser");

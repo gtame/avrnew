@@ -52,7 +52,7 @@ void EstadisticasDetalleScreen::setSector(uint8_t sector)
 	if (sector==0)
 		sector=1;
 
-	estadistica = &gtKeeper.estadisticas[sector-1];
+	estadistica = &Riego.estadisticas[sector-1];
 	currentsector=sector;
 	screenManager.needrefresh=true;
 

@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <Time.h>
 #include <Logger.h>
-#include "types.h"
-#include "settings.h"
+#include "../types.h"
+#include "../settings.h"
 
 
 #ifndef __SALIDA_H__

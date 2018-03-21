@@ -51,7 +51,7 @@ void PonerHora()
 	elements.Minute=0;
 	time_t hora=makeTime(elements);
 	
-	gtKeeper.SetHora(hora);*/
+	Riego.SetHora(hora);*/
 
 	setTime(0,0,0,1,1,2018);
 	printTime(now());
@@ -119,11 +119,11 @@ test (prog_elapsedSecsThisWeek2)
 test(prog_CargaProgramaDesdeString)
 {
 	
-	gtKeeper.ResetPrograma(0);
-	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	Riego.ResetPrograma((uint8_t)0);
+	assertTrue(Riego.CargaProgramaDesdeString(0,programa));
 	
 	memset(buffer_test,0, MAIN_BUFFER_SIZE);
-	gtKeeper.ProgramaToString(0,buffer_test);
+	Riego.ProgramaToString(0,buffer_test);
 	
 	LOG_DEBUG_ARGS("%s vs %s",programa, buffer_test);
 	assertTrue(strcmp(buffer_test,programa)==0);
@@ -133,12 +133,12 @@ test(prog_CargaProgramaDesdeString)
 
 test(prog_GrabarProgramaAEEPROM)
 {
-	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
-	assertTrue(gtKeeper.GrabarProgramaAEEPROM(0));
-	gtKeeper.ResetPrograma(0);
-	assertTrue(gtKeeper.programas[0].Sector==0);
-	assertTrue(gtKeeper.CargarProgramaDesdeEEPROM(0));
-	assertTrue(gtKeeper.programas[0].Sector==3);
+	assertTrue(Riego.CargaProgramaDesdeString(0,programa));
+	assertTrue(Riego.GrabarProgramaAEEPROM(0));
+	Riego.ResetPrograma((uint8_t)0);
+	assertTrue(Riego.programas[0].Sector==0);
+	assertTrue(Riego.CargarProgramaDesdeEEPROM(0));
+	assertTrue(Riego.programas[0].Sector==3);
 }
 
 test (prog_CargarProgramaDesdeEEPROM)
@@ -149,27 +149,27 @@ test (prog_CargarProgramaDesdeEEPROM)
 
 test(prog_ResetPrograma)
 {
-	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
-	assertTrue(gtKeeper.programas[0].Sector==3);
-	gtKeeper.ResetPrograma(0);
-	assertTrue(gtKeeper.programas[0].Sector==0);
+	assertTrue(Riego.CargaProgramaDesdeString(0,programa));
+	assertTrue(Riego.programas[0].Sector==3);
+	Riego.ResetPrograma((uint8_t) 0);
+	assertTrue(Riego.programas[0].Sector==0);
 }
 
 test(prog_ProgramaToDisplay)
 {
-	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	assertTrue(Riego.CargaProgramaDesdeString(0,programa));
 	memset(buffer_test,0, MAIN_BUFFER_SIZE);
-	gtKeeper.ProgramaToDisplay(0,buffer_test);
+	Riego.ProgramaToDisplay(0,buffer_test);
 	assertTrue(strlen(buffer_test)>0);
 	LOG_DEBUG_B(buffer_test);
 }
 
 test(prog_ProgramaToString)
 {
-	assertTrue(gtKeeper.CargaProgramaDesdeString(0,programa));
+	assertTrue(Riego.CargaProgramaDesdeString(0,programa));
 
 	memset(buffer_test,0, MAIN_BUFFER_SIZE);
-	gtKeeper.ProgramaToString(0,buffer_test);
+	Riego.ProgramaToString(0,buffer_test);
 		
 	LOG_DEBUG_ARGS("%s vs %s",programa, buffer_test);
 	assertTrue(strcmp(buffer_test,programa)==0);
@@ -183,17 +183,17 @@ test(prog_GetNextEjecucion)
 	PonerHora();
 
 	//Ponemos programa
-	gtKeeper.programas[0].Dias =  M;
-	gtKeeper.programas[0].HoraInicio=8;
+	Riego.programas[0].Dias =  M;
+	Riego.programas[0].HoraInicio=8;
 	
-	time_t nextexecution=gtKeeper.GetNextEjecucion(0);
+	time_t nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	//Ejecucion del prog deberia ser el 02-01 a las 8:00
 	assertTrue(nextexecution== GetTime(8,0,0,2,1,2018));
 
 	//Si estamos el martes a las 7:59 aun debemos tener como proxima ejecucion ese dia a las 08:00
 	setTime(7,59,0,2,1,2018);
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(8,0,0,2,1,2018));
 
@@ -201,51 +201,51 @@ test(prog_GetNextEjecucion)
 	//Ahora si hemos llegado al martes a las 8 su programacion se tiene que ir a la semana siguiente
 	setTime(8,0,0,2,1,2018);
 	printTime(now());
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(8,0,0,9,1,2018));
 
 
 	//Ponemos el jueves y vemos que fecha propone
-	gtKeeper.programas[0].Dias =  J;
-	gtKeeper.programas[0].HoraInicio=23;
-	gtKeeper.programas[0].MinutoInicio=59;
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	Riego.programas[0].Dias =  J;
+	Riego.programas[0].HoraInicio=23;
+	Riego.programas[0].MinutoInicio=59;
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(23,59,0,4,1,2018));
 
 	//Ponemos el jueves y vemos que fecha propone
-	gtKeeper.programas[0].Dias =  J;
-	gtKeeper.programas[0].HoraInicio=6;
-	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	Riego.programas[0].Dias =  J;
+	Riego.programas[0].HoraInicio=6;
+	Riego.programas[0].MinutoInicio=1;
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,4,1,2018));
 	
 
 	
 	//Programamos dias de la semana y vemos que fecha propone
-	gtKeeper.programas[0].Dias =  L | M  | X | J | V;
-	gtKeeper.programas[0].HoraInicio=6;
-	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	Riego.programas[0].Dias =  L | M  | X | J | V;
+	Riego.programas[0].HoraInicio=6;
+	Riego.programas[0].MinutoInicio=1;
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,3,1,2018));
 
 
 	//NONE
-	gtKeeper.programas[0].Dias =  NONE;
-	gtKeeper.programas[0].HoraInicio=6;
-	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	Riego.programas[0].Dias =  NONE;
+	Riego.programas[0].HoraInicio=6;
+	Riego.programas[0].MinutoInicio=1;
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== 0);
 
 	//Lunes domingo y sabado.. deberia ser el sabado (dia 6)
-	gtKeeper.programas[0].Dias =  L | D | S;
-	gtKeeper.programas[0].HoraInicio=6;
-	gtKeeper.programas[0].MinutoInicio=1;
-	nextexecution=gtKeeper.GetNextEjecucion(0);
+	Riego.programas[0].Dias =  L | D | S;
+	Riego.programas[0].HoraInicio=6;
+	Riego.programas[0].MinutoInicio=1;
+	nextexecution=Riego.GetNextEjecucion(0);
 	printTime(nextexecution);
 	assertTrue(nextexecution== GetTime(6,1,0,6,1,2018));
 	
@@ -256,26 +256,26 @@ test(prog_EEPROMCargaProgramas)
 
 	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{
-		assertTrue(gtKeeper.CargaProgramaDesdeString(i,programa));
-		gtKeeper.programas[i].Sector= i;
-		assertTrue(gtKeeper.GrabarProgramaAEEPROM(i));
-		assertTrue(gtKeeper.CargarProgramaDesdeEEPROM(i));
-		assertTrue(gtKeeper.programas[i].Sector== i);
+		assertTrue(Riego.CargaProgramaDesdeString(i,programa));
+		Riego.programas[i].Sector= i;
+		assertTrue(Riego.GrabarProgramaAEEPROM(i));
+		assertTrue(Riego.CargarProgramaDesdeEEPROM(i));
+		assertTrue(Riego.programas[i].Sector== i);
 
 	}
 
-	//Si llamamos a gtKeeper.ResetPRogramas(); //soon guardados en eeprom
+	//Si llamamos a Riego.ResetPRogramas(); //soon guardados en eeprom
 	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{	
-		gtKeeper.ResetPrograma(i);
+		Riego.ResetPrograma(i);
 	}
  
 
-	assertTrue(gtKeeper.EEPROMCargaProgramas());
+	assertTrue(Riego.EEPROMCargaProgramas());
 
 	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{
-		assertTrue(gtKeeper.programas[i].Sector== i);
+		assertTrue(Riego.programas[i].Sector== i);
 	}
 	
 }
@@ -286,22 +286,22 @@ test(prog_ResetProgramas)
 {
 	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{
-		assertTrue(gtKeeper.CargaProgramaDesdeString(i,programa));
-		gtKeeper.programas[i].Sector= i;
-		assertTrue(gtKeeper.GrabarProgramaAEEPROM(i));
-		assertTrue(gtKeeper.CargarProgramaDesdeEEPROM(i));
-		assertTrue(gtKeeper.programas[i].Sector== i);
+		assertTrue(Riego.CargaProgramaDesdeString(i,programa));
+		Riego.programas[i].Sector= i;
+		assertTrue(Riego.GrabarProgramaAEEPROM(i));
+		assertTrue(Riego.CargarProgramaDesdeEEPROM(i));
+		assertTrue(Riego.programas[i].Sector== i);
 
 	}
 
-	//Si llamamos a gtKeeper.ResetPRogramas(); //soon guardados en eeprom
-	gtKeeper.ResetProgramas();
+	//Si llamamos a Riego.ResetPRogramas(); //soon guardados en eeprom
+	Riego.ResetProgramas();
 
-	assertTrue(gtKeeper.EEPROMCargaProgramas());
+	assertTrue(Riego.EEPROMCargaProgramas());
 
 	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{
-		assertTrue(gtKeeper.programas[i].Sector== 0);
+		assertTrue(Riego.programas[i].Sector== 0);
 	}
 	
 }
@@ -310,12 +310,12 @@ test(prog_ShowInfoProgramas)
 {
 		for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 		{
-			assertTrue(gtKeeper.CargaProgramaDesdeString(i,programa));
-			gtKeeper.programas[i].Sector= i;
-			gtKeeper.programas[i].TiempoRiego=i*60;//Incrementamos 1' a cada sector
+			assertTrue(Riego.CargaProgramaDesdeString(i,programa));
+			Riego.programas[i].Sector= i;
+			Riego.programas[i].TiempoRiego=i*60;//Incrementamos 1' a cada sector
 			}
 	
-		gtKeeper.ShowInfoProgramas();
+		Riego.ShowInfoProgramas();
 		pass();
 
 }

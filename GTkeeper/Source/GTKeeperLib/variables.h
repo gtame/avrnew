@@ -5,12 +5,20 @@
  *  Author: gtame
  */ 
 
-#include "settings.h"
+
+ #include "Clases/Configuracion.h"
+ #include "Clases/Riegos.h"
+ #include "Clases/GSM.h"
 
 
-//#include <SIM900.h>
-#include <Keypad.h>
-#include <LiquidCrystal_I2C.h>
+ #include "settings.h"
+ //#include <SIM900.h>
+ #include <Keypad.h>
+ #include <LiquidCrystal_I2C.h>
+ #include <LogSD.h>
+
+
+// 
 /*
 #include <StateMachineLib.h>
 #include <SD.h>
@@ -22,17 +30,18 @@
 #define VARIABLES_H_
 
 
+
 //Variables
 extern char bufferapp[MAIN_BUFFER_SIZE];
 
-//Constantes
-extern const uint8_t ports[PORTS_NUM] ;
-extern  const uint8_t ports_abono[PORTS_ABONO];
 
 //extern variables
 extern Keypad keypad;
 extern LiquidCrystal_I2C lcd;
-
+extern LogSD SDCard;
+extern Configuracion Config;
+extern Riegos Riego;
+extern GSM GSMModem;
 
 //Interrupciones variables
 extern volatile bool int_input_user;//El user pulso una key

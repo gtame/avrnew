@@ -13,7 +13,7 @@
 #include <ArduinoUnit.h>
 #include <DS1307RTC.h>
 #include <gtkeeper.h>
-
+#include "variables.h"
 
 #ifndef MAX_FILE_LOG_SIZE
 	#define MAX_FILE_LOG_SIZE 100 //MAX log size for SD

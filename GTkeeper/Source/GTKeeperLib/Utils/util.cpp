@@ -20,13 +20,27 @@ bool isValidNumber(char* inputstr){
 	return true;
 }
 
+
+char * PBB (char * mybuffer, int8_t sizeofbuffer, const __FlashStringHelper * p1,...)
+{
+
+	va_list ap;
+	va_start(ap,p1);
+	memset(mybuffer,0,sizeofbuffer);
+	vsnprintf_P(mybuffer, sizeofbuffer,(char*)p1, ap);
+	va_end(ap);
+	return mybuffer;
+}
+
+
+
 #if DEBUG
 void LogTime(time_t hora)
 {
-		TimeElements timeEl;
-		 breakTime( hora, &timeEl);
-		 //LOG_INFO7
-		 LOG_INFO_ARGS("Chk->%02i/%s/%02i %02i:%02i:%02i",timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);	
-	
+		TimeElements timeEl ;
+		breakTime( hora, timeEl);
+		//LOG_INFO7
+		LOG_INFO_ARGS("Chk->%02i/%s/%02i %02i:%02i:%02i",timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);
+		
 }
 #endif

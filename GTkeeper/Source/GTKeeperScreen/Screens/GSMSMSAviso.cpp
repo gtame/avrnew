@@ -42,13 +42,13 @@ void GsmSmsAvisoScreen::OnEnter()
  	char* buffer=screenManager.BufferScreen;
 	memset(buffer,0,sizeof(SC_BUFFER_SIZE));
 
-	strncpy(buffer,gtKeeper.config.PasswordSMS,4);
+	strncpy(buffer,Config.config.PasswordSMS,4);
 
 	sprintf_P(buffer+4,PSTR("%c%c%c%c"),
-			(gtKeeper.config.AvisosSMS & SMSInicioSector?'X':'_'),
-			(gtKeeper.config.AvisosSMS & SMSFinSector?'X':'_'),
-			(gtKeeper.config.AvisosSMS & SMSProgramacionWeb?'X':'_'),
-			(gtKeeper.config.AvisosSMS & SMSReset?'X':'_'));
+			(Config.config.AvisosSMS & SMSInicioSector?'X':'_'),
+			(Config.config.AvisosSMS & SMSFinSector?'X':'_'),
+			(Config.config.AvisosSMS & SMSProgramacionWeb?'X':'_'),
+			(Config.config.AvisosSMS & SMSReset?'X':'_'));
 
 	strncpy(screenManager.strings,buffer,strlen(buffer));
 
@@ -127,30 +127,30 @@ void GsmSmsAvisoScreen::OnClickButton(uint8_t field)
 			LOG_DEBUG_ARGS("N %s",pass);
 			if (strlen(pass)==4)
 			{
-				strcpy(gtKeeper.config.PasswordSMS,pass);
+				strcpy(Config.config.PasswordSMS,pass);
 
 				/*Ahora el AvisoSMS*/
-				gtKeeper.config.AvisosSMS=0;
+				Config.config.AvisosSMS=0;
 
 				//iniciar
 				 value=screenManager.GetValueField(1);
 				 if (strncmp(value,"X",1)==0)
-					 gtKeeper.config.AvisosSMS |= SMSInicioSector;
+					 Config.config.AvisosSMS |= SMSInicioSector;
 				 //parar
 				 value=screenManager.GetValueField(2);
 				 if (strncmp(value,"X",1)==0)
-					 gtKeeper.config.AvisosSMS |= SMSFinSector;
+					 Config.config.AvisosSMS |= SMSFinSector;
 				 //reiniciar
 				 value=screenManager.GetValueField(3);
 				 if (strncmp(value,"X",1)==0)
-					 gtKeeper.config.AvisosSMS |= SMSProgramacionWeb;
+					 Config.config.AvisosSMS |= SMSProgramacionWeb;
 
 				 //web
 				 value=screenManager.GetValueField(4);
 				 if (strncmp(value,"X",1)==0)
-					 gtKeeper.config.AvisosSMS |= SMSReset;
+					 Config.config.AvisosSMS |= SMSReset;
 
-				gtKeeper.EEPROMGuardaConfig();
+				Config.EEPROMGuardaConfig();
 				screenManager.SetPantallaActual((ScreenBase *)&gsmMenuScreen);
 			}
 			else

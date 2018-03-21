@@ -47,7 +47,7 @@ bool ManualMenu::SetKey(unsigned char c)
 	 if (result==0)
 	 {
 		 LOG_DEBUG_ARGS("Parando riegos!! %i",result);
-		 gtKeeper.ApagarRiegos();
+		 Riego.ApagarRiegos();
 	 }
 }
 

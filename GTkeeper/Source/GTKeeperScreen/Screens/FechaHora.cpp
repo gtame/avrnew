@@ -6,7 +6,7 @@
  */
 
 #include "FechaHora.h"
-
+#ifdef PANTALLA_TECLADO
 FechaHoraScreen fechahoraScreen;
 
 FechaHoraScreen::FechaHoraScreen() {
@@ -194,3 +194,4 @@ void FechaHoraScreen::OnClickButton(uint8_t field)
 		screenManager.SetPantallaActual((ScreenBase *)&parametrosMenuScreen);
 	}
 }
+#endif

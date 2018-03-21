@@ -31,8 +31,9 @@ public:
 	bool ClearLogs(); //Elimina los logs
 	uint32_t WriteLogToStream(Stream *stream);//Escribe el contenido de los logs al stream
 	void FlushLog();//Flush cierra archivos internamiente y asegura cambios pdtes.
-protected:
 	bool SDInitializate(); //Incializa SDCard
+protected:
+	
 private:
 	bool isInitializated;
 	File dataFile;

@@ -25,7 +25,7 @@ bool GTKeeper::CheckSMS()
 		MILLISECONDS_DELAY(100);
 		//Entra en user mode cuando el user pulsa una tecla
 		//1-Recibi una interrupcion  GSM
-		 while  (!result && ReadSerialLine(buffer)==RX_OK_READ  )
+		 while  (!result && gsm->ReadSerialLine(buffer)==RX_OK_READ  )
 		{
 			//char * lastresponse= GetLastResponse();
 			LOG_DEBUG_ARGS("ENTRO SMS %s %i",buffer,strncmp_P(buffer,PSTR("+CMT:"),5));
@@ -45,7 +45,7 @@ void GTKeeper::OnSMS()
 	LOG_DEBUG("OnSmS");
 	//Esperamos a recibir la siguiente linea
 	MILLISECONDS_DELAY(200);
-	ReadSerialLine(buffer);
+	gsm->ReadSerialLine(buffer);
 	//No se pq llega con RX_NO_DATA, debe ser pq no le llega el salto de linea
 	//if (ReadSerialLine(buffer)==RX_OK_READ)
 	if (buffer!=NULL && strlen(buffer)>0)

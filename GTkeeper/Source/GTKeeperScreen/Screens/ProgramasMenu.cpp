@@ -62,7 +62,7 @@ bool ProgramasMenu::SetKey(unsigned char c)
 {
 	 if (result==0)
 	 {
-		 gtKeeper.ResetProgramas();
+		 Riego.ResetProgramas();
 
 	 }
 }

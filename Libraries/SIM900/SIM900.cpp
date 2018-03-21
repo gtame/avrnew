@@ -246,3 +246,8 @@ bool  SIM900::GenerarPulsoDTMF(char caracter,uint16_t durationseg=1)
 	return (SendCommandCheckError(F("AT+CLDTMF=%i,\"%c\",%i,2"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*) AT_ERROR,durationseg,caracter,durationseg*100)==RX_CHECK_OK);
 }
 
+bool SIM900::PasarDTMFMode()
+{
+	
+	return (SendCommandCheck(F("AT+DDET=1,1000,0,0"),(__FlashStringHelper*) AT_OK)==RX_CHECK_OK);
+}

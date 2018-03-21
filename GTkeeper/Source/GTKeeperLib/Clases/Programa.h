@@ -7,9 +7,9 @@
 #include <stdint.h>
 #include <Time.h>
 #include <Logger.h>
-#include "types.h"
-#include "settings.h"
-#include "Utils\util.h"
+#include "../types.h"
+#include "../settings.h"
+#include "../Utils/util.h"
 
 #ifndef __PROGRAMA_H__
 #define __PROGRAMA_H__
@@ -69,6 +69,8 @@ public:
 	void ShowInfoProgramas();
 	inline bool GetChangedProgramas() { return changed;}
 protected:
+	bool CargarProgramaDesdeEEPROM(uint8_t progIndex,tPrograma * prog);
+	void ResetPrograma(tPrograma *prog);
 	inline void SetChangedProgramas(bool value) { changed=value;}
 	void CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
 private:

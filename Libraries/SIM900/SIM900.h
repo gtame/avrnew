@@ -50,8 +50,10 @@ public:
 	bool URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),void (*HttpResultCallback)(const char*,int));
 	bool ConfigAPN(const __FlashStringHelper * variable,const char* valor);
 	bool GPIOWrite(uint8_t pin,uint8_t mode);//GPIO
+
+	//DTMF
 	bool GenerarPulsoDTMF(char caracter,uint16_t duration);//DTMF pulso
-	
+	bool PasarDTMFMode();
 	
 
 	//Punteros a funcion

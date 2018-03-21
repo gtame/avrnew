@@ -37,8 +37,8 @@ char config[]="12765331679911111215";
 
 test (config_ShowConfigInfo)
 {
-	gtKeeper.CargaConfigDesdeString(config);
-	gtKeeper.ShowConfigInfo();
+	Config.CargaConfigDesdeString(config);
+	Config.ShowConfigInfo();
 	pass();
 }
 
@@ -48,10 +48,10 @@ test (config_ResetConfig)
 {
 
 	
-	assertTrue(gtKeeper.CargaConfigDesdeString(config));
-	assertTrue(strlen(gtKeeper.config.MovilAviso)>0);
-	gtKeeper.ResetConfig();
-	assertTrue(strlen(gtKeeper.config.MovilAviso)==0);
+	assertTrue(Config.CargaConfigDesdeString(config));
+	assertTrue(strlen(Config.config.MovilAviso)>0);
+	Config.ResetConfig();
+	assertTrue(strlen(Config.config.MovilAviso)==0);
 	pass();
 }
 
@@ -69,22 +69,22 @@ test (config_CargaConfigDesdeSim)
 test  (config_CargaConfigDesdeString)
 {
 
-	assertFalse(gtKeeper.CargaConfigDesdeString("1asd679dfgd215"));
-	gtKeeper.ResetConfig();
-	assertTrue(gtKeeper.CargaConfigDesdeString(config));
+	assertFalse(Config.CargaConfigDesdeString("1asd679dfgd215"));
+	Config.ResetConfig();
+	assertTrue(Config.CargaConfigDesdeString(config));
 	//CheckPhone
-	assertTrue(strcmp(gtKeeper.config.MovilAviso ,"653316799")==0);
+	assertTrue(strcmp(Config.config.MovilAviso ,"653316799")==0);
 	
 	//Check Avisos
-	assertTrue(((SmsAviso)gtKeeper.config.AvisosSMS & SMSFinSector)>0);
-	assertTrue(((SmsAviso)gtKeeper.config.AvisosSMS & SMSInicioSector)>0);
-	assertTrue(((SmsAviso)gtKeeper.config.AvisosSMS & SMSProgramacionWeb)>0);
-	assertTrue(((SmsAviso)gtKeeper.config.AvisosSMS & SMSReset)>0);
+	assertTrue(((SmsAviso)Config.config.AvisosSMS & SMSFinSector)>0);
+	assertTrue(((SmsAviso)Config.config.AvisosSMS & SMSInicioSector)>0);
+	assertTrue(((SmsAviso)Config.config.AvisosSMS & SMSProgramacionWeb)>0);
+	assertTrue(((SmsAviso)Config.config.AvisosSMS & SMSReset)>0);
  
 	//Check puertos
-	assertTrue(gtKeeper.config.numabono == 2 );
-	assertTrue(gtKeeper.config.motor_diesel == true );
-	assertTrue(gtKeeper.config.numpuertos== 15);
+	assertTrue(Config.config.numabono == 2 );
+	assertTrue(Config.config.motor_diesel == true );
+	assertTrue(Config.config.numpuertos== 15);
 	
  	pass();
 }
@@ -92,10 +92,10 @@ test  (config_CargaConfigDesdeString)
 
 test  (config_ConfiguracionToString)
 {
-	gtKeeper.ResetConfig();
-	assertTrue(gtKeeper.CargaConfigDesdeString(config));
+	Config.ResetConfig();
+	assertTrue(Config.CargaConfigDesdeString(config));
 	memset(buffer_test,0,MAIN_BUFFER_SIZE);
-	gtKeeper.ConfiguracionToString(buffer_test);
+	Config.ConfiguracionToString(buffer_test);
 	assertTrue(strlen(buffer_test)==LEN_CONFIG_STRING);
 	
 	//LOG_DEBUG_ARGS("%s vs %s",buffer_test,config);
@@ -106,15 +106,15 @@ test  (config_ConfiguracionToString)
 
 test  (config_EEPROMGuardaConfig)
 {
-	gtKeeper.ResetConfig();
-	assertTrue(gtKeeper.CargaConfigDesdeString(config));
+	Config.ResetConfig();
+	assertTrue(Config.CargaConfigDesdeString(config));
 	
-	gtKeeper.EEPROMGuardaConfig();
-	gtKeeper.ResetConfig();
-	assertTrue(gtKeeper.EEPROMCargaConfig());
+	Config.EEPROMGuardaConfig();
+	Config.ResetConfig();
+	assertTrue(Config.EEPROMCargaConfig());
 	
 	memset(buffer_test,0,MAIN_BUFFER_SIZE);
-	gtKeeper.ConfiguracionToString(buffer_test);
+	Config.ConfiguracionToString(buffer_test);
 	assertTrue(strcmp(buffer_test,config)==0);
 	
 	pass();

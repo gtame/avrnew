@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 #include <Logger.h>
-#include "types.h"
-#include "settings.h"
-#include "Utils/util.h"
+#include "../types.h"
+#include "../settings.h"
+#include "../Utils/util.h"
 
 #ifndef __CONFIGURACION_H__
 #define __CONFIGURACION_H__
@@ -46,6 +46,7 @@ public:
 	inline bool GetChangedConfig() { return changed;}
 protected:
 	inline void SetChangedConfig(bool value) { changed=value;}
+	bool EEPROMCargaConfig(tConfiguracion* configload);
 private:
 
 

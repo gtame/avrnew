@@ -36,7 +36,7 @@ void LanzaSectorScreen::OnDrawFields()
 void  LanzaSectorScreen::OnSelection ( )
 {
 	LOG_DEBUG_ARGS("LANZANDO SECTOR %i",currentvalue);
-	gtKeeper.EnciendeSector(currentvalue);
+	Riego.EnciendeSector(currentvalue);
 	OnGotoMenu();
 
 }

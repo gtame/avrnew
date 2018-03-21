@@ -5,54 +5,60 @@
  *      Author: gtame
  */
 
+
+ 
+ //Thirdparty
+ #include <stdlib.h>
+ #include <string.h>
+ #include <inttypes.h>
+ #include <stdio.h>
+ #include <avr/sleep.h>
+ #include <avr/interrupt.h>
+ #include <avr/io.h>
+ #include <avr/wdt.h>
+ #include <avr/eeprom.h>
+ #include <WString.h>
+ #include <Arduino.h>
+ #include <LowPower.h>
+ #include <Time.h>
+
+ //Libs Propias
+ #include <ScreenManager.h>
+ #include <LiquidCrystal_I2C.h>
+ #include <Keypad.h>
+ #include <StateMachineLib.h>
+ #include <LogSD.h>
+ #include <Hora.h>
+
+
+ //Locales H
+ #include "types.h"
+ #include "pinout.h"
+ #include "variables.h"
+ #include "settings.h"
+ #include "textos.h"
+ #include "Utils/util.h"
+
+ //Clases proyecto
+ #include  "Clases/Configuracion.h"
+ #include  "Clases/Programa.h"
+ #include  "Clases/Salida.h"
+ #include  "Clases/Estadistica.h"
+ #include  "clases/Riegos.h"
+ #include  "Clases/GSM.h"
+
+
+ //Screens
+ #ifdef PANTALLA_TECLADO
+ #include <GTKeeperScreens.h>
+ #endif
+
+
+
+
 #ifndef GTKEEPER_H_
 #define GTKEEPER_H_
 
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
-#include <stdio.h>
-#include <avr/sleep.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <avr/wdt.h>
-#include <avr/eeprom.h>
-#include <WString.h>
-#include <Arduino.h>
-#include <Time.h>
-#include <LogSD.h>
-
-#include "types.h"
-#include "pinout.h"
-#include "variables.h"
-#include "settings.h"
-#include "textos.h"
-
-#include "Utils/util.h"
-
-
-
-//Referencia al core de arduino
-
-
-#include <SIM900.h>
-#include <ScreenManager.h>
-#include <LiquidCrystal_I2C.h>
-#include <Keypad.h>
-#include <StateMachineLib.h>
-#include <SD.h>
-#include <DS1307RTC.h>
-#include <LowPower.h>
-#include <Hora.h>
-#include  "Clases/Configuracion.h"
-#include  "Clases/Programa.h"
-#include  "Clases/Salida.h"
-#include  "Clases/Estadistica.h"
-
-//Screens
-#ifdef PANTALLA_TECLADO
-	#include <GTKeeperScreens.h>
-#endif
 
 #define SCREEN_ACTIVE() screenManager.IsActive()
 
@@ -73,46 +79,36 @@ enum MachineStates
 };
 
 
-class GTKeeper : public SIM900, public StateMachine, public Configuracion,public LogSD,public Hora {
-
+class GTKeeper : public StateMachine,public Hora {
 //variables
 public:
 
 protected:
-
+	tConfiguracion *config;
+	Configuracion *configuracion;
+	GSM* gsm;
+	Riegos *riegos;
+	LogSD* logsd;
 
 private:
 	TimeElements timeEl;
 	time_t t_last_web;			//Tiempo para controlar la ultima actualizacion correcta web.
 	time_t t_last_error_web;	//Tiempo para controlar la ultima actualizacion erronea web.
-
 	uint8_t error_web;//Numero de errores acumulados al intentar sincronizar via web
 	uint8_t error_web_salidas;//Numero de intentos erroneos de subida web de salidas
-	
 	bool bSetupCompleted; //Flag para indicar que ya esta dentro del bloquee loop, y el terminal esta configurado
 	bool bpendingWeb;//Flag para indicar que se recibio el comando para la actualizacion via web
-	
-	
-	//bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
-	//bool bWebInProcess;//Flag para indicar que estamos actualmente refrescando desde la web	
-	
 	uint16_t error_code;//Codigo de error del dispositivo. ¿?
-	
-	
 	
 	char  * buffer;	  //buffer
 	uint8_t buffersize; //buffer size
-	
 	char buff_parse[MAIN_BUFFER_PARSE]; //Parser para Comandos desde MemoryPrograms
-	
-
-
 	
 //functions
 public:
 
 //CONSTRUCTOR & DESTRUCTOR
-	GTKeeper(char *buff,uint8_t sizebuff);
+	GTKeeper(Configuracion *configuracion,	GSM* gsmmodem,Riegos * riegos,LogSD* logsd,char *buff,uint8_t sizebuff);
 //END CONSTRUCTOR & DESTRUCTOR
 
 ///ESTADOS
@@ -163,7 +159,7 @@ public:
 	void Setup();
 	bool LoopGSM();
 	void Sleep();
-	virtual bool OnProcessResult( char * ) override;//overrides
+
 	void setLed(uint8_t led );
 	bool ExecuteCommand(char* commandstr);//Ejecuta un comando desde string , bien sea desde SMS o desde CALL
 	
@@ -177,17 +173,22 @@ public:
 	inline time_t GetLastWebSync() { return t_last_web;} //Retorna ultima vez que la web fue actualiza satisfactoriamente
 	inline void SetLastWebSync() { t_last_web=now();} //Actualiza la fecha de actualizacion de la web
 
-	void CargaConfigWeb();//Carga los parametros de configuración web para que el modulo pueda conectar a internet
+
+
+
     void GetURL(const char * url,int length);
 	bool GetURL(char *url);
 	void GetHttpResultCallback(const char* url,int len);
+
+	/*
 	void CheckWebConfig();	//Metodo para comprobar si necesita refrescar la config desde la web. Si es asi CargaConfigWeb
     bool GetConfig4Web(char *url);
+
     static void ConfigHttpResultCallbackStatic(const char* url,int len);
     static void ConfigHttpResultCallback(const char* url,int len);
     static void DefaultHttpResultCallbackStatic(const char* url,int len);
 	static bool  PostHttpParametersCallback();
-	static void PostHttpResultCallback(const char* url,int len);
+	static void PostHttpResultCallback(const char* url,int len);*/
 	
 	////Riegos Arranca-para...
     //void CheckRiegos();
@@ -224,7 +225,7 @@ protected:
 	void setupStateMachine();
 private:
  	//Utils ..   
-    char * PBB (const __FlashStringHelper * p1,...);
+    //char * PBB (const __FlashStringHelper * p1,...);
 
 };
 

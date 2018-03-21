@@ -42,7 +42,7 @@ bool EstadisticasMenu::SetKey(unsigned char c)
 	 if (result==0)
 	 {
 		 LOG_DEBUG_ARGS("REseteando estadisticas!! %i",result);
-		 gtKeeper.ResetearEstadisticas();
+		 Riego.ResetearEstadisticas();
 		 //gtKeeper.ApagarRiegos();
 
 	 }

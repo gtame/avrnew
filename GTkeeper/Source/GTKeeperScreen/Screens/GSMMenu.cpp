@@ -28,7 +28,7 @@ void GSMMenu::OnEnter()
 	screenManager.AddFields(0,2,Option,MNU_GSM_TEXT_APN);
 	screenManager.AddFields(0,3,Option,MNU_GSM_TEXT_USR);
 	screenManager.AddFields(0,4,Option,MNU_GSM_TEXT_PWD);
-	if (gtKeeper.IsGSMEnable())
+	if (Config.IsGSMEnable())
 	{
 	screenManager.AddFields(0,5,Option,MNU_GSM_TEXT_TEST_SMS);
 	screenManager.AddFields(0,6,Option,MNU_GSM_TEXT_TEST_WEB);
@@ -88,12 +88,12 @@ void GSMMenu::OnClickButton(uint8_t field)
 					if (isReady())
 					{
 
-						 if (gtKeeper.Sms(gtKeeper.config.MovilAviso,"Sms Test")==RX_CHECK_OK)
+						 if (GSMModem.Sms_P(Config.config.MovilAviso,PSTR("Sms Test"))==RX_CHECK_OK)
 						 {
-							 screenManager.PrintTextLine(3,"ENVIO SMS", "OK");
+							 screenManager.PrintTextLine(3,PSTR("ENVIO SMS"), ATSerial::AT_OK);
 						 }
 						 else
-							 screenManager.PrintTextLine(3,"ENVIO SMS", "ERROR");
+							 screenManager.PrintTextLine(3,PSTR("ENVIO SMS"), ATSerial::AT_OK);
 					}
 
 
@@ -120,7 +120,7 @@ void GSMMenu::OnClickButton(uint8_t field)
 			if (isReady())
 			{
 
-				 if (gtKeeper.URLRequest("http://www.google.es",true,NULL,NULL))
+				 if (GSMModem.URLRequest("http://www.google.es",true,NULL,NULL))
 				 {
 					 screenManager.PrintTextLine_P(3,TXT_WWW, TXT_OK);
 				 }
@@ -146,19 +146,19 @@ void GSMMenu::OnClickButton(uint8_t field)
 
 bool GSMMenu::isReady()
 {
-	 if (gtKeeper.EstaArrancado())
+	 if (GSMModem.EstaArrancado())
 	 {
 
-		 gtKeeper.CargaConfigWeb();
+		 GSMModem.CargaConfigWeb();
 
 		 screenManager.PrintTextLine_P(0,TXT_MOD_GSM, TXT_OK);
 
 		 delay(100);
-		 if (gtKeeper.SIMEstaLista())
+		 if (GSMModem.SIMEstaLista())
 		 {
 			 screenManager.PrintTextLine_P(1,TXT_SIM,  TXT_OK);
 			 delay(100);
-			 if (gtKeeper.EstaRegistrado())
+			 if (GSMModem.EstaRegistrado())
 			 {
 				 screenManager.PrintTextLine_P(2,TXT_CONECTIVIDAD,  TXT_OK);
 				 delay(100);

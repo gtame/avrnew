@@ -62,9 +62,9 @@
 
 	if (screenManager.ShowMsgBox_P(PSTR("Resetear todas configuraciones?"), MsgYesNoButton)==0)
 	{
-		ResetProgramas();
-		ResetearEstadisticas();
-		ResetConfig();
+		riegos->ResetProgramas();
+		riegos->ResetearEstadisticas();
+		configuracion->ResetConfig();
 	}
 	screenManager.Apagar();
  }

@@ -36,6 +36,7 @@ Salida::Salida( char * ibuffer,uint8_t isizebuffer)
 {
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
+	salidas_activas=0;//Al arrancar no hay salidas activas ;)
 } //Salida
 
 

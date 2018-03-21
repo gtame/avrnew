@@ -97,10 +97,20 @@ bool Programa::GrabarProgramaAEEPROM(uint8_t progIndex)
 	if (progIndex>=MAX_PROGRAMAS)
 		return false;
 		
-		
-	//Cargamos la configuracion
-	while (!eeprom_is_ready());
-	eeprom_write_block((void*)&programas[progIndex], ( void*) GET_ADDRES_PROGRAM(progIndex), sizeof(tConfiguracion));
+	
+	 tPrograma progEeprom;
+     CargarProgramaDesdeEEPROM (progIndex, &progEeprom);
+
+	//La lectura de la eeprom es mucha mas rapida que la escritura, ademas el nº de escrituras en una eeprom es limitado
+	//Por lo que comprobaremos antes de escribir que ha cambiado (memcmp)
+	if (memcmp((void*)&programas[progIndex],(void *)&progEeprom,sizeof(tPrograma)) !=0)
+	{
+		uint16_t address=GET_ADDRES_PROGRAM(progIndex);
+
+		//Cargamos la configuracion
+		while (!eeprom_is_ready());
+		eeprom_write_block((void*)&programas[progIndex], ( void*) address, sizeof(tPrograma));
+	}
 	
 	//Quiza hay que implementar un metodo para check - Ver metodo EPPROMCargaConfig
 	return true;
@@ -136,30 +146,44 @@ bool Programa::GrabarProgramaAEEPROM(uint8_t progIndex)
 	}*/
 }
 
-bool Programa::CargarProgramaDesdeEEPROM(uint8_t progIndex)
+
+bool Programa::CargarProgramaDesdeEEPROM(uint8_t progIndex,tPrograma * programa)
 {
 	if (progIndex>=MAX_PROGRAMAS)
-		return false;
+	return false;
 	//config.flag_check='\0';//Lo ponemos a false para comprobar que carga bien la config
-	ResetPrograma(progIndex);
+	ResetPrograma(programa);
 	//Cargamos la configuracion
-	eeprom_read_block((void*)&programas[progIndex], (const void*) GET_ADDRES_PROGRAM(progIndex), sizeof(tPrograma));
+	eeprom_read_block((void*)programa, (const void*) GET_ADDRES_PROGRAM(progIndex), sizeof(tPrograma));
 	//return (config.flag_check=='X');
 	return true;
+}
+
+bool Programa::CargarProgramaDesdeEEPROM(uint8_t progIndex)
+{
+	return CargarProgramaDesdeEEPROM(progIndex,&programas[progIndex]);
+}
+
+void Programa::ResetPrograma(tPrograma *prog)
+{
+	
+	prog->Dias=0;
+	prog->Sector=0;
+	prog->HoraInicio=0;
+	prog->MinutoInicio=0;
+	prog->TiempoAbono=0;
+	prog->TiempoRiego=0;
+
 }
 
 void Programa::ResetPrograma(uint8_t progIndex)
 {
 	if (progIndex>=MAX_PROGRAMAS)
-		return;
-		
+	return;
+	
 	tPrograma* programa=&programas[progIndex];
-	programa->Dias=0;
-	programa->Sector=0;
-	programa->HoraInicio=0;
-	programa->MinutoInicio=0;
-	programa->TiempoAbono=0;
-	programa->TiempoRiego=0;
+	ResetPrograma(programa);
+	
 }
 
 //Podria ser eliminada - solo es usada a modo debug

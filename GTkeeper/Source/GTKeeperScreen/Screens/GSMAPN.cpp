@@ -21,15 +21,15 @@ void  GSMAPNScreen::OnSave ()
 	char *val1=screenManager.GetValueField(0);
 	if (strlen(val1)>0)
 	{
-		memset(gtKeeper.config.APN,0,25);
-		strcpy(gtKeeper.config.APN,val1);
+		memset(Config.config.APN,0,25);
+		strcpy(Config.config.APN,val1);
 
 		char *val2=screenManager.GetValueField(1);
 		if (strlen(val2)>0)
-			strcpy(gtKeeper.config.APN+strlen(gtKeeper.config.APN),val2);
+			strcpy(Config.config.APN+strlen(Config.config.APN),val2);
 
-		gtKeeper.EEPROMGuardaConfig();
-		gtKeeper.CargaConfigWeb();
+		Config.EEPROMGuardaConfig();
+		GSMModem.CargaConfigWeb();
 		OnGotoMenu();
 	}
 	else
@@ -48,7 +48,7 @@ void  GSMAPNScreen::OnGotoMenu()
 
 char* GSMAPNScreen::GetValue()
 {
-	return gtKeeper.config.APN;
+	return Config.config.APN;
 }
 
 

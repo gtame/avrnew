@@ -12,7 +12,7 @@
 
 	 
 	 //Configuro
-	 strcpy(gtKeeper.config.PasswordSMS,"1111");
+	 strcpy(Config.config.PasswordSMS,"1111");
 
 	 //Lanza programaa no existe
 	 memset(buffer_test,0,MAIN_BUFFER_SIZE);

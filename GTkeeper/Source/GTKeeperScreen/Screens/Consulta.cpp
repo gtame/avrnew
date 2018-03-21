@@ -114,7 +114,7 @@ bool Consulta::NeedRefresh()
 	else if (minute(now())!=minute(_lastrefresh))
 		return true;
 	//El numero de riegos activos ha cambiado
-	else if (num_activos!=gtKeeper.GetSalidasActivas())
+	else if (num_activos!=Riego.GetSalidasActivas())
 		return true;
 	else
 		return false;
@@ -173,10 +173,10 @@ void Consulta::OnDrawFields()
 //		//Ordenados de menor a mayor.??
 //		for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
 //		{
-//			if (gtKeeper.programas[i].Hasta>0)
+//			if (Riego.programas[i].Hasta>0)
 //			{
 //				//obtenemos el numero de segundos que faltan para apagarse
-//				time_t hasta = gtKeeper.programas[i].Hasta -now();
+//				time_t hasta = Riego.programas[i].Hasta -now();
 //				if (hasta>0)
 //				{
 //
@@ -195,7 +195,7 @@ void Consulta::OnDrawFields()
 //
 //					}*/
 //					screenManager.m_lcd->setCursor(0,linea);
-//					snprintf_P(buffer,SC_MAX_TEXT_FIELDS,PSTR("P%02i S%02i %02lu:%02lu \0"),i+1,gtKeeper.programas[i].Sector,numberOfHours(hasta), numberOfMinutes(hasta) );
+//					snprintf_P(buffer,SC_MAX_TEXT_FIELDS,PSTR("P%02i S%02i %02lu:%02lu \0"),i+1,Riego.programas[i].Sector,numberOfHours(hasta), numberOfMinutes(hasta) );
 //					screenManager.m_lcd->print(buffer);
 //					linea++;
 //					//Añadimos 1 minuto para que no aparezca que le quedan 0. Esto se hace sumando 60 segundos al hasta
@@ -209,7 +209,7 @@ void Consulta::OnDrawFields()
 //
 
 
-		num_activos=gtKeeper.GetSalidasActivas();
+		num_activos=Riego.GetSalidasActivas();
 		if(num_activos==0)
 			screenManager.m_lcd->setCursor(0,2);
 		else
@@ -226,24 +226,24 @@ void Consulta::OnDrawFields()
 			for (uint8_t i=0;i<num_activos;i++)
 			{
 
-				switch( gtKeeper.salidas[i].Tipo)
+				switch( Riego.salidas[i].Tipo)
 				{
 
-				case	actPrograma:
-					sprintf_P(buffer +strlen(buffer),PSTR("P%02i S%02i "),gtKeeper.salidas[i].Ident+1,gtKeeper.salidas[i].Sector);
+					case	actPrograma:
+					sprintf_P(buffer +strlen(buffer),PSTR("P%02i S%02i "),Riego.salidas[i].Ident+1,Riego.salidas[i].Sector);
 					break;
-				case 	actSector:
-					sprintf_P(buffer +strlen(buffer),PSTR("S%02i "), gtKeeper.salidas[i].Sector);
+					case 	actSector:
+					sprintf_P(buffer +strlen(buffer),PSTR("S%02i "), Riego.salidas[i].Sector);
 					break;
-				case actAbono:
-					sprintf_P(buffer +strlen(buffer),PSTR("A%02i "), gtKeeper.salidas[i].Ident);
+					case actAbono:
+					sprintf_P(buffer +strlen(buffer),PSTR("A%02i "), Riego.salidas[i].Ident);
 					break;
-				case actMotor:
-						sprintf_P(buffer +strlen(buffer),PSTR("M%02i "), gtKeeper.salidas[i].Ident);
-						break;
-				default:
+					case actMotor:
+					sprintf_P(buffer +strlen(buffer),PSTR("M%02i "), Riego.salidas[i].Ident);
+					break;
+					default:
 
-					sprintf_P(buffer +strlen(buffer),PSTR("DEF%02i %i "), gtKeeper.salidas[i].Ident,gtKeeper.salidas[i].Tipo);
+					sprintf_P(buffer +strlen(buffer),PSTR("DEF%02i %i "), Riego.salidas[i].Ident,Riego.salidas[i].Tipo);
 				}
 
 				if (strlen(buffer)==20 && num_linea<4)
@@ -265,9 +265,9 @@ void Consulta::OnDrawFields()
 
 
 		//Mostramos info de la cobertura!!
-		if (gtKeeper.IsGSMEnable())
+		if (Config.IsGSMEnable())
 		{
-			uint8_t current_cobertura=gtKeeper.GetCobertura();
+			uint8_t current_cobertura=GSMModem.GetCobertura();
 			writeMeter(current_cobertura);
 		}
 
