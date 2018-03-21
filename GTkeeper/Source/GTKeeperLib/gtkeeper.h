@@ -24,6 +24,7 @@
 
 #include "types.h"
 #include "pinout.h"
+#include "variables.h"
 #include "settings.h"
 #include "textos.h"
 
@@ -43,10 +44,10 @@
 #include <DS1307RTC.h>
 #include <LowPower.h>
 #include <Hora.h>
-#include  "Configuracion.h"
-#include  "Programa.h"
-#include  "Salida.h"
-#include  "Estadistica.h"
+#include  "Clases/Configuracion.h"
+#include  "Clases/Programa.h"
+#include  "Clases/Salida.h"
+#include  "Clases/Estadistica.h"
 
 //Screens
 #ifdef PANTALLA_TECLADO
@@ -54,9 +55,6 @@
 #endif
 
 #define SCREEN_ACTIVE() screenManager.IsActive()
-//Defines para operar con puertos
-#define APAGA_RELE(x)  LOG_INFO_ARGS_B("RELE OFF %i",x); digitalWrite(x,LOW);
-#define ENCIENDE_RELE(x) LOG_INFO_ARGS_B("RELE ON %i",x);  digitalWrite(x,HIGH);
 
 
 //Estados de la maquina , gtKeeper
@@ -75,7 +73,7 @@ enum MachineStates
 };
 
 
-class GTKeeper : public SIM900, public StateMachine, public Configuracion,public Salida,public Estadistica,public Programa,public LogSD,public Hora {
+class GTKeeper : public SIM900, public StateMachine, public Configuracion,public LogSD,public Hora {
 
 //variables
 public:
@@ -85,27 +83,31 @@ protected:
 
 private:
 	TimeElements timeEl;
-	time_t t_last_web; //Tiempo para controlar los tiempos de la web.
-	time_t t_last_error_web; //Tiempo para controlar los tiempos de la web.
-	time_t last_RiegosCheck; //Ultima vez que se realizo el control 
-	time_t stop_abono; 
-	uint8_t error_web;//Numero de errores que se producen al intentar acceder al dispositivo
+	time_t t_last_web;			//Tiempo para controlar la ultima actualizacion correcta web.
+	time_t t_last_error_web;	//Tiempo para controlar la ultima actualizacion erronea web.
+
+	uint8_t error_web;//Numero de errores acumulados al intentar sincronizar via web
 	uint8_t error_web_salidas;//Numero de intentos erroneos de subida web de salidas
+	
 	bool bSetupCompleted; //Flag para indicar que ya esta dentro del bloquee loop, y el terminal esta configurado
-	//bool bWebInProcess;//Flag para indicar que estamos actualmente refrescando desde la web
-	bool bpendingWeb;//Flag para indicar que es necesario el update de web
-	bool isGSMOn;//Flag para saber si el modem esta presente... (Responde)
-	bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
-	uint16_t error_code;
+	bool bpendingWeb;//Flag para indicar que se recibio el comando para la actualizacion via web
+	
+	
+	//bool bRebootSIM;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
+	//bool bWebInProcess;//Flag para indicar que estamos actualmente refrescando desde la web	
+	
+	uint16_t error_code;//Codigo de error del dispositivo. ¿?
+	
+	
 	
 	char  * buffer;	  //buffer
 	uint8_t buffersize; //buffer size
 	
 	char buff_parse[MAIN_BUFFER_PARSE]; //Parser para Comandos desde MemoryPrograms
-	static const uint8_t ports[PORTS_NUM] ;
-	static const uint8_t ports_abono[PORTS_ABONO] ;
+	
 
 
+	
 //functions
 public:
 
@@ -187,33 +189,33 @@ public:
 	static bool  PostHttpParametersCallback();
 	static void PostHttpResultCallback(const char* url,int len);
 	
-	//Riegos Arranca-para...
-    void CheckRiegos();
-    void AbrirValvulaLatch(uint8_t sector);
-    void CerrarValvulaLatch(uint8_t sector);
-    void LanzaRiego(uint8_t contador,bool sendsms) ;
-    void ApagarRiegos();
-    void EnciendeSectorSMS(uint8_t sector);
-	bool EnciendePrograma(uint8_t program);
-	bool ApagaPrograma (uint8_t program);
-	bool EnciendeSector(uint8_t sector);
-	bool ApagaSector (uint8_t sector);
-	bool EnciendeAbono(uint8_t unidAbono);
-	bool ApagaAbono (uint8_t unidAbono);
-	bool ApagaMotor();
-	bool EnciendeMotor ();
-	void PararRiego(uint8_t contador);
-	void ChequearRiegos(time_t tiempo);
+	////Riegos Arranca-para...
+    //void CheckRiegos();
+    //void AbrirValvulaLatch(uint8_t sector);
+    //void CerrarValvulaLatch(uint8_t sector);
+    //void LanzaRiego(uint8_t contador,bool sendsms) ;
+    //void ApagarRiegos();
+    //void EnciendeSectorSMS(uint8_t sector);
+	//bool EnciendePrograma(uint8_t program);
+	//bool ApagaPrograma (uint8_t program);
+	//bool EnciendeSector(uint8_t sector);
+	//bool ApagaSector (uint8_t sector);
+	//bool EnciendeAbono(uint8_t unidAbono);
+	//bool ApagaAbono (uint8_t unidAbono);
+	//bool ApagaMotor();
+	//bool EnciendeMotor ();
+	//void PararRiego(uint8_t contador);
+	//void ChequearRiegos(time_t tiempo);
 
 
 
-
-     //SMS
-    void SendSmsFinReinicio();
-    void SendSmsIniReinicio();
-	void SendSmsProgramacion();
-	void SendSmsSectoresEjecucion();
-	void SendSmsHora();
+//
+     ////SMS
+    //void SendSmsFinReinicio();
+    //void SendSmsIniReinicio();
+	//void SendSmsProgramacion();
+	//void SendSmsSectoresEjecucion();
+	//void SendSmsHora();
 
 
 	
@@ -227,18 +229,5 @@ private:
 };
 
 
-//Variables
-extern char bufferapp[MAIN_BUFFER_SIZE];
-
-//extern variables
-extern Keypad keypad;
-extern LiquidCrystal_I2C lcd;
 extern GTKeeper gtKeeper; //Machine
-
-//Interrupciones variables
-extern volatile bool int_input_user;//El user pulso una key
-extern volatile bool int_input_gsm;//El user pulso una key
-
-
-
 #endif /* GTKEEPER_H_ */

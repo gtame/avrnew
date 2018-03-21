@@ -24,8 +24,8 @@ LiquidCrystal_I2C lcd(0x20, 20, 4);//Display LCD I2C
 //Instanciamos Keypad
 Keypad keypad(makeKeymap(keys), rowPins, colPins, KEYPAD_ROWS, KEYPAD_COLUMNS);
 
-const uint8_t GTKeeper::ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
-const uint8_t GTKeeper::ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
+const uint8_t ports[PORTS_NUM]= {PORT_SECTOR1_PIN };//,PORT_SECTOR2_PIN,PORT_SECTOR3_PIN};//{224,25,26,27,28,29,30,31,32,33,34,35,36,37,38 } ;
+const uint8_t ports_abono[PORTS_ABONO]= {PORT_ABONO1_PIN,PORT_ABONO2_PIN } ;
  
  //Interrupciones variables (Volatile)
  volatile bool int_input_user=false; //User interaccion
@@ -49,14 +49,14 @@ void GTKeeper::OnON()
 		//Inicializamos variables
 		t_last_web=0; //Tiempo para controlar los tiempos de la web.
 		last_RiegosCheck =0;
-		stop_abono=0;
+		//stop_abono=0;
 		error_web=0;//Numero de errores que se producen al intentar acceder al dispositivo
 		salidas_activas=0;//Al arrancar no hay salidas activas ;)
 
 		bSetupCompleted=false; //Flag para indicar que ya esta dentro del bloquee loop, y el terminal esta configurado
 		//bWebInProcess=false;//Flag para indicar que estamos actualmente refrescando desde la web
 		bpendingWeb=false;//Flag para indicar que es necesario el update de web
-		bRebootSIM=false;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
+		//bRebootSIM=false;//Flag para indicar que hemos reiniciado el modulo GSM, y necesitamos reconfigurarlo
 		
 		//salidas_web=0; //Numero de salidas pendientes de ser enviadas x WEB
 

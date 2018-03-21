@@ -20,3 +20,13 @@ bool isValidNumber(char* inputstr){
 	return true;
 }
 
+#if DEBUG
+void LogTime(time_t hora)
+{
+		TimeElements timeEl;
+		 breakTime( hora, &timeEl);
+		 //LOG_INFO7
+		 LOG_INFO_ARGS("Chk->%02i/%s/%02i %02i:%02i:%02i",timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);	
+	
+}
+#endif

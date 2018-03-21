@@ -1,17 +1,28 @@
-/*
- * gtKeeperRiegos.cpp
- *
- * Created: 18/03/2018 18:33:33
- *  Author: Gabi
- */ 
- #include "../gtkeeper.h"
- 
- ///////////////////////////////////////////////////////////////////////
- ///////////////////////////////////////////////////////////////////////
- ///////////////////////////////////////////////////////////////////////
+/* 
+* Riegos.cpp
+*
+* Created: 21/03/2018 15:06:31
+* Author: gtame
+*/
 
- void GTKeeper::CheckRiegos()
+
+#include "Riegos.h"
+
+// default constructor
+Riegos::Riegos(char * ibuffer,uint8_t isizebuffer):Salida(ibuffer,isizebuffer),Estadistica(ibuffer,isizebuffer), Programa(ibuffer,isizebuffer)
+{
+	internalbuffer=ibuffer;
+	sizebuffer=isizebuffer;
+
+} //Riegos
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+ void Riegos::CheckRiegos()
  {
+	 
 	 //Comprobamos si hay que lanzar-parar algun riego (Lo hacemos cuando cambia cada minuto)
 	 time_t current_minute=now();
 	 if (last_RiegosCheck==0 ||
@@ -24,15 +35,12 @@
 		 current_minute=TIME_WITHOUT_SECONDS(current_minute);
 
 		 //Si cambia el minuto registramos estadisticas
-		// RegistrarEstadisticas();
-
-		 //actualizamos la hora de arduino
-		 //time_t hora_actual=GetTime(timeEl);
-		 //setTime(hora_actual);
-		 breakTime( current_minute, timeEl);
-		 //LOG_INFO7
-		 LOG_INFO_ARGS("Chk->%02i/%s/%02i %02i:%02i:%02i",timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);
-
+		 // RegistrarEstadisticas();
+#if DEBUG
+		//Log fecha actual
+		LogTime(current_minute);
+#endif
+	 
 		 LOG_INFO("Chequeando riegos");
 		 if (last_RiegosCheck == 0) {
 
@@ -60,7 +68,7 @@
 
  }
  
- void GTKeeper::LanzaRiego(uint8_t contador,bool sendsms=false) {
+ void Riegos::LanzaRiego(uint8_t contador,bool sendsms=false) {
 
 	 //Si esta entre los sectores activos :)
 	 if (programas[contador].Sector>0 && programas[contador].Sector<=PORTS_NUM )
@@ -119,7 +127,7 @@
 	 }
  }
 
- void GTKeeper::PararRiego(uint8_t contador) {
+ void Riegos::PararRiego(uint8_t contador) {
 
 	 //Desactiva la salida
 	 ApagaPrograma(contador);
@@ -160,7 +168,7 @@
 
  }
 
- void GTKeeper::ChequearRiegos(time_t tiempo) {
+ void Riegos::ChequearRiegos(time_t tiempo) {
 
 	 //Recorremos todos los programas miramos si debemos lanzar alguno
 	 //O parar alguno que este en ejecucion...
@@ -270,7 +278,7 @@
  //PAra las valvulas latch hay que dar un golpe(abrir y cerrar) el rele
  //Con una polaridad abre la valvula, con la otra la cierra
  //De este modo la valula no tiene que estar alimentada continuamente.(ahorro)
- void GTKeeper::AbrirValvulaLatch(uint8_t sector)
+ void Riegos::AbrirValvulaLatch(uint8_t sector)
  {
 	 //El comun si no se activa esta a -(negativo)
 	 //Activamos el puente para que le llege positivo a la valvula
@@ -301,7 +309,7 @@
  //PAra las valvulas latch hay que dar un golpe(abrir y cerrar) el rele
  //Con una polaridad abre la valvula, con la otra la cierra
  //De este modo la valula no tiene que estar alimentada continuamente.(ahorro)
- void GTKeeper::CerrarValvulaLatch(uint8_t sector)
+ void Riegos::CerrarValvulaLatch(uint8_t sector)
  {
 	 ///El comun si no se activa esta a -(negativo)
 	 //Activamos el puente para que le llege positivo a la valvula
@@ -326,27 +334,29 @@
 
  }
 
- bool GTKeeper::EnciendeSector(uint8_t sector)
+ bool Riegos::EnciendeSector(uint8_t sector)
  {
+	if (sector>0 && sector<=PORTS_NUM)
+	{
+		 if (!SalidaRegistrada(sector,actSector))
+		 {
+			 //Lo ponemos en marcha si aun no lo estaba
+			 if (RiegosActivosEnSector(sector)==0)
+			 this->AbrirValvulaLatch(sector);
 
-	 if (!SalidaRegistrada(sector,actSector))
-	 {
-		 //Lo ponemos en marcha si aun no lo estaba
-		 if (RiegosActivosEnSector(sector)==0)
-		 this->AbrirValvulaLatch(sector);
+			 RegistrarSalida(sector,sector,actSector);
+			 if (config.motor_diesel)
+			 EnciendeMotor();
 
-		 RegistrarSalida(sector,sector,actSector);
-		 if (config.motor_diesel)
-		 EnciendeMotor();
-
-		 return true;
-	 }
-	 else
-	 return false;
+			 return true;
+		 }
+		 else
+		 return false;
+	}
 
  }
 
- bool GTKeeper::ApagaSector (uint8_t sector)
+ bool Riegos::ApagaSector (uint8_t sector)
  {
 
 	 LOG_DEBUG_ARGS_B("Apagando sector %i",sector);
@@ -374,7 +384,7 @@
 	 return false;
  }
 
- bool GTKeeper::EnciendeAbono(uint8_t unidAbono)
+ bool Riegos::EnciendeAbono(uint8_t unidAbono)
  {
 	 if (!SalidaRegistrada(unidAbono,actAbono))
 	 {
@@ -386,20 +396,19 @@
 	 return false;
  }
 
- bool GTKeeper::ApagaAbono (uint8_t unidAbono)
+ bool Riegos::ApagaAbono (uint8_t unidAbono)
  {
 	 if (SalidaRegistrada(unidAbono,actAbono))
 	 {
 		 APAGA_RELE(ports_abono[unidAbono-1]);
 		 EliminarSalida(unidAbono,actAbono);
-		 stop_abono=0;
 		 return true;
 	 }
 	 else
 	 return false;
  }
 
- bool GTKeeper::EnciendePrograma(uint8_t program)
+ bool Riegos::EnciendePrograma(uint8_t program)
  {
 	 if (!SalidaRegistrada(program,actPrograma))
 	 {
@@ -420,7 +429,7 @@
 
  }
 
- bool GTKeeper::ApagaPrograma (uint8_t program)
+ bool Riegos::ApagaPrograma (uint8_t program)
  {
 	 if (SalidaRegistrada(program,actPrograma))
 	 {
@@ -441,7 +450,7 @@
 	 return false;
  }
 
- bool GTKeeper::ApagaMotor()
+ bool Riegos::ApagaMotor()
  {
 	 if (SalidaRegistrada(1,actMotor))
 	 {
@@ -453,7 +462,7 @@
 	 return false;
  }
 
- bool GTKeeper::EnciendeMotor ()
+ bool Riegos::EnciendeMotor ()
  {
 	 if (!SalidaRegistrada(1,actMotor))
 	 {
@@ -465,32 +474,8 @@
 	 return false;
  }
 
- void GTKeeper::EnciendeSectorSMS(uint8_t sector)
- {
-	 //Apagamos todos sectores , excepto el que estamos arrancando
-	 ApagarRiegos();
 
-	 //encendemos el seleccionado
-	 if (sector>0 && sector<=PORTS_NUM)
-	 {
-		 EnciendeSector(sector);
-
-
-		 LOG_INFO_ARGS("Encendiendo Sector %i, puerto %i",sector,ports[sector-1]);
-
-		 #ifdef SMS
-		 if (config.GSMAvailable &&  (config.AvisosSMS & SMSInicioSector))
-		 {
-
-			 Sms(config.MovilAviso,PBB(F("Arrancado Sector %i desde SMS"),sector));
-		 }
-		 #endif
-	 }
-
-
- }
-
- void GTKeeper::ApagarRiegos()
+ void Riegos::ApagarRiegos()
  {
 
 	 //Si hacemos un for, como lo reordena, nos hace la pirula y se quedan activos

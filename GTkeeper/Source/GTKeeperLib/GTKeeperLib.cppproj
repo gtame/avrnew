@@ -183,19 +183,43 @@
     <PostBuildEvent>mv $(OutputDirectory)\$(OutputFileName)$(OutputFileExtension) $(OutputDirectory)\..\..\..\..\output\</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Configuracion.cpp">
+    <Compile Include="Clases\Configuracion.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Configuracion.h">
+    <Compile Include="Clases\Configuracion.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Estadistica.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Estadistica.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\GSM.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\GSM.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Programa.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Programa.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Riegos.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Riegos.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Salida.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Clases\Salida.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="errors.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Estadistica.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Estadistica.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="gtkeeper.cpp">
@@ -204,28 +228,19 @@
     <Compile Include="gtkeeper.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="GTkeeper\Riegos.cpp">
+    <Compile Include="variables.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="GTkeeper\SMS.cpp">
+    <None Include="GTkeeper\_Riegos.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="GTkeeper\utils.cpp">
+    </None>
+    <None Include="GTkeeper\SMS.cpp">
       <SubType>compile</SubType>
-    </Compile>
+    </None>
+    <None Include="GTkeeper\utils.cpp">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="pinout.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Programa.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Programa.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Salida.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Salida.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="settings.h">
@@ -282,6 +297,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="GTkeeper" />
+    <Folder Include="Clases" />
     <Folder Include="States" />
     <Folder Include="Utils" />
   </ItemGroup>

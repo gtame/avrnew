@@ -264,7 +264,8 @@ bool Salida::PostHttpParametersCallback()
 				}
 
 
-				t+=Salida.SendRawData(Salida.buff_parse);
+				t+=Salida.SendRawData(Salida.
+				);
 			}
 
 

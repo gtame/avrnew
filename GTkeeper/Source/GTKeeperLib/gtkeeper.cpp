@@ -7,7 +7,7 @@
  *      Author: gtame
  */
 
-GTKeeper::GTKeeper(char * ibuffer,uint8_t isize):SIM900(&Serial1), StateMachine(9,13),Salida(ibuffer,MAIN_BUFFER_SIZE),Programa(ibuffer,MAIN_BUFFER_SIZE),Configuracion(ibuffer,MAIN_BUFFER_SIZE),LogSD(ibuffer,MAIN_BUFFER_SIZE),Estadistica(ibuffer,MAIN_BUFFER_SIZE)
+GTKeeper::GTKeeper(char * ibuffer,uint8_t isize):SIM900(&Serial1), StateMachine(9,13),Configuracion(ibuffer,MAIN_BUFFER_SIZE),LogSD(ibuffer,MAIN_BUFFER_SIZE)
 {
 	buffer=ibuffer;
 	buffersize=isize;
@@ -26,7 +26,7 @@ bool GTKeeper::OnProcessResult( char * msg)
 	
 	return false;
 
-	if (msg!=NULL && bSetupCompleted)
+	if (msg!=NULL)
 	{
 
 

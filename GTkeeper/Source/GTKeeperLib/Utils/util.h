@@ -16,4 +16,8 @@
 
 bool isValidNumber(char* str);
 
+#if DEBUG
+void LogTime(time_t hora);
+#endif
+
 #endif /* UTIL_H_ */

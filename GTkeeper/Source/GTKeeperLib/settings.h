@@ -9,6 +9,14 @@
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
 
+
+ 
+
+
+
+
+
+
 const static char CRLF[] PROGMEM= "\r\n";;
 
 //Longitud de la eeprom
