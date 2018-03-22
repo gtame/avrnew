@@ -14,6 +14,31 @@
 	Riego.ShowInfoSalidas();
  }
 
+ test (sali_Sort)
+ {
+	Riego.salidas[0].Tipo=actNone;
+	Riego.salidas[0].Sector=1;
+	Riego.salidas[1].Sector=2;
+	Riego.salidas[1].Tipo=actPrograma;
+
+	
+	qsort (Riego.salidas, 2, sizeof(SalidasActivas),sortmethod);
+
+	assertTrue(Riego.salidas[0].Tipo==actPrograma);
+	assertTrue(Riego.salidas[1].Tipo==actNone);
+
+		//Riego.salidas[0].Tipo=actPrograma;
+		//Riego.salidas[0].Sector=1;
+		//Riego.salidas[0].Desde=60;
+		//Riego.salidas[1].Sector=2;
+		//Riego.salidas[1].Tipo=actPrograma;
+		//Riego.salidas[0].Desde=180;
+//
+//
+			//assertTrue(Riego.salidas[0].Sector==1);
+			//assertTrue(Riego.salidas[1].Sector=2);
+}
+
  test (sali_GetPosicion)
  {
 	int8_t posicion=Riego.RegistrarSalida(1,1, actSector);
@@ -125,6 +150,35 @@
 	}
  }
  
+test (sali_RegistrarPrograma)
+{
+//ASeg no hay salidas
+ Riego.ApagarRiegos();
+ assertTrue(Riego.GetSalidasActivas()==0);
+
+ //Programamos para 2018/01/01 00:01
+ Riego.programas[0].Dias= L | M | X;
+ Riego.programas[0].Sector=1;
+ Riego.programas[0].HoraInicio=hour(now());
+ Riego.programas[0].MinutoInicio=1;
+ Riego.programas[0].TiempoAbono=2;//Minutos
+ Riego.programas[0].TiempoRiego=3;//Minutos
+ Riego.programas[0].Motor=true;
+ memset(buffer_test,0,MAIN_BUFFER_SIZE);
+ Riego.ProgramaToDisplay(0,buffer_test);
+ LOG_DEBUG_ARGS("PROG-> %s",buffer_test);
+ 
+ time_t ahora=now()+(3*SECS_PER_MIN);
+ //Lanzar programa
+int salidaIndex= Riego.RegistrarSalida(0,1,actPrograma);
+//Debe haber la salida activa..
+assertTrue(Riego.GetSalidasActivas()==1);
+
+pass();
+
+ }
+  
+
 
  test (sali_RegistrarSalidaEnWeb)
  {

@@ -155,20 +155,11 @@ void Riegos::ChequearRiegos(time_t tiempo) {
 		{
 			//Log.Debug("Programa. %i - hora %i minuto %i", contador, programas[contador].HoraInicio,	programas[contador].MinutoInicio);
 
-			if (hora_actual == programas[contador].HoraInicio && minuto_actual ==programas[contador].MinutoInicio) {
-				bool lanzar = false;
-				  
+			if (hora_actual == programas[contador].HoraInicio && minuto_actual ==programas[contador].MinutoInicio) 
+			{
+ 
 				//Tenemos que ver para que dias de la semana esta configurado que salte. ;>
 				if (programas[contador].Dias &  dayToDiasSemana(dayOfWeek2(tiempo)))
-				{
-					LOG_DEBUG_ARGS("Esta en hora de lanzar riego. %i", contador);
-
-					lanzar = true;
-				}
-				  
-
-				//Si la tenemos que lanzar
-				if (lanzar)
 					LanzaRiego(contador,true);
 				  
 			}
@@ -191,30 +182,30 @@ time_t Riegos::CalculateNextAction ()
 	return 0;
 }
 
- void Riegos::LanzaRiego(uint8_t contador,bool sendsms=false) {
+ void Riegos::LanzaRiego(uint8_t progIndex,bool sendsms=false) {
 
 	 //Si esta entre los sectores activos :)
-	 if (programas[contador].Sector>0 && programas[contador].Sector<=PORTS_NUM )
+	 if (programas[progIndex].Sector>0 && programas[progIndex].Sector<=PORTS_NUM )
 	 {
 		 //Log.Debug("Parada programada ->  %04i/%02i/%02i/ %02i:%02i", year(programas[contador].Hasta), month(programas[contador].Hasta), day(programas[contador].Hasta), hour(programas[contador].Hasta), minute(programas[contador].Hasta));
 		 //ACtivamos salida ;>
-		 EnciendePrograma(contador);
+		 EnciendePrograma(progIndex);
 
 		 //Actualizamos la fecha Hasta
-		 uint8_t pos=GetPosicion(contador,actPrograma);
+		 uint8_t pos=GetPosicion(progIndex,actPrograma);
 		 if (pos!=-1)
-		 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[contador].TiempoRiego * SECS_PER_MIN);
+		 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[progIndex].TiempoRiego * SECS_PER_MIN);
 
 		 //Miramos los tiempos de abonos :)
-		 if (programas[contador].TiempoAbono>0)
+		 if (programas[progIndex].TiempoAbono>0)
 		 {
 			 EnciendeAbono(1);
 			 uint8_t pos=GetPosicion(1,actAbono);
 			 if (pos!=-1)
 			 {
 				 //Actualizamos la fecha de abono si es mas posterior
-				 if (salidas[pos].Hasta<(now() + programas[contador].TiempoAbono))
-				 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[contador].TiempoAbono * SECS_PER_MIN);
+				 if (salidas[pos].Hasta<(now() + programas[progIndex].TiempoAbono))
+				 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[progIndex].TiempoAbono * SECS_PER_MIN);
 			 }
 
 		 }
@@ -223,9 +214,9 @@ time_t Riegos::CalculateNextAction ()
 		 if (IsGSMEnable() &&  sendsms || (config.AvisosSMS & SMSInicioSector))
 		 {
 
-			 SmsMessage(PBB(F("Lanza S%i R%02d:%02d A%02d:%02d\n"),programas[contador].Sector
-			 ,hour(programas[contador].TiempoRiego),minute(programas[contador].TiempoRiego)
-			 ,hour(programas[contador].TiempoAbono),minute(programas[contador].TiempoAbono)));
+			 SmsMessage(PBB(F("Lanza S%i R%02d:%02d A%02d:%02d\n"),programas[progIndex].Sector
+			 ,hour(programas[progIndex].TiempoRiego),minute(programas[progIndex].TiempoRiego)
+			 ,hour(programas[progIndex].TiempoAbono),minute(programas[progIndex].TiempoAbono)));
 		 }
 		 #endif
 		 //Log.Debug("Rega
@@ -235,24 +226,24 @@ time_t Riegos::CalculateNextAction ()
 	 }
  }
 
- void Riegos::PararRiego(uint8_t contador) {
+ void Riegos::PararRiego(uint8_t progIndex) {
 
 	 //Desactiva la salida
-	 ApagaPrograma(contador);
+	 ApagaPrograma(progIndex);
 
 
 	 //Log.Debug("Parando riego-> Programa:%i Sector:%i", contador, programas[contador].Sector);
 	 //Miramos si hay algun programa que debemos lanzar. ;>
 	 for (uint8_t i = 0; i < MAX_PROGRAMAS; i++)
 	 {
-		 if (i != contador)
+		 if (i != progIndex)
 		 {
 			 //Chequeamos que no haya otro programa que este en ejecucion para el mismo sector y acabe mas tarde
 			 if (programas[i].HoraInicio == 88)
 			 {
 				 uint8_t programa = programas[i].MinutoInicio;
 				 //El contador empieza en 0
-				 if ((programa - 1) == contador && programas[i].TiempoRiego>0)
+				 if ((programa - 1) == progIndex && programas[i].TiempoRiego>0)
 				 {
 					 LanzaRiego(i);
 				 }
@@ -267,7 +258,7 @@ time_t Riegos::CalculateNextAction ()
 	 #ifdef SMS
 	 if (IsGSMEnable() && (config.AvisosSMS & SMSFinSector))
 	 {
-		 SmsMessage(PBB(F("Paro P%i S%i\n"),contador+1, programas[contador].Sector));
+		 SmsMessage(PBB(F("Paro P%i S%i\n"),progIndex+1, programas[progIndex].Sector));
 
 	 }
 	 #endif
@@ -287,7 +278,7 @@ time_t Riegos::CalculateNextAction ()
 			 if (RiegosActivosEnSector(sector)==0)
 			 this->AbrirValvulaLatch(sector);
 
-			 RegistrarSalida(sector,sector,actSector);
+			 OnRegistrarSalida(sector,sector,actSector);
 			 if (config->motor_diesel)
 			 EnciendeMotor();
 
@@ -313,7 +304,7 @@ time_t Riegos::CalculateNextAction ()
 			 this->CerrarValvulaLatch(sector);
 		 }
 
-		 EliminarSalida(sector,actSector);
+		 OnEliminarSalida(sector,actSector);
 		 if (GetSalidasActivas()==1)
 		 {
 			 if (SalidaRegistrada(1,actMotor))
@@ -332,7 +323,7 @@ time_t Riegos::CalculateNextAction ()
 	 if (!SalidaRegistrada(unidAbono,actAbono))
 	 {
 		 ENCIENDE_RELE(ports_abono[unidAbono-1]);
-		 RegistrarSalida(unidAbono,0,actAbono);
+		 OnRegistrarSalida(unidAbono,0,actAbono);
 		 return true;
 	 }
 	 else
@@ -343,8 +334,9 @@ time_t Riegos::CalculateNextAction ()
  {
 	 if (SalidaRegistrada(unidAbono,actAbono))
 	 {
+		LOG_DEBUG("ABONOO OFF");
 		 APAGA_RELE(ports_abono[unidAbono-1]);
-		 EliminarSalida(unidAbono,actAbono);
+		 OnEliminarSalida(unidAbono,actAbono);
 		 return true;
 	 }
 	 else
@@ -362,16 +354,11 @@ time_t Riegos::CalculateNextAction ()
 		 if (RiegosActivosEnSector(programa->Sector)==0)
 			this->AbrirValvulaLatch(programa->Sector);
 
-		 RegistrarSalida(program,programa->Sector,actPrograma);
+		 OnRegistrarSalida(program,programa->Sector,actPrograma);
 
-		 memset(internalbuffer,0,sizebuffer);
-		 ProgramaToDisplay(program,internalbuffer);
-		 LOG_DEBUG_ARGS_B("LANZA -> %s",internalbuffer);
- 
 		 if (config->motor_diesel)
-		 {
 			 EnciendeMotor();
-		 }
+
 		 return true;
 	 }
 	 else
@@ -387,7 +374,7 @@ time_t Riegos::CalculateNextAction ()
 		 if (RiegosActivosEnSector(programas[program].Sector)==1)
 		 this->CerrarValvulaLatch(programas[program].Sector);
 
-		 EliminarSalida(program,actPrograma);
+		 OnEliminarSalida(program,actPrograma);
 		 if (GetSalidasActivas()==1)
 		 {
 			 if (SalidaRegistrada(1,actMotor))
@@ -405,7 +392,7 @@ time_t Riegos::CalculateNextAction ()
 	 if (!SalidaRegistrada(1,actMotor))
 	 {
 		 ENCIENDE_RELE(PORT_MOTOR_PIN);
-		 RegistrarSalida(1,0,actMotor);
+		 OnRegistrarSalida(1,0,actMotor);
 		 return true;
 	 }
 	 else
@@ -417,7 +404,7 @@ time_t Riegos::CalculateNextAction ()
 	 if (SalidaRegistrada(1,actMotor))
 	 {
 		 APAGA_RELE(PORT_MOTOR_PIN);
-		 EliminarSalida(1,actMotor);
+		 OnEliminarSalida(1,actMotor);
 		 return true;
 	 }
 	 else
@@ -493,6 +480,9 @@ time_t Riegos::CalculateNextAction ()
 	 //Si hacemos un for, como lo reordena, nos hace la pirula y se quedan activos
 	 while (GetSalidasActivas()>0)
 	 {
+	 		
+	 	
+
 		 switch (salidas[0].Tipo)
 		 {
 			 case actPrograma:
@@ -530,3 +520,31 @@ time_t Riegos::CalculateNextAction ()
 	 }
 
  }
+
+
+
+
+ void Riegos::OnEliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
+ {
+	
+	if (paraCallback!=NULL)
+	{	uint8_t posicion=GetPosicion(salida,tipo);
+		if (posicion!=-1)
+		paraCallback(&salidas[posicion], salidas[posicion].Tipo==actPrograma?&programas[salidas[posicion].Ident]:NULL);
+	}
+	
+	EliminarSalida(salida,tipo);
+
+ }
+	 //void OnRegistrarSalida((uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo);
+	 //void OnEliminarSalida(uint8_t salida , TipoSalidaActiva tipo);
+
+ void Riegos::OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo)
+ {
+	 uint8_t posicion= RegistrarSalida(salida,sector,tipo);
+	 if (lanzaCallback!=NULL)
+	 {
+		lanzaCallback(&salidas[posicion], salidas[posicion].Tipo==actPrograma?&programas[salidas[posicion].Ident]:NULL);
+	 }
+ }
+

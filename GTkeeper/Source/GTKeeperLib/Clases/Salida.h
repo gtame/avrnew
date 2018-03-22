@@ -17,6 +17,7 @@
 
 
 
+int  sortmethod(const void* a, const void* b);
 
 class Salida
 {
@@ -37,12 +38,12 @@ public:
 
 	//Estos metodos manejan las salidas activas 
 	void ShowInfoSalidas();
-	int8_t GetPosicion(uint8_t salida , TipoSalidaActiva tipo);
-	bool SalidaRegistrada(uint8_t salida , TipoSalidaActiva tipo);
+	int8_t GetPosicion(uint8_t ProgSectorIndex , TipoSalidaActiva tipo);
+	bool SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalidaActiva tipo);
 	uint8_t RiegosActivosEnSector(uint8_t sector);
 
-	int8_t RegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo);
-	void EliminarSalida(uint8_t salida , TipoSalidaActiva tipo);
+	int8_t RegistrarSalida(uint8_t ProgSectorIndex ,uint8_t sector, TipoSalidaActiva tipo);
+	void EliminarSalida(uint8_t ProgSectorIndex , TipoSalidaActiva tipo);
 
 	inline uint8_t GetSalidasActivas() { return salidas_activas;}
 	void SalidaToString(uint8_t salidaIndex, char *text) ;

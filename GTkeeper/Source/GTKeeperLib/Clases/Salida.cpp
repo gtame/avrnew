@@ -18,7 +18,7 @@ int  sortmethod(const void* a, const void* b)
 	SalidasActivas *salidaB = (SalidasActivas *)b;
 
 	//Lo que mas pesara sera el tipo :>
-	uint8_t result= (salidaA->Tipo-salidaB->Tipo);
+	int8_t result= (salidaA->Tipo-salidaB->Tipo);
 
 	//Si son del mismo tipo, fecha desde
 	if (result==0)
@@ -51,7 +51,7 @@ void Salida::ShowInfoSalidas()
 		{
 			case actPrograma:
 			{
-				strcpy_P(internalbuffer,PSTR("PROGRAMA"));
+				sprintf_P(internalbuffer,PSTR("P%02i S%02i"),salidas[i].Ident,salidas[i].Sector);
 			}
 			break;
 			case actSector:
@@ -74,6 +74,12 @@ void Salida::ShowInfoSalidas()
 				strcpy_P(internalbuffer,PSTR("LIMPIEZA"));
 			}
 			break;
+			case actNone:
+			{
+				strcpy_P(internalbuffer,PSTR("NONE "));
+			}
+			break;
+
 
 		}
 
@@ -82,11 +88,11 @@ void Salida::ShowInfoSalidas()
 }
 
 //Obtiene la posición en la que la salida ha sido registrada
-int8_t Salida::GetPosicion(uint8_t salida , TipoSalidaActiva tipo)
+int8_t Salida::GetPosicion(uint8_t ProgSectorIndex , TipoSalidaActiva tipo)
 {
 	for(int8_t i=0;i<GetSalidasActivas();i++)
 	{
-		if (salidas[i].Tipo== tipo && salidas[i].Ident==salida )
+		if (salidas[i].Tipo== tipo && salidas[i].Ident==ProgSectorIndex )
 		{
 			return i;
 		}
@@ -95,9 +101,9 @@ int8_t Salida::GetPosicion(uint8_t salida , TipoSalidaActiva tipo)
 }
 
 //Indica si esa salida esta registrada
-bool Salida::SalidaRegistrada(uint8_t salida , TipoSalidaActiva tipo)
+bool Salida::SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalidaActiva tipo)
 {
-	return (GetPosicion(salida,tipo)!=-1);
+	return (GetPosicion(ProgSectorIndex,tipo)!=-1);
 }
 
 uint8_t Salida::RiegosActivosEnSector(uint8_t sector)
@@ -114,27 +120,28 @@ uint8_t Salida::RiegosActivosEnSector(uint8_t sector)
 }
 
 //Registra la salida
-int8_t Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva tipo)
+int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSalidaActiva tipo)
 {
-	int8_t pos=GetPosicion(salida,tipo);
+	int8_t pos=GetPosicion(ProgSectorIndex,tipo);
 	if (pos==-1)
 	{
 
 		uint8_t i=GetSalidasActivas();
 
-		LOG_DEBUG_ARGS_B("SAl %i No registrada, registrar en %i, ",salida,i);
+		LOG_DEBUG_ARGS_B("SAl %i No registrada, registrar en %i, ",ProgSectorIndex,i);
 		//Pal saco - Lo asocio al 1º que esta libre
 		salidas[i].Tipo= tipo;
-		salidas[i].Ident= salida;
+		salidas[i].Ident= ProgSectorIndex;
 		salidas[i].Desde=now();//Registra la hora desde la que esta activa!!
 
 
+
 		if (tipo==actSector)
-		salidas[i].Sector=salida;
+			salidas[i].Sector=ProgSectorIndex;
 		else if (tipo==actPrograma)
 		{	
 			if (sector==0)
-				LOG_DEBUG_ARGS_B("Sector no puede ser =0 %i %i",salida,i);
+				LOG_DEBUG_ARGS_B("Sector no puede ser =0 %i %i",ProgSectorIndex,i);
 			salidas[i].Sector=sector;
 		}
 		else
@@ -144,7 +151,9 @@ int8_t Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva 
 		salidas_activas++;
 		qsort (salidas, salidas_activas, sizeof(SalidasActivas),sortmethod);
 
-		pos =GetPosicion(salida,tipo);
+		pos =GetPosicion(ProgSectorIndex,tipo);
+
+
 	}
 
 	return pos;
@@ -154,6 +163,7 @@ int8_t Salida::RegistrarSalida(uint8_t salida,uint8_t sector , TipoSalidaActiva 
 //Elimina la salida
 void Salida::EliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
 {
+	
 	int8_t pos=GetPosicion(salida,tipo);
 	if (pos!=-1)
 	{
@@ -166,7 +176,7 @@ void Salida::EliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
 
 		//Registrar estadistica
 		//salidas[pos].Hasta=0;
-
+		LOG_DEBUG_ARGS("ORDENANDO %i",salidas_activas);
 		salidas[pos].Tipo=actNone;
 		qsort (salidas, salidas_activas, sizeof(SalidasActivas),sortmethod);
 		salidas_activas--;//Importante para que reordene correctamente hacer la resta despues del qsort

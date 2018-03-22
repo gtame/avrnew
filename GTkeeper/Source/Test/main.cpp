@@ -81,9 +81,6 @@ void setup()
 	while (!Serial1);
 
 
-	LOG_DEBUG_ARGS("Resto %i:%i",NUMERO_HORAS(25), NUMERO_MINUTOS(25));
-	 
-  
 	Test::out = streamLog;
 	Test::exclude("*");
  	/*
@@ -104,10 +101,11 @@ void setup()
 	//Test::include("sali*"); //Test de estadisticas
 
 	//Test::include("config_EEPROMGuardaConfig");
-	Test::include("riego*"); //Test de riegos
+	//Test::include("riego*"); //Test de riegos
 	
-	//Test::include("sali_GetPosicion");
-
+	Test::include("riego_delay_imprevistos");
+	//Test::include("riego_multiples");
+	
 	//Test::include("dayToDiasSemana");
 	//Test::include("elapsedSecsThisWeek2");
 	//Test::include("dayOfWeek2*");
