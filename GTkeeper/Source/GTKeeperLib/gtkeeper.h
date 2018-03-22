@@ -91,7 +91,7 @@ protected:
 	LogSD* logsd;
 
 private:
-	TimeElements timeEl;
+	//TimeElements timeEl;
 	time_t t_last_web;			//Tiempo para controlar la ultima actualizacion correcta web.
 	time_t t_last_error_web;	//Tiempo para controlar la ultima actualizacion erronea web.
 	uint8_t error_web;//Numero de errores acumulados al intentar sincronizar via web
@@ -157,7 +157,7 @@ public:
 
 	//Funciones principales ó de proceso
 	void Setup();
-	bool LoopGSM();
+	//bool LoopGSM();
 	void Sleep();
 
 	void setLed(uint8_t led );
@@ -174,13 +174,13 @@ public:
 	inline void SetLastWebSync() { t_last_web=now();} //Actualiza la fecha de actualizacion de la web
 
 
-
+	/*
 
     void GetURL(const char * url,int length);
 	bool GetURL(char *url);
 	void GetHttpResultCallback(const char* url,int len);
 
-	/*
+	
 	void CheckWebConfig();	//Metodo para comprobar si necesita refrescar la config desde la web. Si es asi CargaConfigWeb
     bool GetConfig4Web(char *url);
 

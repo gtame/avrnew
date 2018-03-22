@@ -225,22 +225,25 @@
     </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="gtkeeper\configuracion.cpp">
+    <None Include="Clases\configuracion.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\estadistica.cpp">
+    </None>
+    <None Include="Clases\estadistica.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\executecommand.cpp">
+    </None>
+    <None Include="Clases\executecommand.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\programa.cpp">
+    </None>
+    <None Include="Clases\programa.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\logsd.cpp">
+    </None>
+    <None Include="Clases\logsd.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="gtkeeper\salidas.cpp">
+    </None>
+    <None Include="Clases\salidas.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="riegos.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.cpp">
@@ -251,7 +254,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="gtkeeper" />
+    <Folder Include="Clases" />
     <Folder Include="live" />
   </ItemGroup>
   <ItemGroup>

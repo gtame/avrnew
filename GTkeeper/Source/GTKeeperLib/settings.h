@@ -96,7 +96,7 @@ const static char CRLF[] PROGMEM= "\r\n";;
 #define MAX_PORTS 24//Numero maximo de sectores a manejar por el programador
 
 //Define de constantes  depuertos
-#define PORTS_NUM 1//15 Numero max de puertos:)
+#define PORTS_NUM	15 //Numero max de puertos:)
 #define PORTS_ABONO 2 //Numero de puertos de abono
 
 

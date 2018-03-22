@@ -55,7 +55,7 @@ volatile bool int_input_gsm=false;//GSM interaccion
 Stream *streamLog=&Serial;
 Logger Log(streamLog);
 
-
+time_t newtime=0;
 
 //Funcion necesaria para el compilador
 extern "C" void __cxa_pure_virtual() {}
@@ -89,12 +89,14 @@ void setup()
  
 	//gtKeeper.Setup();
  
-	Test::include("sdlog*"); //Test de sd & Logs
-	Test::include("config*"); //Test de configuracion
-	Test::include("prog*"); //Test de programas
-	Test::include("esta*"); //Test de estadisticas
-	Test::include("sali*"); //Test de estadisticas
+	//Test::include("sdlog*"); //Test de sd & Logs
+	//Test::include("config*"); //Test de configuracion
+	//Test::include("prog*"); //Test de programas
+	//Test::include("esta*"); //Test de estadisticas
+	//Test::include("sali*"); //Test de estadisticas
 
+
+	Test::include("riego*"); //Test de estadisticas
 	
 	//Test::include("sali_GetPosicion");
 
@@ -103,10 +105,18 @@ void setup()
 	//Test::include("dayOfWeek2*");
 	//Test::include("getnextEjecucion*");*/
  
+	newtime=now();
 }
 
+
+
 void loop()
-{ 
+{	
+
+		newtime+=10;//1' cada loop ;)
+
+		setTime(newtime);
+
 		Test::run();
  
 }

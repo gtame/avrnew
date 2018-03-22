@@ -319,6 +319,7 @@ else
 }
  
 //Loop para procesar
+/*
 bool GTKeeper::LoopGSM()
 {
 	bool hashError=false;
@@ -393,3 +394,4 @@ bool GTKeeper::LoopGSM()
 	return hashError;
 }
 
+*/

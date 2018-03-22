@@ -40,7 +40,7 @@ void LogTime(time_t hora)
 		TimeElements timeEl ;
 		breakTime( hora, timeEl);
 		//LOG_INFO7
-		LOG_INFO_ARGS("Chk->%02i/%s/%02i %02i:%02i:%02i",timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);
+		LOG_INFO_ARGS("Chk->(%i) %02i/%s/%02i %02i:%02i:%02i",dayToDiasSemana(dayOfWeek2(hora)) ,timeEl.Day, monthStr(timeEl.Month),timeEl.Year, timeEl.Hour,timeEl.Minute,timeEl.Second);
 		
 }
 #endif

@@ -63,10 +63,10 @@ void Riegos::UpdateWebSuccess()
 		LogTime(current_minute);
 #endif
 	 
-		 LOG_INFO("Chequeando riegos");
 		 if (last_RiegosCheck == 0) {
 
-			 LOG_INFO("Check 0");
+		 
+		 LOG_DEBUG("Revisando 0");
 			 ChequearRiegos(current_minute);
 
 			 } else {
@@ -247,7 +247,6 @@ void Riegos::UpdateWebSuccess()
 	 }
 
 
-
 	 for (uint8_t contador = 0; contador < MAX_PROGRAMAS; contador++) {
 
 		 //Si todavia no esta arrancado
@@ -257,33 +256,20 @@ void Riegos::UpdateWebSuccess()
 
 			 if (hora_actual == programas[contador].HoraInicio && minuto_actual ==programas[contador].MinutoInicio) {
 				 bool lanzar = false;
-				 //Log.Debug("Esta en hora de lanzar riego. %i", contador);
-
+				 
 				 //Tenemos que ver para que dias de la semana esta configurado que salte. ;>
-				 if ((programas[contador].Dias & L) && weekday(tiempo) == dowMonday)
-				 lanzar = true;
+				 if (programas[contador].Dias &  dayToDiasSemana(dayOfWeek2(tiempo)))
+				 {
+				 LOG_DEBUG_ARGS("Esta en hora de lanzar riego. %i", contador);
 
-				 if ((programas[contador].Dias & M) && weekday(tiempo) == dowTuesday)
 				 lanzar = true;
-
-				 if ((programas[contador].Dias & X) && weekday(tiempo) == dowWednesday)
-				 lanzar = true;
-
-				 if ((programas[contador].Dias & J) && weekday(tiempo) == dowThursday)
-				 lanzar = true;
-
-				 if ((programas[contador].Dias & V) && weekday(tiempo) == dowFriday)
-				 lanzar = true;
-
-				 if ((programas[contador].Dias & S) && weekday(tiempo) == dowSaturday)
-				 lanzar = true;
-
-				 if ((programas[contador].Dias & D) && weekday(tiempo) == dowSunday)
-				 lanzar = true;
+				 }
+				 
 
 				 //Si la tenemos que lanzar
 				 if (lanzar)
 				 LanzaRiego(contador);
+				 
 			 }
 
 		 }
