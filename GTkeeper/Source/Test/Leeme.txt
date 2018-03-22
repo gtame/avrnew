@@ -1,3 +1,9 @@
 ﻿Test Project
 ============
 El test es hecho usando  ArduinoUnit.
+
+Dentro de la carpeta clases estas los test para las clases de almacenamiento y Log.
+
+En live estan los test que han de ser ejecutados con una conexion contra un modem GSM
+
+

@@ -1,6 +1,6 @@
  
 #include "main.h"
- 
+ #include "EEPROM.h"
 //Variables
  char bufferapp[MAIN_BUFFER_SIZE];
 
@@ -11,7 +11,7 @@ char buffer_test[MAIN_BUFFER_SIZE];
  
 
 
- 
+ /*
  EEMEM tConfiguracion eevars = {
 	 "653316799",
 	 "1111",
@@ -28,7 +28,7 @@ char buffer_test[MAIN_BUFFER_SIZE];
 	 0,
 	 0,
 	 'X'
- };
+ };*/
 
 //Creamos FakeStreams
 FakeStream FakeGSMStream; //Fake Stream para GSM
@@ -81,10 +81,18 @@ void setup()
 	while (!Serial1);
 
 
+	LOG_DEBUG_ARGS("Resto %i:%i",NUMERO_HORAS(25), NUMERO_MINUTOS(25));
 	 
   
 	Test::out = streamLog;
 	Test::exclude("*");
+ 	/*
+	 while (!eeprom_is_ready());	
+	 for (int i = 0 ; i < EEPROM.length() ; i++) {
+		 EEPROM.write(i, 0);
+	 }
+ 	
+	 */
  
  
 	//gtKeeper.Setup();
@@ -95,8 +103,8 @@ void setup()
 	//Test::include("esta*"); //Test de estadisticas
 	//Test::include("sali*"); //Test de estadisticas
 
-
-	Test::include("riego*"); //Test de estadisticas
+	//Test::include("config_EEPROMGuardaConfig");
+	Test::include("riego*"); //Test de riegos
 	
 	//Test::include("sali_GetPosicion");
 
@@ -112,12 +120,7 @@ void setup()
 
 void loop()
 {	
-
-		newtime+=10;//1' cada loop ;)
-
-		setTime(newtime);
-
-		Test::run();
+	Test::run();
  
 }
  

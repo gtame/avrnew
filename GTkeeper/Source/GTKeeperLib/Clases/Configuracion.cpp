@@ -137,7 +137,7 @@ void Configuracion::EEPROMGuardaConfig()
 	
 	tConfiguracion configEeprom;
 
-	 if (EEPROMCargaConfig(&configEeprom))
+	 if (EEPROMCargaConfig(&configEeprom,false))
 	 {
 		//La lectura de la eeprom es mucha mas rapida que la escritura, ademas el nº de escrituras en una eeprom es limitado
 		//Por lo que comprobaremos antes de escribir que ha cambiado (memcmp)
@@ -154,19 +154,22 @@ void Configuracion::EEPROMGuardaConfig()
 
 }
 
-bool Configuracion::EEPROMCargaConfig(tConfiguracion* configload)
+bool Configuracion::EEPROMCargaConfig(tConfiguracion* configload,bool validateflag)
 {
 	configload->flag_check='\0';//Lo ponemos a false para comprobar que carga bien la config
 
 	//Cargamos la configuracion
 	eeprom_read_block((void*)configload, (const void*) GET_ADDRES_CONFIG, sizeof(tConfiguracion));
-
-	return (configload->flag_check=='X');
+	
+	if(validateflag)
+		return (configload->flag_check=='X');
+	else 
+		return true;
 }
 
 bool Configuracion::EEPROMCargaConfig()
 {
-	return EEPROMCargaConfig(&config);
+	return EEPROMCargaConfig(&config,true);
 
 }
  

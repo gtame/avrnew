@@ -33,8 +33,8 @@ typedef enum {
 } DiasSemana;
 
 
-#define NUMERO_HORAS(SEG) (SEG/SECS_PER_HOUR)
-#define NUMERO_MINUTOS(SEG) (SEG % SECS_PER_HOUR) / SECS_PER_MIN
+#define NUMERO_HORAS(MIN) (MIN/ 60)
+#define NUMERO_MINUTOS(MIN) (MIN % 60) 
 
 
 class Programa
@@ -72,7 +72,7 @@ protected:
 	bool CargarProgramaDesdeEEPROM(uint8_t progIndex,tPrograma * prog);
 	void ResetPrograma(tPrograma *prog);
 	inline void SetChangedProgramas(bool value) { changed=value;}
-	void CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
+	
 private:
 }; //Programa
 

@@ -24,8 +24,8 @@
 
 
 //Defines para operar con puertos
-#define APAGA_RELE(x)  LOG_INFO_ARGS_B("RELE OFF %i",x); digitalWrite(x,LOW);
-#define ENCIENDE_RELE(x) LOG_INFO_ARGS_B("RELE ON %i",x);  digitalWrite(x,HIGH);
+#define APAGA_RELE(x)  digitalWrite(x,LOW)// LOG_INFO_ARGS_B("RELE OFF %i",x);
+#define ENCIENDE_RELE(x)  digitalWrite(x,HIGH)// LOG_INFO_ARGS_B("RELE ON %i",x);
 
 
 
@@ -76,11 +76,13 @@ public:
 	bool EnciendeMotor ();
 	
 	
+	time_t CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
+
+	
 	 inline bool GetChangedRiegos() { return GetChangedSalidas();} // Indica si se activo o desactivo algun riego ;)
 protected:
 	void AbrirValvulaLatch(uint8_t sector);
 	void CerrarValvulaLatch(uint8_t sector);
-
 
 private:
 

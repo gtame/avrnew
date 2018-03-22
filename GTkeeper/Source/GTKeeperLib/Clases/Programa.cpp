@@ -195,7 +195,7 @@ void Programa::ProgramaToDisplay(uint8_t progIndex, char *text) {
 	tPrograma* programa=&programas[progIndex];
 
 	if (programa->HoraInicio == 88) {
-		sprintf_P(text, PSTR("S%02i SA:%02i R%02lu:%02i A%02lu:%02i"), programa->Sector,programa->MinutoInicio,NUMERO_HORAS(programa->TiempoRiego),minute(programa->TiempoRiego),NUMERO_HORAS(programa->TiempoAbono),minute(programa->TiempoAbono));
+		sprintf_P(text, PSTR("S%02i SA:%02i R%02i:%02i A%02i:%02i"), programa->Sector,programa->MinutoInicio,NUMERO_HORAS(programa->TiempoRiego),NUMERO_MINUTOS(programa->TiempoRiego),NUMERO_HORAS(programa->TiempoAbono),NUMERO_MINUTOS(programa->TiempoAbono));
 
 		} else {
 
@@ -212,8 +212,8 @@ void Programa::ProgramaToDisplay(uint8_t progIndex, char *text) {
 		dias_select[6] = ((dias & D) ? 'D' : '_');
 		dias_select[7]=0;
 
-		sprintf_P(text, PSTR("S%02i  %s H%02i:%02i R%02lu:%02i A%02lu:%02i"),
-		programa->Sector, dias_select,programa->HoraInicio,programa->MinutoInicio,NUMERO_HORAS(programa->TiempoRiego),minute(programa->TiempoRiego),NUMERO_HORAS(programa->TiempoAbono),minute(programa->TiempoAbono));
+		sprintf_P(text, PSTR("S%02i  %s H%02i:%02i R%02i:%02i A%02i:%02i"),
+		programa->Sector, dias_select,programa->HoraInicio,programa->MinutoInicio,NUMERO_HORAS(programa->TiempoRiego),NUMERO_MINUTOS(programa->TiempoRiego),NUMERO_HORAS(programa->TiempoAbono),NUMERO_MINUTOS(programa->TiempoAbono));
 	}
 
 
@@ -232,10 +232,10 @@ void Programa::ProgramaToString(uint8_t progIndex, char *text) {
  programa->Dias,
  programa->HoraInicio,
  programa->MinutoInicio,
- hour(programa->TiempoRiego),
- minute(programa->TiempoRiego),
- hour(programa->TiempoAbono),
- minute(programa->TiempoAbono));
+ NUMERO_HORAS(programa->TiempoRiego),
+ NUMERO_MINUTOS(programa->TiempoRiego),
+ NUMERO_HORAS(programa->TiempoAbono),
+ NUMERO_MINUTOS(programa->TiempoAbono));
 }
 
 ///Adaptacion de la libreria de arduino TimeAlarms.h
@@ -281,9 +281,11 @@ time_t Programa::GetNextEjecucion(uint8_t progIndex)
 				//Y tiene programada una hora posterior
 				(
 				(i==day) &&
-				(programa->HoraInicio>timeAhora.Hour) ||
-				//Si es la misma hora el minuto programado tiene que ser mayor , si es el mismo busca la siguiente programacion
-				(programa->HoraInicio==timeAhora.Hour && programa->MinutoInicio>timeAhora.Minute)
+				  (
+					(programa->HoraInicio>timeAhora.Hour) ||
+					//Si es la misma hora el minuto programado tiene que ser mayor , si es el mismo busca la siguiente programacion
+					(programa->HoraInicio==timeAhora.Hour && programa->MinutoInicio>timeAhora.Minute)
+				  )
 				)
 				//O Tiene hora programada un dia posterior independientemente del dia
 				|| (i>day)

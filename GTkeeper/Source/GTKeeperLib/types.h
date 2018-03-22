@@ -71,10 +71,12 @@ typedef struct  {
   uint8_t Sector; //Sector
   uint8_t Dias; //Dias en los que se debe ejecutar
   uint8_t HoraInicio;//Cuando debe ejecutarse , tiene dos variantes
-  uint8_t MinutoInicio;//99:XX --> Indicara que se lanze cuando termine el programa XX
+  uint8_t MinutoInicio;//88:XX --> Indicara que se lanze cuando termine el programa XX
   	  	  	  	  	   //HH:MM --> Indicara la hora a la que se lanzara si el dia esta marcado
-  uint32_t TiempoRiego; //Tiempo de riego , en segundos
-  uint32_t TiempoAbono; //Tiempo de abono,  en segundos
+  uint16_t TiempoRiego; //Tiempo de riego , en minutos
+  uint16_t TiempoAbono; //Tiempo de abono,  en minutos
+  
+  bool Motor;
 
 } 	tPrograma_t, tPrograma, *tmProgramaPtr_t;
 

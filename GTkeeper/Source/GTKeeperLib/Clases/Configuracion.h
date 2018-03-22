@@ -46,7 +46,7 @@ public:
 	inline bool GetChangedConfig() { return changed;}
 protected:
 	inline void SetChangedConfig(bool value) { changed=value;}
-	bool EEPROMCargaConfig(tConfiguracion* configload);
+	bool EEPROMCargaConfig(tConfiguracion* configload,bool validateflag);
 private:
 
 
