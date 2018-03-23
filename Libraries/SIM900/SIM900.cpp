@@ -94,7 +94,10 @@ void SIM900::PowerOn()
 
 /////// ENDMETHODS
 
- 
+ bool SIM900::GetHttpBuffer(uint8_t desde,uint8_t length)
+ {
+	return (SendCommandCheck( F("AT+HTTPREAD=%i,%i"),F("+HTTPREAD:"),desde,length)==RX_CHECK_OK);
+ }
  
 
 bool SIM900::SetSleepMode(Sim900SleepMode mode)

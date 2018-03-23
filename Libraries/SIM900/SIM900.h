@@ -48,6 +48,7 @@ public:
 
 	bool SetSleepMode(Sim900SleepMode mode);
 	bool URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),void (*HttpResultCallback)(const char*,int));
+	bool GetHttpBuffer(uint8_t desde,uint8_t length);
 	bool ConfigAPN(const __FlashStringHelper * variable,const char* valor);
 	bool GPIOWrite(uint8_t pin,uint8_t mode);//GPIO
 

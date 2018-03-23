@@ -47,25 +47,17 @@
 		//Mientras no haya UserInput ó Call ó SMS
 		while(!int_input_user && !int_input_gsm && !CheckWeb())
 		{
-			//LOG_DEBUG("A DORMIR COOO!");
-			// Enter power down state with ADC and BOD module disabled.
-			// Wake up when wake up pin is low.SLEEP_8S
-			//SLEEP_FOREVER
-			//LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+
+			//Dormimos procesador y modulo GSM
 			GTKEEPER_SLEEP(SLEEP_8S);
-			// Do something here
-			// Example: Read sensor, data logging, data transmission.
-			//Lo dormimos durante 1 min
 			
 			//Chequeamos programacion
 			riegos->CheckRiegos();
 
+			//Chequeamos si es necesario guardar estadisticas 
+			if (ELAPSED_SECONDS(Riego.GetLastEstadisticasSaved())>SECS_PER_HOUR)
+					riegos->GuardarEstadisticasEEPROM();
 
-			//Sleep();	
-			//LOG_DEBUG("DESPIERTAAAAAAAAAAAAAAAAA COOO!");
-
-		 
-		
 		}
 		// Disable external pin interrupt on wake up pin.
 		detachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT));

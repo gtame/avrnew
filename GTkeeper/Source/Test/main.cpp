@@ -99,9 +99,9 @@ void setup()
 	//Test::include("sali*"); //Test de estadisticas
 
 	//Test::include("config_EEPROMGuardaConfig");
-	//Test::include("riego*"); //Test de riegos
+	Test::include("riego*"); //Test de riegos
 	
-	Test::include("riego_CalculateNextAction_dia");
+	//Test::include("riego_EnciendeSector_ApagarRiegos");
 	//Test::include("riego_multiple_cruzado");
 	
 	//Test::include("riego_multiple_cruzado");

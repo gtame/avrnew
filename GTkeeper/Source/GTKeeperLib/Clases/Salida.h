@@ -23,11 +23,11 @@ class Salida
 {
 //variables
 public:
-		SalidasActivas salidas [MAX_PROGRAMAS];//Array para guardar las salidas activas
+		tSalida salidas [MAX_PROGRAMAS];//Array para guardar las salidas activas
 protected:
 		uint8_t salidas_activas;//Contador para almacenar las salidas activas
 		//uint32_t salidas_web;//Almacen la posicion EEPROM donde esta actualmente el cursor de salidas.
-		//SalidasActivas pendingWeb[MAX_PROGRAMAS*2];//Array para guardar las salidas
+		//tSalida pendingWeb[MAX_PROGRAMAS*2];//Array para guardar las salidas
 private:
  	char * internalbuffer;
  	uint8_t sizebuffer;
@@ -38,12 +38,12 @@ public:
 
 	//Estos metodos manejan las salidas activas 
 	void ShowInfoSalidas();
-	int8_t GetPosicion(uint8_t ProgSectorIndex , TipoSalidaActiva tipo);
-	bool SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalidaActiva tipo);
+	int8_t GetPosicion(uint8_t ProgSectorIndex , TipoSalida tipo);
+	bool SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalida tipo);
 	uint8_t RiegosActivosEnSector(uint8_t sector);
 
-	int8_t RegistrarSalida(uint8_t ProgSectorIndex ,uint8_t sector, TipoSalidaActiva tipo);
-	void EliminarSalida(uint8_t ProgSectorIndex , TipoSalidaActiva tipo);
+	int8_t RegistrarSalida(uint8_t ProgSectorIndex ,uint8_t sector, TipoSalida tipo);
+	void EliminarSalida(uint8_t ProgSectorIndex , TipoSalida tipo);
 
 	inline uint8_t GetSalidasActivas() { return salidas_activas;}
 	void SalidaToString(uint8_t salidaIndex, char *text) ;

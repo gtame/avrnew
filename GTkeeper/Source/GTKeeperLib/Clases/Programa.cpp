@@ -91,6 +91,13 @@ bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 
 }
 
+void Programa::GuardarProgramasEEPROM()
+{
+	for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
+		GrabarProgramaAEEPROM(i);
+}
+
+
 bool Programa::GrabarProgramaAEEPROM(uint8_t progIndex)
 {
 	

@@ -35,8 +35,8 @@ class Riegos:public Salida,public Estadistica,public Programa
 
 
 //Definimos eventos para facilitar pruebas y debuging;
-typedef void(*LanzaCallbackAction)(SalidasActivas *salida,tPrograma * programa);
-typedef void(*ParaCallbackAction)(SalidasActivas *salida, tPrograma * programa);
+typedef void(*LanzaCallbackAction)(tSalida *salida,tPrograma * programa);
+typedef void(*ParaCallbackAction)(tSalida *salida, tPrograma * programa);
 
 //variables
 public:
@@ -45,6 +45,7 @@ private:
 	char * internalbuffer;
 	uint8_t sizebuffer;
 	time_t last_RiegosCheck; //Ultima vez que se realizo el control 
+	time_t nextaction;//Proxima accion, calculado desde el metodo CalculateNextAction
 	tConfiguracion* config;
 	LanzaCallbackAction lanzaCallback;
 	ParaCallbackAction paraCallback;
@@ -84,20 +85,20 @@ public:
 	bool ApagaMotor();
 	bool EnciendeMotor ();
 	
-		//Lanza Riego ¿?
-		void LanzaRiego(uint8_t programaIndex,bool sendsms) ;
-		void PararRiego(uint8_t programaIndex);
+	//Lanza Riego ¿?
+	void LanzaRiego(uint8_t programaIndex,bool sendsms) ;
+	void PararRiego(uint8_t programaIndex);
 	time_t CalculateNextAction ();//Calcula la fecha de la proxima accion programada a ejecutar (Programas & Salidas) <-> (Parar - arrancar) devuelta por GetNextAction
 
-	
+	 inline time_t GetNextAction() { return nextaction;}//Devuelve la fecha de la proxima accion programada a ejecutar CalculateNextAction
 	 inline bool GetChangedRiegos() { return GetChangedSalidas();} // Indica si se activo o desactivo algun riego ;)
 protected:
 	void AbrirValvulaLatch(uint8_t sector);
 	void CerrarValvulaLatch(uint8_t sector);
 
  
-	 void OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo);
-	 void OnEliminarSalida(uint8_t salida , TipoSalidaActiva tipo);
+	 void OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalida tipo);
+	 void OnEliminarSalida(uint8_t salida , TipoSalida tipo);
 
 private:
 

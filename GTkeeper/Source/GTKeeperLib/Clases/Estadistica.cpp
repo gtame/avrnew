@@ -13,12 +13,13 @@ Estadistica::Estadistica(char * ibuffer,uint8_t isizebuffer)
 {
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
+	
+	lastsaved=0;
 
-
+	//Inicializo los sectores
 	for (uint8_t contador=1;contador<=MAX_PORTS;contador++)
 		 estadisticas[contador-1].sector=contador ;
 }
-
 
 void Estadistica::ResetearEstadistica(uint8_t statIndex)
 {
@@ -28,6 +29,16 @@ void Estadistica::ResetearEstadistica(uint8_t statIndex)
 
 void Estadistica::RegistrarEstadisticas(uint8_t sector,bool abono)
  {
+
+	estadisticas[sector-1].tiempo_riego++;
+	
+	if(abono)
+	estadisticas[sector-1].tiempo_abono++;
+
+	//Para registrar estaditicas lo que hacemos es mirar que sectores estan en riego
+
+	//Si abono esta encendido
+
  /*
 	 //Chequeamos si tiene abono
 	 bool bAbono1= SalidaRegistrada(1,actAbono);
@@ -39,9 +50,6 @@ void Estadistica::RegistrarEstadisticas(uint8_t sector,bool abono)
 		 if (salidas[salida].Tipo==actSector || salidas[salida].Tipo==actPrograma)
 		 {
 
-
-
-			 //salidas[salida].sector
 			 //Check en caso que ese sector este en ejecucion x mas de un programa
 			 bool bImputado=false;
 			 for (uint8_t i=0;i<salida;i++)
@@ -83,13 +91,6 @@ void Estadistica::RegistrarEstadisticas(uint8_t sector,bool abono)
 	 */
  }
 
- 	//eeprom_write_block((void*)&config, ( void*) GET_ADDRES_CONFIG, sizeof(tConfiguracion));
-//
- //
-	 ////Cargamos la configuracion
-	 //eeprom_read_block((void*)&config, (const void*) GET_ADDRES_CONFIG, sizeof(tConfiguracion));
-
- 
 
 void Estadistica::EEPROMLeerEstadistica(uint8_t statIndex,tEstadistica *stat)
 {
@@ -141,6 +142,9 @@ void Estadistica::CargarEstadisticasEEPROM()
  
 void Estadistica::GuardarEstadisticasEEPROM()
 {
+
+	//Guardamos fecha 
+	lastsaved=now();
 	for (uint8_t contador=1;contador<=MAX_PORTS;contador++)
 	{
 		EEPROMGuardarEstadistica(&estadisticas[contador-1]);

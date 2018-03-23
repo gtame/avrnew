@@ -137,36 +137,136 @@ void PostHttpResultCallback(const char* url,int length)
 
 	uint16_t contador=0;
 	uint8_t readResult=0;
-	uint8_t result =-1;
+	uint8_t result =LOAD_WEB_OK;
+	uint8_t currentprogram=0;
 
 	//Solo esperamos 2 posibles valores OK ó ERR
-	if (length==2)
+	//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
+
+	while (	contador!=length && result==LOAD_WEB_OK ) //Mientras no haya errores de procesamiento
 	{
-		//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
-		if (GSMModem.SendCommandCheck( F("AT+HTTPREAD=%i,%i"),F("+HTTPREAD:"),contador,length)==RX_CHECK_OK)
+		//Obtenemos los 3 primeros caracteres, son los que nos marcaran el contenido que vamos a leer
+		if (GSMModem.GetHttpBuffer(contador,3))	
 		{
-			//19 Es por que el programa es de longuitud 17 +2 (CR+LF)
-			//+HTTPREAD: 19
-			//char *buffer=GetLastResponse();
-			//buffer=buffer+10;
-			//int serialLen= atoi(buffer);<--Serial len
+			//Incrementamos el contador
+			contador+=3;
 
 			GSMModem.WaitResponse(500);
-			//Ahora llamamos a la funcion que gestionara los datos recibidos de la peticion GET
+
 			readResult= GSMModem.ReadSerialLine();
 			char *line=GSMModem.GetLastResponse();
-
-			LOG_INFO_ARGS("Web=>%s",line);
-
-			if (readResult==RX_OK_READ && strcmp_P(line,ATSerial::AT_OK)==0 ) //Mientras no haya errores de procesamiento
+			if  (strcmp_P(line,PSTR("R+:"))==0) //Respuesta
 			{
-				 //Todo OK!!;)
-				 gtKeeper.UpdateWebSuccess();			 
+				if (GSMModem.GetHttpBuffer(contador,3))
+				{
+					contador+=3;//1 caracter + CRLF caracteres
+					//La respuesta es 'O' -> OK
+					//La respuesta es 'E' -> ERROR No proceso bien el fichero .. :(
+					readResult= GSMModem.ReadSerialLine();
+					char *line=GSMModem.GetLastResponse();
+					//Si no es OK
+					if (!strcmp_P(line,PSTR("O"))==0)
+					{
+						if (strcmp_P(line,PSTR("E"))==0)
+						result=LOAD_WEB_ERR_SERVER_RESPONSE;
+						else
+						result=LOAD_WEB_ERR_UNKNOWN_RESPONSE;
+					}
+
+				}
+				else
+				result=LOAD_WEB_ERR_MALFORMED_FILE;
 			}
+			else if  (strcmp_P(line,PSTR("C+:"))==0) //Config
+			{
+	
+				//Leemos configuracion
+				if (GSMModem.GetHttpBuffer(contador,LEN_CONFIG_STRING_CR_LF))
+				{
+					contador+=LEN_CONFIG_STRING_CR_LF;//17 caracter + CRLF caracteres
+		
+					readResult= GSMModem.ReadSerialLine();
+					char *line=GSMModem.GetLastResponse();
+					//Si no es OK
+					if (strlen(line)==LEN_CONFIG_STRING_CR_LF)
+					{
+						if (!Config.CargaConfigDesdeString(line))
+						result=LOAD_WEB_ERR_CANT_LOAD_CONFIG;
+					}
+					else
+					result=LOAD_WEB_ERR_MALFORMED_CONFIG;
+				}
+				else
+				result=LOAD_WEB_ERR_MALFORMED_FILE;
+
+	
+			}
+			else if  (strcmp_P(line,PSTR("D+:"))==0) //Eliminar programacion
+			{
+				if (GSMModem.GetHttpBuffer(contador,3))
+				{
+					contador+=3;//1 caracter + CRLF caracteres
+					//La respuesta es 'O' -> OK
+					//La respuesta es 'E' -> ERROR No proceso bien el fichero .. :(
+					readResult= GSMModem.ReadSerialLine();
+					char *line=GSMModem.GetLastResponse();
+					//Si no es OK
+					if (!strcmp_P(line,PSTR("O"))==0)
+					result=LOAD_WEB_ERR_UNKNOWN_DELETE_RESPONSE;
+				}
+				else
+				result=LOAD_WEB_ERR_MALFORMED_FILE;
+
+			}
+			else if  (strcmp_P(line,PSTR("P+:"))==0)//Programa
+			{
+	
+				//Leemos programa
+				if (GSMModem.GetHttpBuffer(contador,LEN_PROGRAMA_STRING_CR_LF))
+				{
+					contador+=LEN_PROGRAMA_STRING_CR_LF;//17 caracter + CRLF caracteres
+		
+					readResult= GSMModem.ReadSerialLine();
+					char *line=GSMModem.GetLastResponse();
+					//Si no es OK
+					if (strlen(line)==LEN_PROGRAMA_STRING_CR_LF)
+					{
+						if (Riego.CargaProgramaDesdeString(currentprogram,line))
+						currentprogram++;
+						else
+						result=LOAD_WEB_ERR_CANT_LOAD_PROGRAM;
+					}
+					else
+					result=LOAD_WEB_ERR_MALFORMED_PROGRAM;
+				}
+				else
+				result=LOAD_WEB_ERR_MALFORMED_FILE;
+			}
+			else
+			result=LOAD_WEB_ERR_UNKNOWN_STRING; //Respuesta desconocida
+
+		} // Fin de if
+	}// fin de while
+
+	//Si todo cargo OK -> Guardamos lo que se ha actualizado
+	if (result==LOAD_WEB_OK)
+	{
+		//Guardamos programas
+		if (Riego.GetChangedProgramas())
+			Riego.GuardarProgramasEEPROM();
+
+		//Guardamos config
+		if (Config.GetChangedConfig())
+			Config.EEPROMGuardaConfig();
 
 
+		gtKeeper.UpdateWebSuccess();
 
-		}
+		//Avisamos por SMS?
+	}
+	else
+	{
+		//Avisamos por SMS¿?
 	}
 
 }

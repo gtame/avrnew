@@ -27,6 +27,7 @@ protected:
 private:
  	char * internalbuffer;
  	uint8_t sizebuffer;
+	time_t lastsaved;//ultima vez que se guardaron estadisticas a eeprom
 
 //functions
 public:
@@ -37,6 +38,8 @@ public:
 	void ResetearEstadistica(uint8_t index);
 	void RegistrarEstadisticas(uint8_t sector,bool abono);
 
+
+	inline time_t GetLastEstadisticasSaved() {return lastsaved;}
 	//Metodos para la coleccion
 	void ResetearEstadisticas();
 	void CargarEstadisticasEEPROM();

@@ -4,8 +4,7 @@
  * Created: 22/03/2018 1:04:05
  *  Author: Gabi
  */ 
- #include "main.h"
-
+ #include "..\main.h"
 
  uint8_t lastprograma=0;
  uint8_t lanzados=0;
@@ -34,7 +33,10 @@
 	 	lanzados_abonos=0;
 	 	parados=0;
 	 	parados_abonos=0;
-		 
+		//Limpiamos salidas
+		Riego.ApagarRiegos();
+		
+		Riego.ResetProgramas();
 		 
 	for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{
@@ -80,7 +82,6 @@ void FijarFecha(int year, uint month ,uint day)
 void LoadProgramas(uint8_t desde, uint8_t hasta)
 {
 	
-	Riego.ResetProgramas();
 	
 	Riego.programas[desde].Dias= L | M | X;
 	Riego.programas[desde].Sector=1;
@@ -149,8 +150,7 @@ test (riego_Calcular_FechaHasta)
 {
 	
 	FijarFecha(2018,1,1);//Lunes 00:00
-	//Limpiamos salidas
-	Riego.ApagarRiegos();
+	InitResults();
 
 	//Programamos para 2018/01/01 00:01
 	Riego.programas[0].Dias= L | M | X;
@@ -201,7 +201,7 @@ test (riego_delay_imprevistos)
 	
 
 			
-	Riego.LanzaCallBack([](SalidasActivas *salida,tPrograma *programa){ 
+	Riego.LanzaCallBack([](tSalida *salida,tPrograma *programa){ 
 	
 		if (salida->Tipo== actAbono)
 			LOG_DEBUG("LANZADO ABONO"); 
@@ -215,7 +215,7 @@ test (riego_delay_imprevistos)
 
 	
 	});
-	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){ 
+	Riego.ParaCallBack([](tSalida *salida,tPrograma *programa){ 
 	
 			if (salida->Tipo== actAbono)
 			LOG_DEBUG("PARADO ABONO");
@@ -277,7 +277,7 @@ test (riego_multiple_secuencial)
 	//setTime(now()+ (5*SECS_PER_MIN));//Lo adelantamos 5 minutos , deberian saltar los 2 riegos
 	time_t ahora=now();
 
-	Riego.LanzaCallBack([](SalidasActivas *salida,tPrograma *programa){
+	Riego.LanzaCallBack([](tSalida *salida,tPrograma *programa){
 		
 		if (salida->Tipo== actAbono)
 		{
@@ -298,7 +298,7 @@ test (riego_multiple_secuencial)
 		
 	});
 
-	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){
+	Riego.ParaCallBack([](tSalida *salida,tPrograma *programa){
 		
 		if (salida->Tipo== actAbono)
 		{
@@ -360,7 +360,7 @@ test (riego_multiple_cruzado)
 	time_t ahora=now();
 
 	
-	Riego.LanzaCallBack([](SalidasActivas *salida,tPrograma *programa){
+	Riego.LanzaCallBack([](tSalida *salida,tPrograma *programa){
 		
 		if (salida->Tipo== actAbono)
 		{
@@ -382,7 +382,7 @@ test (riego_multiple_cruzado)
 		
 	});
 
-	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){
+	Riego.ParaCallBack([](tSalida *salida,tPrograma *programa){
 		
 		if (salida->Tipo== actAbono)
 		{
@@ -447,8 +447,35 @@ test (riego_CalculateNextAction_dia)
 	FijarFecha(2018,1,1);
 	InitResults();
 
+	LoadProgramas(0,20);
+	//Riego.ShowInfoProgramas();
+
+
 	time_t result=Riego.CalculateNextAction();
-	assertTrue(result==SECS_PER_MIN);
+	LOG_DEBUG_ARGS("Result %i",result-now());
+	assertTrue(result-now()==SECS_PER_MIN);
 }
 
  
+//Calcula cuanto le queda para la siguiente accion a procesar
+test (riego_CalculateNextAction_conSalida)
+{
+	FijarFecha(2018,1,1);
+	InitResults();
+	LoadProgramas(0,3);
+	Riego.programas[0].HoraInicio=6; //Adelante 1 hora el prog1 - index0
+
+	//Obtengo del prog2(index1) y cogo el minimo entre tiempo abono y riego y le sumo la fecha actual , esa sera su fecha de paro
+	time_t resultmin=(Riego.programas[1].TiempoAbono==0?Riego.programas[1].TiempoRiego: min(Riego.programas[1].TiempoAbono,Riego.programas[1].TiempoRiego))*SECS_PER_MIN+now();
+	//LanzamosPrograma Index 1 ;)
+	Riego.LanzaRiego(1,false);
+	
+	//La siguiente ejecucion sería la parada de ese riego 
+	time_t result=Riego.CalculateNextAction();
+	//LogTime(resultmin);
+	//LogTime(result);
+	//LOG_DEBUG_ARGS("Resuxlt %lu %lu",result,resultmin);
+	assertTrue(result==resultmin);
+}
+
+

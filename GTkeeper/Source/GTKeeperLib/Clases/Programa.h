@@ -48,7 +48,7 @@ private:
 	bool changed;//Flag si indica que cambio algun programa
  	char * internalbuffer;
  	uint8_t sizebuffer;
-	time_t nexaction=0;
+
 //functions
 public:
 	Programa(char * internalbuffer,uint8_t sizebuffer);
@@ -63,8 +63,8 @@ public:
 	
 	
 	//Metodos para toda la coleccion
-	inline time_t GetNextAction() { return nexaction;}//Devuelve la fecha de la proxima accion programada a ejecutar CalculateNextAction
 	bool EEPROMCargaProgramas();//Carga los programas desde la eeprom
+	void GuardarProgramasEEPROM();//Guarda los programas a la eeprom
 	void ResetProgramas();//Resetea todos los programas y los graba en la eeprom
 	void ShowInfoProgramas();
 	inline bool GetChangedProgramas() { return changed;}

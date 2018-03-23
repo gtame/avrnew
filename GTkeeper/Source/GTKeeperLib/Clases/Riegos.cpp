@@ -106,10 +106,20 @@ void Riegos::ChequearRiegos(time_t tiempo) {
 
 	//Chequeamos si debemos parar algun riego ó abono
 	uint8_t contador = 0;
+
+	//Chequeamos si tiene abono para las estadisticas
+	bool bAbono1= SalidaRegistrada(1,actAbono);
+	
+
 	//Deberemos chequear con un while, ya que con un for no nos vale pq al parar algun programa reordena el listado
 	//y nos la lia
 	while(contador<GetSalidasActivas())
 	{
+		 //Registramos la estadistica
+		 if (salidas[contador].Tipo==actSector || salidas[contador].Tipo==actPrograma)
+			 RegistrarEstadisticas(salidas[contador].Sector,bAbono1);
+
+
 		switch (salidas[contador].Tipo)
 		{
 			case actPrograma:
@@ -178,8 +188,24 @@ void Riegos::ChequearRiegos(time_t tiempo) {
 
 time_t Riegos::CalculateNextAction ()
 {
-	
-	return 0;
+	time_t result=0;
+	//Miramos programas
+	for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
+	{
+		time_t nextejecucion=GetNextEjecucion(i);
+		//LOG_DEBUG_ARGS("Programa %i - result %lu",i,nextejecucion);
+		if (result==0 || (nextejecucion!=0  && nextejecucion<result))
+			result=nextejecucion;
+	}
+	//Miramos salidas
+	for (uint8_t i=0;i<GetSalidasActivas();i++)
+	{
+		time_t finprograma=	salidas[i].Hasta;
+		if (finprograma<result)
+			result=finprograma;
+	}
+
+	return result;
 }
 
  void Riegos::LanzaRiego(uint8_t progIndex,bool sendsms=false) {
@@ -524,7 +550,7 @@ time_t Riegos::CalculateNextAction ()
 
 
 
- void Riegos::OnEliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
+ void Riegos::OnEliminarSalida(uint8_t salida , TipoSalida tipo)
  {
 	
 	if (paraCallback!=NULL)
@@ -536,10 +562,10 @@ time_t Riegos::CalculateNextAction ()
 	EliminarSalida(salida,tipo);
 
  }
-	 //void OnRegistrarSalida((uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo);
-	 //void OnEliminarSalida(uint8_t salida , TipoSalidaActiva tipo);
+	 //void OnRegistrarSalida((uint8_t salida ,uint8_t sector, TipoSalida tipo);
+	 //void OnEliminarSalida(uint8_t salida , TipoSalida tipo);
 
- void Riegos::OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalidaActiva tipo)
+ void Riegos::OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalida tipo)
  {
 	 uint8_t posicion= RegistrarSalida(salida,sector,tipo);
 	 if (lanzaCallback!=NULL)

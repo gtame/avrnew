@@ -243,7 +243,7 @@
     <None Include="Clases\salidas.cpp">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="riegos.cpp">
+    <Compile Include="Clases\riegos.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="EEPROM.h">

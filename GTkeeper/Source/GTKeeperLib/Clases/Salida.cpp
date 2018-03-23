@@ -14,8 +14,8 @@
 //Positivo B>A
 int  sortmethod(const void* a, const void* b)
 {
-	SalidasActivas *salidaA = (SalidasActivas *)a;
-	SalidasActivas *salidaB = (SalidasActivas *)b;
+	tSalida *salidaA = (tSalida *)a;
+	tSalida *salidaB = (tSalida *)b;
 
 	//Lo que mas pesara sera el tipo :>
 	int8_t result= (salidaA->Tipo-salidaB->Tipo);
@@ -88,7 +88,7 @@ void Salida::ShowInfoSalidas()
 }
 
 //Obtiene la posición en la que la salida ha sido registrada
-int8_t Salida::GetPosicion(uint8_t ProgSectorIndex , TipoSalidaActiva tipo)
+int8_t Salida::GetPosicion(uint8_t ProgSectorIndex , TipoSalida tipo)
 {
 	for(int8_t i=0;i<GetSalidasActivas();i++)
 	{
@@ -101,7 +101,7 @@ int8_t Salida::GetPosicion(uint8_t ProgSectorIndex , TipoSalidaActiva tipo)
 }
 
 //Indica si esa salida esta registrada
-bool Salida::SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalidaActiva tipo)
+bool Salida::SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalida tipo)
 {
 	return (GetPosicion(ProgSectorIndex,tipo)!=-1);
 }
@@ -120,7 +120,7 @@ uint8_t Salida::RiegosActivosEnSector(uint8_t sector)
 }
 
 //Registra la salida
-int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSalidaActiva tipo)
+int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSalida tipo)
 {
 	int8_t pos=GetPosicion(ProgSectorIndex,tipo);
 	if (pos==-1)
@@ -149,7 +149,7 @@ int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSali
 
 
 		salidas_activas++;
-		qsort (salidas, salidas_activas, sizeof(SalidasActivas),sortmethod);
+		qsort (salidas, salidas_activas, sizeof(tSalida),sortmethod);
 
 		pos =GetPosicion(ProgSectorIndex,tipo);
 
@@ -161,7 +161,7 @@ int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSali
 
 
 //Elimina la salida
-void Salida::EliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
+void Salida::EliminarSalida(uint8_t salida , TipoSalida tipo)
 {
 	
 	int8_t pos=GetPosicion(salida,tipo);
@@ -178,7 +178,7 @@ void Salida::EliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
 		//salidas[pos].Hasta=0;
 		LOG_DEBUG_ARGS("ORDENANDO %i",salidas_activas);
 		salidas[pos].Tipo=actNone;
-		qsort (salidas, salidas_activas, sizeof(SalidasActivas),sortmethod);
+		qsort (salidas, salidas_activas, sizeof(tSalida),sortmethod);
 		salidas_activas--;//Importante para que reordene correctamente hacer la resta despues del qsort
 
 
@@ -189,7 +189,7 @@ void Salida::EliminarSalida(uint8_t salida , TipoSalidaActiva tipo)
 
 void Salida::SalidaToString(uint8_t salidaIndex, char *text) {
 
-	tSalidas* stat=&salidas[salidaIndex];
+	tSalida* stat=&salidas[salidaIndex];
  	sprintf_P(text,
 	PSTR("%02i%02i%08lu%08lu%02i"),
 	stat->Tipo,

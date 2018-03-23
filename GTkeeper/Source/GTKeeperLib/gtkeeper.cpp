@@ -30,7 +30,9 @@ void GTKeeper::Setup()
 void GTKeeper::Sleep()
 {
 	//Se duerme el micro y el modulo gsm
-
+	gsm->Sleep();
+	//Utilizo macro pq en proteus no le sienta bien asi que hago un sleep;
+	GTKEEPER_SLEEP(SLEEP_8S);//LowPower.powerDown(SLEEP_8S, ADC_OFF,	 BOD_OFF);
 }
 
 void GTKeeper::setLed(uint8_t led )
