@@ -77,7 +77,7 @@ void Riegos::UpdateWebSuccess()
 				 if (last_RiegosCheck > current_minute)
 				 last_RiegosCheck = current_minute;
 
-
+				LOG_DEBUG_ARGS("Revisando %i",minute());
 
 				 ChequearRiegos(last_RiegosCheck);
 			 }

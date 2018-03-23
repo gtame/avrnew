@@ -54,9 +54,7 @@ volatile bool int_input_gsm=false;//GSM interaccion
 //Stream *streamLog=&FakeloggerStream;
 Stream *streamLog=&Serial;
 Logger Log(streamLog);
-
-time_t newtime=0;
-
+ 
 //Funcion necesaria para el compilador
 extern "C" void __cxa_pure_virtual() {}
 
@@ -103,7 +101,10 @@ void setup()
 	//Test::include("config_EEPROMGuardaConfig");
 	//Test::include("riego*"); //Test de riegos
 	
-	Test::include("riego_delay_imprevistos");
+	Test::include("riego_CalculateNextAction_dia");
+	//Test::include("riego_multiple_cruzado");
+	
+	//Test::include("riego_multiple_cruzado");
 	//Test::include("riego_multiples");
 	
 	//Test::include("dayToDiasSemana");
@@ -111,7 +112,7 @@ void setup()
 	//Test::include("dayOfWeek2*");
 	//Test::include("getnextEjecucion*");*/
  
-	newtime=now();
+ 
 }
 
 

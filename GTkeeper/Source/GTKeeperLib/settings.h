@@ -92,7 +92,7 @@ const static char CRLF[] PROGMEM= "\r\n";;
 
 
 //Numero de programas , sectores 
-#define MAX_PROGRAMAS 60//Numero máximo de programas
+#define MAX_PROGRAMAS 20//Numero máximo de programas
 #define MAX_PORTS 24//Numero maximo de sectores a manejar por el programador
 
 //Define de constantes  depuertos

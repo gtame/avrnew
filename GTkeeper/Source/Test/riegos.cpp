@@ -7,7 +7,12 @@
  #include "main.h"
 
 
-
+ uint8_t lastprograma=0;
+ uint8_t lanzados=0;
+ uint8_t parados=0;
+ uint8_t lanzados_abonos=0;
+ uint8_t parados_abonos=0;
+ time_t lastcheckok=0;
  //Struct definido para realizar las pruebas.
  //En ella se definiran la fecha inicio & fin de riego/Abono para cada programa que se ejecute. ;)
  typedef struct
@@ -25,6 +30,12 @@
  //Inicializacion de results;
  void InitResults()
  {
+	 	lanzados=0;
+	 	lanzados_abonos=0;
+	 	parados=0;
+	 	parados_abonos=0;
+		 
+		 
 	for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 	{
 		results[i].InicioRiego=0;
@@ -34,10 +45,23 @@
 	}
  }
 
+ time_t  getTime(int hr,int min,int sec,int day, int month, int yr)
+ {
+	 //Fijamos la fecha a 1/1/2018 0:00 Lunes
+	 TimeElements time;
+	 time.Year=CalendarYrToTm(yr);
+	 time.Month=month;
+	 time.Day=day;
+	 time.Hour=hr;
+	 time.Minute=min;
+	 time.Second=sec;
+	 time_t ahora=makeTime(time);
+	 
+	 return ahora;
+	 
+ }
  
- uint8_t lanzados=0;
- uint8_t parados=0;
-time_t lastcheckok=0;
+
 void FijarFecha(int year, uint month ,uint day)
 {
 	 //Fijamos la fecha a 1/1/2018 0:00 Lunes
@@ -51,6 +75,55 @@ void FijarFecha(int year, uint month ,uint day)
 	 time_t ahora=makeTime(time);
 	 setTime(ahora);
 	
+}
+
+void LoadProgramas(uint8_t desde, uint8_t hasta)
+{
+	
+	Riego.ResetProgramas();
+	
+	Riego.programas[desde].Dias= L | M | X;
+	Riego.programas[desde].Sector=1;
+	Riego.programas[desde].HoraInicio=hour(now());
+	Riego.programas[desde].MinutoInicio=1;
+	Riego.programas[desde].TiempoAbono=random(2,3);//Minutos
+	Riego.programas[desde].TiempoRiego=random(3,5);//Minutos
+	Riego.programas[desde].Motor=true;
+	
+	memset(buffer_test,0,MAIN_BUFFER_SIZE);
+	Riego.ProgramaToDisplay(desde,buffer_test);
+	LOG_DEBUG_ARGS("PROG-> %s",buffer_test);
+	
+	results[desde].programa=&Riego.programas[desde];
+	results[desde].InicioAbono=getTime(0,1,0,1,1,2018) ;
+	results[desde].FinAbono=results[desde].InicioAbono + (Riego.programas[desde].TiempoAbono * SECS_PER_MIN) ;
+	results[desde].InicioRiego=getTime(0,1,0,1,1,2018) ;;
+	results[desde].FinRiego= results[desde].InicioRiego+ (Riego.programas[desde].TiempoRiego * SECS_PER_MIN);
+	
+	for(uint8_t i=desde+1;i<hasta;i++)
+	{
+		tPrograma* programa=&Riego.programas[i];
+		tResults* resultanterior=&results[i-1];
+		
+		programa->Sector =(i % PORTS_NUM)+1;//No puede haber sector 0 por eso +1
+		programa->HoraInicio=88;
+		programa->MinutoInicio=i;//programa anterior
+		programa->Motor=(bool)random(0,1);
+		programa->TiempoAbono=random(0,2);//Minutos
+		programa->TiempoRiego=random(3,5);//Minutos
+		
+		
+		results[i].programa=programa;
+		
+		//La fecha de inicio sera la fecha fin del anterior
+		results[i].InicioAbono=resultanterior->FinRiego;//El inicio del abono se dara con el inicio del anterior
+		results[i].InicioRiego=resultanterior->FinRiego;
+		
+		//La fecha fin, sera la fecha inicio + tiempo indicado
+		results[i].FinAbono=results[i].InicioAbono + (programa->TiempoAbono* SECS_PER_MIN) ;
+		results[i].FinRiego= results[i].InicioRiego+ (programa->TiempoRiego * SECS_PER_MIN);
+	}
+
 }
 
 //Cuando se produce un delay imprevisto tiene que chequear que no se colo ninguno por el medio.
@@ -71,6 +144,7 @@ test (riego_EnciendeSector_ApagarRiegos)
 
 }
 
+//Calculo de fecha hasta
 test (riego_Calcular_FechaHasta)
 {
 	
@@ -115,43 +189,16 @@ test (riego_Calcular_FechaHasta)
 	Riego.ShowInfoSalidas();
 }
 
-
-
-test (riego_multiples)
+//Riego con delay ... para comprobar que saltan los sectores
+test (riego_delay_imprevistos)
 { 
- 
-	FijarFecha(2018,1,1);//Lunes
-	Riego.ApagarRiegos();
-
-	//Programamos para 2018/01/01 00:01	 
-	Riego.programas[0].Dias= L | M | X;
-	Riego.programas[0].Sector=1;
-	Riego.programas[0].HoraInicio=hour(now());
-	Riego.programas[0].MinutoInicio=1;
-	Riego.programas[0].TiempoAbono=2;//Minutos
-	Riego.programas[0].TiempoRiego=3;//Minutos
-	Riego.programas[0].Motor=true;
-	memset(buffer_test,0,MAIN_BUFFER_SIZE);
-	Riego.ProgramaToDisplay(0,buffer_test);
-	LOG_DEBUG_ARGS("PROG-> %s",buffer_test);
-
-	//Acontinuacion Sector2
-	Riego.programas[1].Dias= L | M | X;
-	Riego.programas[1].Sector=2;
-	Riego.programas[1].HoraInicio=hour(now());
-	Riego.programas[1].MinutoInicio=3;
-	Riego.programas[1].TiempoAbono=1;//Minutos
-	Riego.programas[1].TiempoRiego=3;//Minutos
-	Riego.programas[1].Motor=false;
-	memset(buffer_test,0,MAIN_BUFFER_SIZE);
-	Riego.ProgramaToDisplay(1,buffer_test);
-	LOG_DEBUG_ARGS("PROG-> %s",buffer_test);
+	FijarFecha(2018,1,1);
 	
-	//Chequea riegos por 1ª vez para que se actualice la fecha de actualizacion
-	Riego.CheckRiegos();
-
-	//setTime(now()+ (5*SECS_PER_MIN));//Lo adelantamos 5 minutos , deberian saltar los 2 riegos
-	time_t ahora=now();
+	InitResults();
+	
+	LoadProgramas(0,3);
+	
+	
 
 			
 	Riego.LanzaCallBack([](SalidasActivas *salida,tPrograma *programa){ 
@@ -159,10 +206,13 @@ test (riego_multiples)
 		if (salida->Tipo== actAbono)
 			LOG_DEBUG("LANZADO ABONO"); 
 		else if (salida->Tipo ==actPrograma)
+		{
 			LOG_DEBUG_ARGS("LANZADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector ); 
+					lanzados++;
+		}
 
 		Riego.ShowInfoSalidas();
-		lanzados++;
+
 	
 	});
 	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){ 
@@ -171,14 +221,31 @@ test (riego_multiples)
 			LOG_DEBUG("PARADO ABONO");
 			else if (salida->Tipo ==actPrograma)
 			{
+				 parados++;
 				LOG_DEBUG_ARGS("PARADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector ); 
 				Riego.ShowInfoSalidas();	
 			}
 			
 	
-	 parados++;});
+	});
+	 
+	 
+	 Riego.ShowInfoProgramas();
+	 
+	 
+	 
+	 //Lo adelantamos 1' para que saltee .. el riego 1
+	 setTime(now()+61);
+	 
+	 //Chequea riegos por 1ª vez para que se actualice la fecha de actualizacion
+	 Riego.CheckRiegos();
 
-	while(ELAPSED_SECONDS(ahora)<(SECS_PER_MIN*8))
+
+	//Ahora lo adelanatamos 5' deberian saltar los atrasados.
+	setTime(now()+300);
+	time_t ahora= now();
+
+	while(ELAPSED_SECONDS(ahora)<(SECS_PER_MIN*15))
 	{
 			Riego.CheckRiegos();
 			time_t newtime=now()+10;//1' cada loop ;)
@@ -189,56 +256,106 @@ test (riego_multiples)
 	
 	Riego.ShowInfoSalidas();
 	assertTrue(Riego.GetSalidasActivas()==0);
-	assertTrue(lanzados>3);
+	assertTrue(lanzados==3);
 	assertTrue(parados==lanzados);
 	pass();
 }
 
 
-//Cuando se produce un delay imprevisto tiene que chequear que no se colo ninguno por el medio.
-test (riego_delay_imprevistos)
-{ 
- 
-	FijarFecha(2018,1,1);
-	for(uint8_t i=0;i<MAX_PROGRAMAS;i++)
-	{
-		tPrograma* programa=&Riego.programas[i];
-			uint8_t port=(i % MAX_PORTS);
-			programa->Sector =port;
+//Riego multiple secuencial , Empieza-> siguiente sector -> siguiente sector -> siguiente sector.....N veces
+test (riego_multiple_secuencial)
+{
+	
+  	FijarFecha(2018,1,1);
+	InitResults();
 
-
-			bool dias=(bool)(random(0,15)>=12);
-			if (dias)
-			{
-		
-
-				int veces=random(1,7);
-				for (uint8_t j=0;j<veces;j++)
-					programa->Dias|= dayToDiasSemana(j);
-
-							programa->HoraInicio=random(0,23);
-							programa->MinutoInicio=random(0,59);
-			}
-			else
-			{
-
-					programa->HoraInicio=88;
-					do
-					{
-						programa->MinutoInicio=random(1,MAX_PROGRAMAS);
-					} while (programa->MinutoInicio==i);
- 
-		
-			}
-
-			programa->Motor=(bool)random(0,1);
-
-			programa->TiempoAbono=random(0,2);//Minutos
-			programa->TiempoRiego=random(3,5);//Minutos
-		
-	}
+	LoadProgramas(0,20);
+	 
 
 	Riego.ShowInfoProgramas();
+
+	//setTime(now()+ (5*SECS_PER_MIN));//Lo adelantamos 5 minutos , deberian saltar los 2 riegos
+	time_t ahora=now();
+
+	Riego.LanzaCallBack([](SalidasActivas *salida,tPrograma *programa){
+		
+		if (salida->Tipo== actAbono)
+		{
+			LOG_DEBUG_ARGS("LANZADO ABONO %i %i ",minute(results[lastprograma].InicioAbono),minute());
+			assertTrue(minute(results[lastprograma].InicioAbono)==minute());
+			lanzados_abonos++;
+			
+		}
+		else if (salida->Tipo ==actPrograma)
+		{
+			lastprograma	=salida->Ident;
+			LOG_DEBUG_ARGS("LANZADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector );
+			LOG_DEBUG_ARGS("LANZADO PROGRAMA %i %i ",minute(results[salida->Ident].InicioRiego),minute());
+			assertTrue(minute(results[salida->Ident].InicioRiego)==minute());
+			lanzados++;
+		}
+		
+		
+	});
+
+	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){
+		
+		if (salida->Tipo== actAbono)
+		{
+			//Como no se mez
+ 			LOG_DEBUG_ARGS("PARADO ABONO %i %i ",minute(results[lastprograma].FinAbono),minute());
+			assertTrue(minute(results[lastprograma].FinAbono)==minute());
+			parados_abonos++;
+		}
+		else if (salida->Tipo ==actPrograma)
+		{
+			
+			uint8_t lastprogramaParado=salida->Ident;
+			
+			LOG_DEBUG_ARGS("PARADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector );
+			LOG_DEBUG_ARGS("PARADO PROGRAMA %i %i ",minute(results[lastprogramaParado].FinAbono),minute());
+			assertTrue(minute(results[lastprogramaParado].FinRiego)==minute());
+			//Riego.ShowInfoSalidas();
+			parados++;
+		}
+		
+	});
+
+	while(ELAPSED_SECONDS(ahora)<(SECS_PER_HOUR*2))
+	{
+		Riego.CheckRiegos();
+		time_t newtime=now()+55;//1' cada loop ;)
+		setTime(newtime);
+	}
+
+	
+	Riego.ShowInfoSalidas();
+	 
+	
+	assertTrue(Riego.GetSalidasActivas()==0);
+	assertTrue(lanzados>3);
+	assertTrue(parados==lanzados);
+	//Abonos
+	assertTrue(lanzados_abonos==parados_abonos);
+	
+}
+
+
+//Riego multiple secuencial , Empieza-> siguiente sector -> siguiente sector -> siguiente sector.....N veces
+test (riego_multiple_cruzado)
+{
+	
+	FijarFecha(2018,1,1);
+	InitResults();
+	
+
+	
+	LoadProgramas(0,10);
+	LoadProgramas(10,MAX_PROGRAMAS);
+	
+	Riego.ShowInfoProgramas();
+
+	
 	//setTime(now()+ (5*SECS_PER_MIN));//Lo adelantamos 5 minutos , deberian saltar los 2 riegos
 	time_t ahora=now();
 
@@ -246,75 +363,92 @@ test (riego_delay_imprevistos)
 	Riego.LanzaCallBack([](SalidasActivas *salida,tPrograma *programa){
 		
 		if (salida->Tipo== actAbono)
-		LOG_DEBUG("LANZADO ABONO");
-		else if (salida->Tipo ==actPrograma)
-		LOG_DEBUG_ARGS("LANZADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector );
-
-		Riego.ShowInfoSalidas();
-		lanzados++;
-		
-	});
-	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){
-		
-		if (salida->Tipo== actAbono)
-		LOG_DEBUG("PARADO ABONO");
+		{
+			LOG_DEBUG_ARGS("LANZADO ABONO %i %i ",minute(results[lastprograma].InicioAbono),minute());
+			assertTrue(minute(results[lastprograma].InicioAbono)==minute());
+			lanzados_abonos++;
+			
+		}
 		else if (salida->Tipo ==actPrograma)
 		{
-			LOG_DEBUG_ARGS("PARADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector );
-			Riego.ShowInfoSalidas();
+			lastprograma	=salida->Ident;
+			LOG_DEBUG_ARGS("LANZADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector );
+			LOG_DEBUG_ARGS("LANZADO PROGRAMA %i %i ",minute(results[salida->Ident].InicioRiego),minute());
+			assertTrue(minute(results[salida->Ident].InicioRiego)==minute());
+			lanzados++;
 		}
 		
 		
-	parados++;});
+		
+	});
 
-	while(ELAPSED_SECONDS(ahora)<(SECS_PER_HOUR*24))
+	Riego.ParaCallBack([](SalidasActivas *salida,tPrograma *programa){
+		
+		if (salida->Tipo== actAbono)
+		{
+			//Como no se mez
+			LOG_DEBUG_ARGS("PARADO ABONO %i %i ",minute(results[lastprograma].FinAbono),minute());
+			assertTrue(minute(results[lastprograma].FinAbono)==minute());
+			parados_abonos++;
+		}
+		else if (salida->Tipo ==actPrograma)
+		{
+			
+			uint8_t lastprogramaParado=salida->Ident;
+			
+			LOG_DEBUG_ARGS("PARADO PROGRAMA P%i S%i ",salida->Ident,programa->Sector );
+			LOG_DEBUG_ARGS("PARADO PROGRAMA %i %i ",minute(results[lastprogramaParado].FinAbono),minute());
+			assertTrue(minute(results[lastprogramaParado].FinRiego)==minute());
+			//Riego.ShowInfoSalidas();
+			parados++;
+		}
+		
+	});
+
+	while(ELAPSED_SECONDS(ahora)<(SECS_PER_HOUR*1))
 	{
 		Riego.CheckRiegos();
-		time_t newtime=now()+100;//1' cada loop ;)
+		time_t newtime=now()+55;//1' cada loop ;)
 		setTime(newtime);
-		Riego.ShowInfoSalidas();
 	}
 
 	
 	Riego.ShowInfoSalidas();
+	
+	LOG_DEBUG_ARGS("Lanzados %i - Parados %i",lanzados,parados);
 	assertTrue(Riego.GetSalidasActivas()==0);
-	assertTrue(lanzados>3);
-	assertTrue(parados==lanzados);
-	pass();
+	assertTrue(lanzados==MAX_PROGRAMAS);
+	assertTrue(lanzados==parados);
+	
+	//Abonos
+	assertTrue(lanzados_abonos==parados_abonos);
+	
+	
 }
 
 
-
-
-//Esto es para acelearar el bucle y el tiempo corra más liguero
-testing(riegos_check)
- {
-	 
-	if (checkTestDone(riego_EnciendeSector_ApagarRiegos) && 
-		checkTestDone(riego_multiples) &&
-		Riego.GetSalidasActivas()==0
-		)
-		{
-			if (lastcheckok==0)
-				lastcheckok=now();	
-		}
-	else
-		lastcheckok=0;
-	
+//Calcula cuanto le queda para la siguiente accion a procesar
+test (riego_CalculateNextAction_reset)
+{
 		
-	if (lastcheckok!=0 && ELAPSED_SECONDS(lastcheckok)>600)
-	{
-		//Cuando se han ejecutado todos finaliza
-		pass();
-	}
-	else
-	{
-			time_t newtime=now()+10;//1' cada loop ;)
-		setTime(newtime);
+	FijarFecha(2018,1,1);
+	InitResults();
+	//Resetear programas
+	Riego.ResetProgramas();
+	time_t result=Riego.CalculateNextAction();
+	assertTrue(result==0);
+	
+}
 
-		//Ejecutamos un riego simple
-		//LogTime(now());
-		Riego.CheckRiegos();
-		Riego.ShowInfoSalidas();
-	}
- }
+
+//Calcula cuanto le queda para la siguiente accion a procesar
+test (riego_CalculateNextAction_dia)
+{
+	FijarFecha(2018,1,1);
+	InitResults();
+
+	time_t result=Riego.CalculateNextAction();
+	assertTrue(result==SECS_PER_MIN);
+}
+
+ 
