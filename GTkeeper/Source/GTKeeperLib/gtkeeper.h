@@ -79,6 +79,9 @@ enum MachineStates
 };
 
 
+uint8_t PostHttpResultCallback(const char* url,uint16_t length);
+bool PostHttpParametersCallback();
+
 class GTKeeper : public StateMachine,public Hora {
 //variables
 public:
@@ -166,63 +169,20 @@ public:
 
 	//Funciones de clase WEB
 	void UpdateWebSuccess(); // Se llama cuando se actualiza la web correctamente
-	inline void ClearErrorWebs() { error_web=0;} //Limpia Contador de errores en sincronizacion web
-	inline uint8_t	 GetErroresWeb() { return error_web;} //Nº de errores web
-	inline time_t GetLastTimeWebError() {return t_last_error_web; } //Utlima vez que la sincronizacion dio error
-	inline void AddErrorWeb() { error_web++;}  //Contador de errores en sincronizacion web
-	inline time_t GetLastWebSync() { return t_last_web;} //Retorna ultima vez que la web fue actualiza satisfactoriamente
-	inline void SetLastWebSync() { t_last_web=now();} //Actualiza la fecha de actualizacion de la web
+	inline void AddErrorWeb() { error_web++; t_last_error_web=now();}  //Contador de errores en sincronizacion web
 
 
-	/*
-
-    void GetURL(const char * url,int length);
-	bool GetURL(char *url);
-	void GetHttpResultCallback(const char* url,int len);
-
-	
-	void CheckWebConfig();	//Metodo para comprobar si necesita refrescar la config desde la web. Si es asi CargaConfigWeb
-    bool GetConfig4Web(char *url);
-
-    static void ConfigHttpResultCallbackStatic(const char* url,int len);
-    static void ConfigHttpResultCallback(const char* url,int len);
-    static void DefaultHttpResultCallbackStatic(const char* url,int len);
-	static bool  PostHttpParametersCallback();
-	static void PostHttpResultCallback(const char* url,int len);*/
-	
-	////Riegos Arranca-para...
-    //void CheckRiegos();
-    //void AbrirValvulaLatch(uint8_t sector);
-    //void CerrarValvulaLatch(uint8_t sector);
-    //void LanzaRiego(uint8_t contador,bool sendsms) ;
-    //void ApagarRiegos();
-    //void EnciendeSectorSMS(uint8_t sector);
-	//bool EnciendePrograma(uint8_t program);
-	//bool ApagaPrograma (uint8_t program);
-	//bool EnciendeSector(uint8_t sector);
-	//bool ApagaSector (uint8_t sector);
-	//bool EnciendeAbono(uint8_t unidAbono);
-	//bool ApagaAbono (uint8_t unidAbono);
-	//bool ApagaMotor();
-	//bool EnciendeMotor ();
-	//void PararRiego(uint8_t contador);
-	//void ChequearRiegos(time_t tiempo);
-
-
-
-//
-     ////SMS
-    //void SendSmsFinReinicio();
-    //void SendSmsIniReinicio();
-	//void SendSmsProgramacion();
-	//void SendSmsSectoresEjecucion();
-	//void SendSmsHora();
-
-
-	
 
 protected:
 	void setupStateMachine();
+	
+	inline void ClearErrorWebs() { error_web=0;} //Limpia Contador de errores en sincronizacion web
+	inline uint8_t	 GetErroresWeb() { return error_web;} //Nº de errores web
+	inline time_t GetLastTimeWebError() {return t_last_error_web; } //Utlima vez que la sincronizacion dio error
+	
+	inline time_t GetLastWebSync() { return t_last_web;} //Retorna ultima vez que la web fue actualiza satisfactoriamente
+	inline void SetLastWebSync() { t_last_web=now();} //Actualiza la fecha de actualizacion de la web
+
 private:
  	//Utils ..   
     //char * PBB (const __FlashStringHelper * p1,...);

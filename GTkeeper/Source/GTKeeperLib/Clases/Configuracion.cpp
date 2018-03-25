@@ -13,6 +13,7 @@ Configuracion::Configuracion(char * ibuffer,uint8_t isizebuffer)
 {
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
+	changed=false;
 } //Programa
 
 
@@ -61,7 +62,7 @@ bool Configuracion::CargaConfigDesdeSim()
 /*
 	if (ExisteContactoSIM(1) && 	ExisteContactoSIM(2) && 	ExisteContactoSIM(3))
 	{
-
+		SetChangedConfig(true);
 		GetSIMContact(1,config.MovilAviso,NULL);
 		GetSIMContact(2,config.PasswordSMS,NULL);
 		GetSIMContact(3,NULL,config.APN);
@@ -117,6 +118,8 @@ bool Configuracion::CargaConfigDesdeString(char* configstr)
 	strncpy(internalbuffer,configstr+18,2);
 	config.numpuertos=atoi(internalbuffer);
 
+	SetChangedConfig(true);
+
 	return true;
 }
 
@@ -150,8 +153,9 @@ void Configuracion::EEPROMGuardaConfig()
 			while (!eeprom_is_ready());
 			eeprom_write_block((void*)&config, ( void*)address , sizeof(tConfiguracion));
 		}
-	}
+	} 
 
+	SetChangedConfig(false);
 }
 
 bool Configuracion::EEPROMCargaConfig(tConfiguracion* configload,bool validateflag)

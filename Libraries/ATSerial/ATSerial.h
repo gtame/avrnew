@@ -82,8 +82,10 @@ public:
 	size_t SendRawData(char  data);
 	size_t SendRawData_P(PGM_P data);
 
-	uint8_t ReadSerialLine(char *respuesta, uint8_t size=AT_BUFFER_SIZE_RX);
+	uint8_t Read();
+	uint8_t Read(char * respuesta,uint8_t size=AT_BUFFER_SIZE_RX);
 
+	uint8_t ReadSerialLine(char *respuesta, uint8_t size=AT_BUFFER_SIZE_RX);
 	uint8_t ReadSerialLine();
 
 	void WaitResponse( uint16_t wait=0);

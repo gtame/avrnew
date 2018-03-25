@@ -6,16 +6,26 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
+using ATSerialEmulator.Plugins;
 
 namespace ATSerialEmulator
 {
-    class ATSerial:IDisposable
+
+    [Export(typeof(IATEmulator))]
+    class ATSerial: IATEmulator, IDisposable
     {
         private SerialPort _serial = null;
         private CancellationTokenSource cts;
         private Dictionary<string, string> responseDict = new Dictionary<string, string>();
         private List<Command> commands = new List<Command>();
-        
+
+
+        [ImportMany]
+        IEnumerable<Lazy<IATPlugin>> Plugins;
+
+
         private const int TIMEOUT = 500;
 
         enum TypeCommand
@@ -193,6 +203,22 @@ namespace ATSerialEmulator
                     //IF readed something
                     if (!string.IsNullOrEmpty(readed))
                     {
+                        bool handled = false;
+                        foreach (Lazy<IATPlugin> plugin in Plugins)
+                        {
+
+                            if (!handled)
+                            {
+                                string response = plugin.Value.ProcessCommand(ref handled, readed);
+                                if (!string.IsNullOrEmpty(response))
+                                {
+                                    Logger.Info($"<<{response}");
+                                    _serial.WriteLine(response);
+                                }
+                            }
+
+                        }
+
                         //Dictionary responses
                         if (responseDict.ContainsKey(readed))
                         {
@@ -345,6 +371,19 @@ namespace ATSerialEmulator
         }
 
 
+        #region IATEmulator interface
+        void IATEmulator.SendData(byte [] data)
+        {
+            AddCommand(data);
+        }
+
+
+        void IATEmulator.SendData(string data)
+        {
+            AddCommand(data);
+        }
+        #endregion
+
         /// <summary>
         /// Add Command
         /// </summary>
@@ -420,6 +459,8 @@ namespace ATSerialEmulator
             // TODO: quite la marca de comentario de la siguiente línea si el finalizador se ha reemplazado antes.
             // GC.SuppressFinalize(this);
         }
+
+    
         #endregion
 
 

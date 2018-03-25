@@ -14,6 +14,7 @@
 #include <DS1307RTC.h>
 #include <gtkeeper.h>
 #include "variables.h"
+#include "utils/utils.h"
 
 #ifndef MAX_FILE_LOG_SIZE
 	#define MAX_FILE_LOG_SIZE 100 //MAX log size for SD
@@ -23,8 +24,8 @@
 #define SCREEN_ACTIVE() false
 //definida en ScreenManager.h
 #define ELAPSED_SECONDS(X)  (now()-X)
-
-
+#define ELAPSED_SECONDS_F(X) (X-now())
+ 
 //Buffer para tests
 struct definedtest
 {

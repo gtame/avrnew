@@ -133,7 +133,7 @@ bool SIM900::ConfigAPN(const __FlashStringHelper * variable,const char* valor)
 }
 
 
-bool SIM900::URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),void (*HttpResultCallback)(const char*,int))
+bool SIM900::URLRequest(char *url,bool isGet,HttpParametersCallback paramCallback,HttpResultCallback resultCallback)
 {
 	bool result=false;
 	bool httpinit=false;
@@ -181,8 +181,8 @@ bool SIM900::URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),vo
 						//
 						//------WebKitFormBoundaryvZ0ZHShNAcBABWFy--
 						//OK
-						if (HttpParametersCallback!=NULL)
-							HttpParametersCallback();
+						if (paramCallback!=NULL)
+							paramCallback();
 
 						//AT+HTTPACTION=%i -> Action 0 = GET- 1 = POST
 						if (SendCommandCheckError( F("AT+HTTPACTION=%i"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ALL_ERRORS,(isGet?0:1))==RX_CHECK_OK)
@@ -194,12 +194,12 @@ bool SIM900::URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),vo
 								//delay(4000);
 								char *buffer=GetLastResponse();
 								char *httplen=GetToken(buffer,2,",");
-								int serialLen= atoi(httplen);
+								uint16_t serialLen= atoi(httplen);
 
 								//Para bien tendria que devover un resultado
 								//para saber si la respuesta es ok o no..
-								if (HttpResultCallback!=NULL)
-									HttpResultCallback(url,serialLen);
+								if (resultCallback!=NULL)
+									resultCallback(url,serialLen);
 
 								result=true;
 

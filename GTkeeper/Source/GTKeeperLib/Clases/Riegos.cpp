@@ -15,7 +15,7 @@ Riegos::Riegos(tConfiguracion *configuracion ,char * ibuffer,uint8_t isizebuffer
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
 	last_RiegosCheck =0;
-
+	nextaction=0;
 } //Riegos
 
 

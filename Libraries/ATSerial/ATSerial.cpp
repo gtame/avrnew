@@ -336,6 +336,44 @@ void ATSerial::WaitResponse( uint16_t wait)
 	while ((millis() - t_inicial) < wait && mSerial->available() == 0) {	delay(1);	}
 }
 
+
+
+
+uint8_t ATSerial::Read()
+{
+	return Read(buff_response,AT_BUFFER_SIZE_RX);
+}
+
+
+//Lee datos del puerto serie 
+//Returns
+//0 OK
+//1 No data
+//2 Size buffer overflow (La linea recibida es mas grande que el buffer)
+uint8_t ATSerial::Read(char * respuesta,uint8_t size)
+{
+	uint8_t contador=0;
+	mSerial->flush();
+
+	if (size>0)
+	{
+		memset(respuesta, 0, size);
+
+		while (mSerial->available() && contador<size) {
+
+			char readchar = (char) mSerial->read();
+			respuesta[contador] = readchar;
+			contador++; 					  
+		}
+
+	}
+
+	 return (contador==0?RX_NO_DATA: RX_OK_READ);
+
+}
+
+
+
 uint8_t ATSerial::ReadSerialLine()
 {
 	return ATSerial::ReadSerialLine(buff_response,AT_BUFFER_SIZE_RX);

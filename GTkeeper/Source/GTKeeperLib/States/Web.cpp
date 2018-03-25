@@ -27,11 +27,11 @@ bool PostHttpParametersCallback()
 
 	//http://www.raviyp.com/embedded/194
 
-	const char  boundary[] PROGMEM= "---------------------------8278697928671";
+	//const char  boundary[] = ;
 	const char  guion_post[] PROGMEM= "--";
 
 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
-	strcpy_P(bufferapp,boundary);
+	strcpy_P(bufferapp,PSTR("---------------------------8278697928671"));
 
 	if (GSMModem.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,bufferapp)==RX_CHECK_OK)
 	{
@@ -132,7 +132,7 @@ bool PostHttpParametersCallback()
 	return false;
 }
 
-void PostHttpResultCallback(const char* url,int length)
+uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 {
 
 	uint16_t contador=0;
@@ -142,17 +142,21 @@ void PostHttpResultCallback(const char* url,int length)
 
 	//Solo esperamos 2 posibles valores OK ó ERR
 	//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
+	LOG_DEBUG("INI WHILE");
 
 	while (	contador!=length && result==LOAD_WEB_OK ) //Mientras no haya errores de procesamiento
 	{
+	
+		 LOG_DEBUG("LEIDO??");
 		//Obtenemos los 3 primeros caracteres, son los que nos marcaran el contenido que vamos a leer
 		if (GSMModem.GetHttpBuffer(contador,3))	
 		{
+			LOG_DEBUG("LEIDOS +3");
 			//Incrementamos el contador
 			contador+=3;
 
 			GSMModem.WaitResponse(500);
-
+		
 			readResult= GSMModem.ReadSerialLine();
 			char *line=GSMModem.GetLastResponse();
 			if  (strcmp_P(line,PSTR("R+:"))==0) //Respuesta
@@ -245,8 +249,16 @@ void PostHttpResultCallback(const char* url,int length)
 			else
 			result=LOAD_WEB_ERR_UNKNOWN_STRING; //Respuesta desconocida
 
-		} // Fin de if
+		} 
+		else
+			result=LOAD_WEB_ERR_UNKNOWN_RESPONSE;
+		// Fin de if
+
+		LOG_DEBUG_ARGS("Result %i",result);
+
 	}// fin de while
+
+	LOG_DEBUG("FIN WHILE");
 
 	//Si todo cargo OK -> Guardamos lo que se ha actualizado
 	if (result==LOAD_WEB_OK)
@@ -284,14 +296,27 @@ bool GTKeeper::CheckWeb()
 	//2º Que haya datos pendientes de envio (De config, programas o  salidas ) ó se cumpla leadtime envios de logs, tb se conectara si el usuario ha forzado la conexion
 	//3º Que no hay que ejecutar acciones programadas o riegos en XXX minutos
 
-	if (ELAPSED_SECONDS(GetLastTimeWebError())> (WEB_ERROR_SEND_TIME * GetErroresWeb()))
+	if (ELAPSED_SECONDS(GetLastTimeWebError())>= (WEB_ERROR_SEND_TIME * GetErroresWeb()))
 	{
+		LOG_DEBUG("ENTRA EN Chagned");
 
 		//Cambios pdtes.
 		if (configuracion->GetChangedConfig() || riegos->GetChangedProgramas() || riegos->GetChangedSalidas() || ELAPSED_SECONDS(GetLastWebSync())> WEB_LOG_SEND_TIME )
-			//Comprobamos que estamos en el rango de seguridad
-			//Es más importante el riego que el envio de datos
-			return ( ELAPSED_SECONDS(riegos->GetNextAction()) > -WEB_NOACTIVITY_TIME);//Debe ser negativo ya que GEtNextAction() estara en el futuro o 0
+		{
+			LOG_DEBUG_ARGS("EINx? %lu %lu",now(),riegos->GetNextAction());
+			
+			LogTime(riegos->GetNextAction());
+			LogTime(now());
+
+			if (riegos->GetNextAction()<now())
+				//La ultima accion ya fue ejecutada..
+				return true;
+			else	
+				//La accion esta por ejecutarse
+				//Comprobamos que estamos en el rango de seguridad
+				//Es más importante el riego que el envio de datos
+				return (  (riegos->GetNextAction()-now()) >= WEB_NOACTIVITY_TIME);//Debe ser negativo ya que GEtNextAction() estara en el futuro o 0
+		}
 	}
 	 
 	return false;
@@ -337,8 +362,11 @@ void GTKeeper::OnWeb()
 //SALE
 void GTKeeper::OnLeaveWeb()
 {
+#ifdef PANTALLA_TECLADO
 	//Apagamos
 	screenManager.Apagar();
+#endif
+
 	//REseteamos todo, config, programas y estadisticas.
 	LOG_DEBUG("Salimos de User");
 	

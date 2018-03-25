@@ -27,35 +27,6 @@ void printTime(time_t hora)
 	LOG_INFO_ARGS("HORA->%02i/%s/%04i %02i:%02i:%02i" ,timeEl.Day, monthStr(timeEl.Month),tmYearToCalendar(timeEl.Year), timeEl.Hour,timeEl.Minute,timeEl.Second);
 
 }
-time_t GetTime(int hr,int min,int sec,int dy, int mnth, int yr)
-{
- 
-	//Fijamos hora a 01-01-2018 -LUNES
-	TimeElements elements;
-	elements.Year=CalendarYrToTm(2018);
-	elements.Month=mnth;
-	elements.Day=dy;
-	elements.Hour=hr;
-	elements.Minute=min;
-	elements.Second=sec;
-	return	makeTime(elements);
-}
-void PonerHora()
-{
-	//Fijamos hora a 01-01-2018 -LUNES
-	/*TimeElements elements;
-	elements.Year=CalendarYrToTm(2018);
-	elements.Month=1;
-	elements.Day=1;
-	elements.Hour=0;
-	elements.Minute=0;
-	time_t hora=makeTime(elements);
-	
-	Riego.SetHora(hora);*/
-
-	setTime(0,0,0,1,1,2018);
-	printTime(now());
-}
 
 
 ///TEST para macros

@@ -37,6 +37,8 @@ Salida::Salida( char * ibuffer,uint8_t isizebuffer)
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
 	salidas_activas=0;//Al arrancar no hay salidas activas ;)
+	changed=false; 
+
 } //Salida
 
 
@@ -153,7 +155,7 @@ int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSali
 
 		pos =GetPosicion(ProgSectorIndex,tipo);
 
-
+		SetChangedSalidas(true);
 	}
 
 	return pos;
@@ -181,7 +183,7 @@ void Salida::EliminarSalida(uint8_t salida , TipoSalida tipo)
 		qsort (salidas, salidas_activas, sizeof(tSalida),sortmethod);
 		salidas_activas--;//Importante para que reordene correctamente hacer la resta despues del qsort
 
-
+		SetChangedSalidas(true);
 	}
 }
 

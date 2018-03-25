@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ATSerialEmulator.Plugins;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
@@ -16,7 +18,18 @@ namespace ATSerialEmulator
     public partial class frmMain : Form
     {
 
-        private ATSerial serial = new ATSerial();
+
+        [Import(typeof(IATEmulator))]
+        public IATEmulator emulator;
+
+        private ATSerial serial
+        {
+            get
+            {
+                return (ATSerial)emulator;
+            }
+        }
+
         private FileSystemWatcher watcher = new FileSystemWatcher();
 
         private ILog _logger = null;

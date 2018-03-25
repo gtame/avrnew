@@ -118,6 +118,11 @@
       <Value>NODELAY</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.preprocessor.UndefSymbols>
+    <ListValues>
+      <Value>NODELAY</Value>
+    </ListValues>
+  </avrgcc.compiler.preprocessor.UndefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.2.150\include</Value>

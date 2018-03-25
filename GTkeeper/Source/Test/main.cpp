@@ -38,7 +38,7 @@ FakeStream FakeloggerStream; //Fake Stream para Logger
 LogSD SDCard(bufferapp,MAIN_BUFFER_SIZE );
 Configuracion Config(bufferapp,MAIN_BUFFER_SIZE);
 Riegos Riego(&Config.config,bufferapp,MAIN_BUFFER_SIZE );
-GSM GSMModem (&Config.config,&FakeGSMStream,bufferapp,MAIN_BUFFER_SIZE );
+GSM GSMModem (&Config.config,&Serial1,bufferapp,MAIN_BUFFER_SIZE );
 GTKeeper gtKeeper(&Config,&GSMModem, &Riego,&SDCard, bufferapp,MAIN_BUFFER_SIZE);  
 
 ///puertos
@@ -96,10 +96,13 @@ void setup()
 	//Test::include("config*"); //Test de configuracion
 	//Test::include("prog*"); //Test de programas
 	//Test::include("esta*"); //Test de estadisticas
-	//Test::include("sali*"); //Test de estadisticas
+	//Test::include("sali*"); //Test de salidas
+	//Test::include("riego*"); //Test de riegos
+
+	Test::include("web_OnWeb"); //Test de webs
 
 	//Test::include("config_EEPROMGuardaConfig");
-	Test::include("riego*"); //Test de riegos
+	
 	
 	//Test::include("riego_EnciendeSector_ApagarRiegos");
 	//Test::include("riego_multiple_cruzado");

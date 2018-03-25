@@ -41,13 +41,16 @@
 
  } Sim900SleepMode;
 
+typedef uint8_t (*HttpResultCallback)(const char*,uint16_t) ;
+typedef bool (*HttpParametersCallback)();
+
 class SIM900:public ATModem {
 public:
 	//Constructor de logger
 	SIM900(Stream *serial);
 
 	bool SetSleepMode(Sim900SleepMode mode);
-	bool URLRequest(char *url,bool isGet,bool (*HttpParametersCallback)(),void (*HttpResultCallback)(const char*,int));
+	bool URLRequest(char *url,bool isGet,HttpParametersCallback paramCallback,HttpResultCallback resultCallback);
 	bool GetHttpBuffer(uint8_t desde,uint8_t length);
 	bool ConfigAPN(const __FlashStringHelper * variable,const char* valor);
 	bool GPIOWrite(uint8_t pin,uint8_t mode);//GPIO

@@ -47,38 +47,6 @@
 	}
  }
 
- time_t  getTime(int hr,int min,int sec,int day, int month, int yr)
- {
-	 //Fijamos la fecha a 1/1/2018 0:00 Lunes
-	 TimeElements time;
-	 time.Year=CalendarYrToTm(yr);
-	 time.Month=month;
-	 time.Day=day;
-	 time.Hour=hr;
-	 time.Minute=min;
-	 time.Second=sec;
-	 time_t ahora=makeTime(time);
-	 
-	 return ahora;
-	 
- }
- 
-
-void FijarFecha(int year, uint month ,uint day)
-{
-	 //Fijamos la fecha a 1/1/2018 0:00 Lunes
-	 TimeElements time;
-	 time.Year=CalendarYrToTm(year);
-	 time.Month=month;
-	 time.Day=day;
-	 time.Hour=0;
-	 time.Minute=0;
-	 time.Second=0;
-	 time_t ahora=makeTime(time);
-	 setTime(ahora);
-	
-}
-
 void LoadProgramas(uint8_t desde, uint8_t hasta)
 {
 	

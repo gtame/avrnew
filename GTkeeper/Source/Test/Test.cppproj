@@ -225,6 +225,12 @@
     </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="utils\utils.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="utils\utils.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="Clases\configuracion.cpp">
       <SubType>compile</SubType>
     </None>
@@ -243,10 +249,13 @@
     <None Include="Clases\salidas.cpp">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="Clases\riegos.cpp">
+    <None Include="Clases\riegos.cpp">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="EEPROM.h">
+    </None>
+    <None Include="EEPROM.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="gtkeeper.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.cpp">
@@ -258,7 +267,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Clases" />
-    <Folder Include="live" />
+    <Folder Include="utils" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Leeme.txt">

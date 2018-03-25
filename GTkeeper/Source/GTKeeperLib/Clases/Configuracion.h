@@ -31,7 +31,18 @@ public:
 	Configuracion(char * internalbuffer,uint8_t sizebuffer); 
 
 	tConfiguracion config;
-
+	/*
+	//Getters
+	inline char * GetAPN() { return config.APN; }
+	//Setters
+	inline void SetAPN(char *apn) 
+	{ 
+		if (strcmp(config.APN,apn)!=0)
+		{
+			strcpy(config.APN,apn);
+			changed==true
+		}
+	}**/
 		
 	void ShowConfigInfo();
 	void ResetConfig();

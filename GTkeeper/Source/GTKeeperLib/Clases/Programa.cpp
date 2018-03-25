@@ -8,8 +8,6 @@
 
 #include "Programa.h"
 
-
-
 tPrograma programas[MAX_PROGRAMAS];
 
 // default constructor
@@ -17,6 +15,7 @@ Programa::Programa(  char * ibuffer,uint8_t isizebuffer)
 { 
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
+	changed=false;
 } //Programa
 
 //03101010120001200000
@@ -84,7 +83,8 @@ bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 	strncpy(internalbuffer,progstr+15,2);
 	programa->TiempoAbono+=atoi(internalbuffer) * SECS_PER_MIN; //Tiempo de abono
 
-
+	//Cambiamos el flag para saber que cambio el programa
+	SetChangedProgramas(true);
 
 	return true;
  
@@ -95,6 +95,8 @@ void Programa::GuardarProgramasEEPROM()
 {
 	for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 		GrabarProgramaAEEPROM(i);
+
+	changed=false;
 }
 
 
@@ -112,12 +114,13 @@ bool Programa::GrabarProgramaAEEPROM(uint8_t progIndex)
 	//Por lo que comprobaremos antes de escribir que ha cambiado (memcmp)
 	if (memcmp((void*)&programas[progIndex],(void *)&progEeprom,sizeof(tPrograma)) !=0)
 	{
-		uint16_t address=GET_ADDRES_PROGRAM(progIndex);
 
+		uint16_t address=GET_ADDRES_PROGRAM(progIndex);
 		//Cargamos la configuracion
 		while (!eeprom_is_ready());
 		eeprom_write_block((void*)&programas[progIndex], ( void*) address, sizeof(tPrograma));
 	}
+	 
 	
 	//Quiza hay que implementar un metodo para check - Ver metodo EPPROMCargaConfig
 	return true;
@@ -363,6 +366,8 @@ bool Programa::EEPROMCargaProgramas()
 		else
 		bresult=false;//LOG_ERROR_ARGS("Cargando programa %i",program);
 	}
+
+
 	return bresult;
 }
 
