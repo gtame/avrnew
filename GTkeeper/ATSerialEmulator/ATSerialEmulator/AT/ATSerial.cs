@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using ATSerialEmulator.Plugins;
+using System.IO;
 
 namespace ATSerialEmulator
 {
@@ -75,6 +76,7 @@ namespace ATSerialEmulator
             get; protected set;
         }
 
+        public Stream BaseStream { get { return _serial.BaseStream; } }
 
         /// <summary>
         /// Command - Responses in dictioanry
@@ -101,7 +103,13 @@ namespace ATSerialEmulator
         public ATSerial()
         {
 
+            ProcessMessages = true;
+
         }
+
+
+        [DefaultValue(true)]
+        public bool ProcessMessages { get; set; }
 
         public void AddResponse(string request,string response)
         {
@@ -129,133 +137,139 @@ namespace ATSerialEmulator
             string readed = string.Empty;
             while (!cts.IsCancellationRequested)
             {
-                try
+                if (ProcessMessages)
                 {
-                    //Commands
-             
-                    foreach (Command command in commands)
-                    {
-                        if (command.Type == TypeCommand.Command)
-                        {
-                            try
-                            {
-                                _serial.Write(ParseCommand(command.CommandString));
-                                Logger.Info("=== SEND  COMMAND ===");
-                                Logger.Info($"<<{command.CommandString}");
-                                Logger.Info("=== END SEND  COMMAND ===");
-                            }
-                            catch(System.TimeoutException ex)
-                            {
-                                Logger.Error($"Error send command {command.CommandString}", ex);
-                            }
-
-                        }
-                        else if (command.Type == TypeCommand.File)
-                        {
-                            try
-                            {
-                                _serial.Write(System.IO.File.ReadAllText(command.CommandString));
-                                Logger.Info($"=== SEND  FILE {command.CommandString} ===");
-                                Logger.Info(System.IO.File.ReadAllText(command.CommandString));
-                                Logger.Info($"=== END SEND  FILE {command.CommandString} ===");
-                            }
-                            catch (System.TimeoutException ex)
-                            {
-                                Logger.Error($"Error send file {command.CommandString}", ex);
-                            }
-
-                        }
-                        else if (command.Type == TypeCommand.CommandBytes)
-                        {
-                            try
-                            { 
-                                byte[] bytes = ((CommandByte)command).Bytes;
-                                Logger.Info(System.Text.UTF8Encoding.Unicode.GetString(bytes));
-                                Logger.Info($"=== SEND  BYTES {bytes.Length} ===");
-                                _serial.Write(bytes, 0, bytes.Length);
-                                Logger.Info($"=== END SEND  BYTES ===");
-
-                            }
-                            catch (System.TimeoutException ex)
-                            {
-                                Logger.Error($"Error send bytes {System.Text.UTF8Encoding.Unicode.GetString(((CommandByte)command).Bytes)}", ex);
-                            }
-                        }
-                    }
-                    //Clear Commands
-                    commands.Clear();
-                    
-                    
-
-                    //READ
                     try
                     {
-                        readed = string.Empty;
-                        //Read serial port
-                        readed=_serial.ReadLine();
-                        Logger.Info($">>{readed}");
-                    }
-                    catch (System.Exception ex)
-                    {
+                        //Commands
 
-                    }
-
-                    //IF readed something
-                    if (!string.IsNullOrEmpty(readed))
-                    {
-                        bool handled = false;
-                        foreach (Lazy<IATPlugin> plugin in Plugins)
+                        foreach (Command command in commands)
                         {
-
-                            if (!handled)
+                            if (command.Type == TypeCommand.Command)
                             {
-                                string response = plugin.Value.ProcessCommand(ref handled, readed);
-                                if (!string.IsNullOrEmpty(response))
+                                try
                                 {
-                                    Logger.Info($"<<{response}");
-                                    _serial.WriteLine(response);
+                                    _serial.Write(ParseCommand(command.CommandString));
+                                    Logger.Info("=== SEND  COMMAND ===");
+                                    Logger.Info($"<<{command.CommandString}");
+                                    Logger.Info("=== END SEND  COMMAND ===");
+                                }
+                                catch (System.TimeoutException ex)
+                                {
+                                    Logger.Error($"Error send command {command.CommandString}", ex);
+                                }
+
+                            }
+                            else if (command.Type == TypeCommand.File)
+                            {
+                                try
+                                {
+                                    _serial.Write(System.IO.File.ReadAllText(command.CommandString));
+                                    Logger.Info($"=== SEND  FILE {command.CommandString} ===");
+                                    Logger.Info(System.IO.File.ReadAllText(command.CommandString));
+                                    Logger.Info($"=== END SEND  FILE {command.CommandString} ===");
+                                }
+                                catch (System.TimeoutException ex)
+                                {
+                                    Logger.Error($"Error send file {command.CommandString}", ex);
+                                }
+
+                            }
+                            else if (command.Type == TypeCommand.CommandBytes)
+                            {
+                                try
+                                {
+                                    byte[] bytes = ((CommandByte)command).Bytes;
+                                    Logger.Info(System.Text.UTF8Encoding.Unicode.GetString(bytes));
+                                    Logger.Info($"=== SEND  BYTES {bytes.Length} ===");
+                                    _serial.Write(bytes, 0, bytes.Length);
+                                    Logger.Info($"=== END SEND  BYTES ===");
+
+                                }
+                                catch (System.TimeoutException ex)
+                                {
+                                    Logger.Error($"Error send bytes {System.Text.UTF8Encoding.Unicode.GetString(((CommandByte)command).Bytes)}", ex);
                                 }
                             }
+                        }
+                        //Clear Commands
+                        commands.Clear();
+
+
+
+                        //READ
+                        try
+                        {
+
+                            readed = string.Empty;
+                            //Read serial port
+                            readed = _serial.ReadLine();
+                            Logger.Info($">>{readed}");
+                        }
+                        catch (System.Exception ex)
+                        {
 
                         }
 
-                        //Dictionary responses
-                        if (responseDict.ContainsKey(readed))
+                        //IF readed something
+                        if (!string.IsNullOrEmpty(readed))
                         {
-                            string response = responseDict[readed];
-                            Logger.Info($"<<{response}");
-                            _serial.WriteLine(response);
-                        }
-                        else
-                        {
-                            //Like option
-                            foreach (var response in responseDict)
+                            bool handled = false;
+                            foreach (Lazy<IATPlugin> plugin in Plugins)
                             {
 
-                                if (response.Key.Contains("*") || response.Key.Contains("%"))
+                                if (!handled)
                                 {
-                                    if (readed.Like(response.Key))
+                                    string response = plugin.Value.ProcessCommand(ref handled, readed);
+                                    if (!string.IsNullOrEmpty(response))
                                     {
-                                        Logger.Info($"<<{response.Value}");
-                                        _serial.WriteLine(ParseCommand(response.Value));
-                                        break;
+                                        Logger.Info($"<<{response}");
+                                        _serial.WriteLine(response);
+                                    }
+                                }
+
+                            }
+
+                            //Dictionary responses
+                            if (responseDict.ContainsKey(readed))
+                            {
+                                string response = responseDict[readed];
+                                Logger.Info($"<<{response}");
+                                _serial.WriteLine(response);
+                            }
+                            else
+                            {
+                                //Like option
+                                foreach (var response in responseDict)
+                                {
+
+                                    if (response.Key.Contains("*") || response.Key.Contains("%"))
+                                    {
+                                        if (readed.Like(response.Key))
+                                        {
+                                            Logger.Info($"<<{response.Value}");
+                                            _serial.WriteLine(ParseCommand(response.Value));
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                   
+
+                    }
+                    catch (System.TimeoutException)
+                    {
+                        //No readed
+                        Logger.Debug($"Timeout reading serial port {_serial.PortName}..");
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Logger.Error($"IO-Error {_serial.PortName}", ex);
+                    }
                 }
-                catch (System.TimeoutException)
-                {
-                    //No readed
-                    Logger.Debug($"Timeout reading serial port {_serial.PortName}..");
-                }
-                catch (System.Exception ex)
-                {
-                    Logger.Error($"IO-Error {_serial.PortName}", ex);
-                }
+                else
+                    System.Threading.Thread.Sleep(100);
 
             }
              //end task

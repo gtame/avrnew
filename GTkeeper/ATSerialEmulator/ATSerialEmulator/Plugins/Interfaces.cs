@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.IO;
 
 namespace ATSerialEmulator.Plugins
 {
@@ -12,6 +13,10 @@ namespace ATSerialEmulator.Plugins
     {
         void SendData(string data);
         void SendData(byte[] bytes);
+
+        Stream BaseStream { get; }
+
+        bool ProcessMessages{ get; set; }
     }
 
     public interface IATPlugin

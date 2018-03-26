@@ -47,6 +47,9 @@ public:
 
 	virtual bool OnProcessResult( char * ) override;//overrides
 
+
+	Stream * GetStream();
+
 protected:
 
 private:

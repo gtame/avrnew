@@ -13,7 +13,8 @@
 #include <ArduinoUnit.h>
 #include <DS1307RTC.h>
 #include <gtkeeper.h>
-#include "variables.h"
+#include  "variables.h"
+#include "testconst.h"
 #include "utils/utils.h"
 
 #ifndef MAX_FILE_LOG_SIZE

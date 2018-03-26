@@ -231,6 +231,9 @@
     <Compile Include="utils\utils.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="testconst.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="Clases\configuracion.cpp">
       <SubType>compile</SubType>
     </None>

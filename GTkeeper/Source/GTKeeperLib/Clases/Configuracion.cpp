@@ -14,6 +14,8 @@ Configuracion::Configuracion(char * ibuffer,uint8_t isizebuffer)
 	internalbuffer=ibuffer;
 	sizebuffer=isizebuffer;
 	changed=false;
+	strcpy_P(config.MovilAviso, PSTR("000000000"));
+	strcpy_P(config.PasswordSMS,PSTR("0000"));
 } //Programa
 
 
@@ -76,11 +78,12 @@ bool Configuracion::CargaConfigDesdeSim()
 
 bool Configuracion::CargaConfigDesdeString(char* configstr)
 {
+	 char buffernumber[4];
 
 ////// VALIDACIONES
 	//El internalbuffer es usado
-	if (configstr==internalbuffer)
-		return false;
+	//if (configstr==internalbuffer)
+	//	return false;
 		
 	if (strlen(configstr)!= LEN_CONFIG_STRING)
 		return false;
@@ -93,9 +96,9 @@ bool Configuracion::CargaConfigDesdeString(char* configstr)
 ////// ENDVALIDACIONES
 	 
 	//3 para AvisosSMS
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,configstr,3);
-	config.AvisosSMS=atoi(internalbuffer);
+	memset(buffernumber,0,4);
+	strncpy(buffernumber,configstr,3);
+	config.AvisosSMS=atoi(buffernumber);
 
 	//6 siguientes para movil
 	strncpy(config.MovilAviso,configstr+3,9);
@@ -104,19 +107,19 @@ bool Configuracion::CargaConfigDesdeString(char* configstr)
 	strncpy(config.PasswordSMS,configstr+12,4);
 
 	//BOOL 1 o 0 para motor diesel
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,configstr+16,1);
-	config.motor_diesel=atoi(internalbuffer);
+	memset(buffernumber,0,4);
+	strncpy(buffernumber,configstr+16,1);
+	config.motor_diesel=atoi(buffernumber);
 	//
 	//NUM 1 para abono
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,configstr+17,1);
-	config.numabono=atoi(internalbuffer);
+	memset(buffernumber,0,4);
+	strncpy(buffernumber,configstr+17,1);
+	config.numabono=atoi(buffernumber);
 
 	//NUM 2 para puertos
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,configstr+18,2);
-	config.numpuertos=atoi(internalbuffer);
+	memset(buffernumber,0,4);
+	strncpy(buffernumber,configstr+18,2);
+	config.numpuertos=atoi(buffernumber);
 
 	SetChangedConfig(true);
 
@@ -125,7 +128,7 @@ bool Configuracion::CargaConfigDesdeString(char* configstr)
 
 //12765331679911111215
 //3 para AvisosSMS
-//6 siguientes para movil
+//9 siguientes para movil
 //NUM 4 password sms
 //BOOL 1 o 0 para motor diesel
 //NUM 1 para abono

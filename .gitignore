@@ -1,6 +1,7 @@
 .metadata/
 .vs/
 Debug/
+bin
 Release/
 */Libraries/**/Debug
 */Libraries/**/Release

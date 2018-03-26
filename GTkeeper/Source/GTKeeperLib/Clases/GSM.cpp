@@ -18,6 +18,10 @@ GSM::GSM(tConfiguracion *configuracion, Stream * stream,char *ibuffer,uint8_t is
 } //GSM
 
 
+Stream * GSM::GetStream()
+{
+	return this->mSerial;
+}
 
 bool GSM::OnProcessResult( char * msg)
 {

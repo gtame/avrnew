@@ -106,6 +106,7 @@ void SIM900::PowerOn()
 	 {
 		memset(buffer,0,length);
 		WaitResponse(500);
+		if(mSerial->available()<length) delay(120);
 		Read(buffer,length);
 		return true;
 	 }
@@ -163,9 +164,10 @@ bool SIM900::URLRequest(char *url,bool isGet,HttpParametersCallback paramCallbac
 {
 	bool result=false;
 	bool httpinit=false;
+	int32_t resultparam=0;
 	//Modificamos el timeout para darle más tiempo
 	int currentimeout=getTimeout();
-	setTimeout(10000);
+	setTimeout(GSM_TIMEOUT_URL_REQUEST);
 	WakeUp();
  
 	//Abrimos el ID de conexion 1
@@ -208,31 +210,38 @@ bool SIM900::URLRequest(char *url,bool isGet,HttpParametersCallback paramCallbac
 						//------WebKitFormBoundaryvZ0ZHShNAcBABWFy--
 						//OK
 						if (paramCallback!=NULL)
-							paramCallback();
-
-						//AT+HTTPACTION=%i -> Action 0 = GET- 1 = POST
-						if (SendCommandCheckError( F("AT+HTTPACTION=%i"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ALL_ERRORS,(isGet?0:1))==RX_CHECK_OK)
+							resultparam=paramCallback();
+						
+						if (resultparam!=-1)
 						{
-							//Alguna vez ocurre que no responde con +HTTPACTION
-							if (WaitResponseResult(buff_response,"+HTTPACTION",10000)==RX_CHECK_OK)
+
+						
+							//AT+HTTPACTION=%i -> Action 0 = GET- 1 = POST
+							if (SendCommandCheckError( F("AT+HTTPACTION=%i"),(__FlashStringHelper*) AT_OK,(__FlashStringHelper*)AT_ALL_ERRORS,(isGet || resultparam==0?0:1))==RX_CHECK_OK)
 							{
-								//+HTTPACTION:0,200,<length>
-								//delay(4000);
-								char *buffer=GetLastResponse();
-								char *httplen=GetToken(buffer,2,",");
-								uint16_t serialLen= atoi(httplen);
+								//Alguna vez ocurre que no responde con +HTTPACTION
+								if (WaitResponseResult(buff_response,"+HTTPACTION",10000)==RX_CHECK_OK)
+								{
+									//+HTTPACTION:0,200,<length>
+									//delay(4000);
+									char *buffer=GetLastResponse();
+									char *httplen=GetToken(buffer,2,",");
+									uint16_t serialLen= atoi(httplen);
 
-								//Para bien tendria que devover un resultado
-								//para saber si la respuesta es ok o no..
-								if (resultCallback!=NULL)
-									resultCallback(url,serialLen);
+									//Para bien tendria que devover un resultado
+									//para saber si la respuesta es ok o no..
+									if (resultCallback!=NULL)
+										resultCallback(url,serialLen);
 
-								result=true;
+									result=true;
 
+								}
 							}
+							else
+								LOG_ERROR_ARGS("%s",GetLastCommand());
 						}
 						else
-							LOG_ERROR_ARGS("%s",GetLastCommand());
+							LOG_ERROR("Params error");
 					}
 					else
 						LOG_ERROR_ARGS("%s",GetLastCommand());

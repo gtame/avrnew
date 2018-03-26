@@ -16,7 +16,8 @@ namespace ATSerialEmulator
 
         private static CompositionContainer _container;
 
-         
+
+
 
         private Program()
         {

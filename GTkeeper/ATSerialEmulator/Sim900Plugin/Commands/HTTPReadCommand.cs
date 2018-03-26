@@ -14,6 +14,12 @@ namespace Sim900Plugin.Commands
     [ExportMetadata("Pattern", "AT+HTTPREAD")]
     class HTTPREADCommand : ICommand
     {
+
+
+        [Import(typeof(ISim900Emulator))]
+        public ISim900Emulator Sim900;
+
+
         string ICommand.ProcessCommand(string command)
         {
             string response = string.Empty;
@@ -25,16 +31,21 @@ namespace Sim900Plugin.Commands
             if (int.TryParse(parameters[0],out desde) &&
             int.TryParse(parameters[1], out count))
             {
-                byte[] bytes = new byte[count];
-                using (FileStream fs = System.IO.File.OpenRead(Sim900Plugin.FILENAME_PATH))
-                {
-                    fs.Read(bytes, desde, count);
-                    fs.Close();
-                }
+                response = Sim900.Request.Content.Substring(desde, count);
 
-                response= System.Text.Encoding.ASCII.GetString(bytes);
+
+                //byte[] bytes = new byte[count];
+                //using (FileStream fs = System.IO.File.OpenRead(Sim900Plugin.FILENAME_PATH))
+                //{
+                //    fs.Seek(desde, SeekOrigin.Begin);
+                //    fs.Read(bytes, 0, count);
+                //    fs.Close();
+                //}
+
+                //response= System.Text.Encoding.ASCII.GetString(bytes);
             }
-            response += "\r\nOK\r\n";
+
+            response = $"+HTTPREAD:{response.Length}\r\n" + response + "\r\nOK\r\n";
             return response;
         }
     }

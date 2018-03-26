@@ -80,7 +80,7 @@ enum MachineStates
 
 
 uint8_t PostHttpResultCallback(const char* url,uint16_t length);
-bool PostHttpParametersCallback();
+int32_t PostHttpParametersCallback();
 
 class GTKeeper : public StateMachine,public Hora {
 //variables

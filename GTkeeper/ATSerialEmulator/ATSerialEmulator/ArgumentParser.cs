@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -86,7 +87,9 @@ namespace ATSerialEmulator
                             break;
                         case ArgumentParser.DICTIONARY_OPTION:
                             {
+
                                 s_option = arg;
+                              
                                 boption = false;
                             }
                             break;
@@ -135,7 +138,13 @@ namespace ATSerialEmulator
                             break;
                         case ArgumentParser.DICTIONARY_OPTION:
                             {
-                                Dictionary = arg;
+
+                                if (!System.IO.Path.IsPathRooted(arg))
+                                {
+                                    Dictionary = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), arg);
+                                }
+                                else
+                                 Dictionary = arg;
                             }
                             break;
                       

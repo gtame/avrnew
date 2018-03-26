@@ -13,7 +13,7 @@
 
  
 
-const static char CRLF[] PROGMEM= "\r\n";;
+static const char CRLF[] PROGMEM= "\r\n";;
 
 //Longitud de la eeprom
 #define EEPROM_LENGTH E2END + 1
@@ -34,10 +34,10 @@ const static char CRLF[] PROGMEM= "\r\n";;
 //+L:LOG
 
 #define LEN_CONFIG_STRING 20
-#define LEN_CONFIG_STRING_CR_LF LEN_CONFIG_STRING+2
+#define LEN_CONFIG_STRING_CR_LF (LEN_CONFIG_STRING+2)
 
 #define LEN_PROGRAMA_STRING 17
-#define LEN_PROGRAMA_STRING_CR_LF LEN_PROGRAMA_STRING+2
+#define LEN_PROGRAMA_STRING_CR_LF (LEN_PROGRAMA_STRING+2)
 
 #define LEN_SALIDA_STRING 22
 #define LEN_SALIDA_STRING_CR_LF 24
@@ -71,9 +71,10 @@ const static char CRLF[] PROGMEM= "\r\n";;
 
 #define MAX_ERROR_WEB 20 //Numero de errores Máx para intentar realizar la comprobación Web
 //#define SETTING_URL_PROGRAMACION "http://clubciclistautebo.es/custom/programas.php?id=%s"
-#define SETTING_URL_PROGRAMACION "file://C:\\test.txt"
-#define SETTING_URL_CONFIG "http://clubciclistautebo.es/custom/config.txt"
-#define URL_SEND_SALIDAS "http://posttestserver.com/post.php?dir=example"
+//#define SETTING_URL_PROGRAMACION "file://C:\\test.txt"
+#define SETTING_URL_PROGRAMACION "http://localhost:3010/api/values/programacion"
+#define SETTING_URL_CONFIG "http://localhost:3010/api/values/config"
+#define URL_SEND_SALIDAS "http://localhost:3010/api/values/salidas"
 //#define URL_SEND_SALIDAS "http://clubciclistautebo.es/custom/post.php?SN=%s"
 //#define TIME_CHECK_WEB_SECONDS 300 //Tiempo que indica que estara en el estado WEB
 

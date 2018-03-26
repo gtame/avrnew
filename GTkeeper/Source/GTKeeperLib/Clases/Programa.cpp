@@ -26,9 +26,10 @@ Programa::Programa(  char * ibuffer,uint8_t isizebuffer)
 //0000 -> Tiempo de abono
 bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 {
+	char buffnum[4];
 	//Validaciones
-	if (progstr==internalbuffer)
-		return false;
+	//if (progstr==internalbuffer)
+		//return false;
 	
 	if (strlen(progstr)!=LEN_PROGRAMA_STRING)
 		return false;
@@ -44,44 +45,44 @@ bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 
 	//01127125000010000
  
-	memset(internalbuffer,0,sizebuffer);
-	strncpy (internalbuffer,progstr,2);
-	programa->Sector=atoi(internalbuffer);
+	memset(buffnum,0,4);
+	strncpy (buffnum,progstr,2);
+	programa->Sector=atoi(buffnum);
 
 
 	//Ejecucion de progstr -- Hora de inicio o sector
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+2,3);
-	programa->Dias= atoi(internalbuffer);
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+2,3);
+	programa->Dias= atoi(buffnum);
 
 	//Ejecucion de progstr -- Hora de inicio o sector
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+5,2);
-	programa->HoraInicio= atoi(internalbuffer);
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+5,2);
+	programa->HoraInicio= atoi(buffnum);
 
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+7,2);
-	programa->MinutoInicio=atoi(internalbuffer);
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+7,2);
+	programa->MinutoInicio=atoi(buffnum);
 
 		
 	//Tiempo riego
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+9,2);
-	programa->TiempoRiego= atoi(internalbuffer) * SECS_PER_HOUR;
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+9,2);
+	programa->TiempoRiego= atoi(buffnum) * SECS_PER_HOUR;
 
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+11,2);
-	programa->TiempoRiego+=atoi(internalbuffer) * SECS_PER_MIN;
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+11,2);
+	programa->TiempoRiego+=atoi(buffnum) * SECS_PER_MIN;
 
 
 	//Tiempo abono
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+13,2);
-	programa->TiempoAbono=atoi(internalbuffer) * SECS_PER_HOUR;; //Tiempo de abono
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+13,2);
+	programa->TiempoAbono=atoi(buffnum) * SECS_PER_HOUR;; //Tiempo de abono
 
-	memset(internalbuffer,0,sizebuffer);
-	strncpy(internalbuffer,progstr+15,2);
-	programa->TiempoAbono+=atoi(internalbuffer) * SECS_PER_MIN; //Tiempo de abono
+	memset(buffnum,0,4);
+	strncpy(buffnum,progstr+15,2);
+	programa->TiempoAbono+=atoi(buffnum) * SECS_PER_MIN; //Tiempo de abono
 
 	//Cambiamos el flag para saber que cambio el programa
 	SetChangedProgramas(true);

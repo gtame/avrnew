@@ -4,11 +4,11 @@
  * Created: 14/03/2018 8:46:53
  *  Author: gtame
  */ 
-#include "WString.h"
+
 #include <gtkeeper.h>
 
 
-bool PostHttpParametersCallback()
+int32_t PostHttpParametersCallback()
 {
 
 	//Set the Content as multipart/form-data type of HTTP POST and also set the boundary value
@@ -30,46 +30,60 @@ bool PostHttpParametersCallback()
 
 	static const char  boundary[] PROGMEM="---------------------------8278697928671" ;
 	static const char  guion_post[] PROGMEM= "--";
+	static const uint8_t POST_HEADERS_LEN=191;
+
+
+
+	//Cambios de configuracion¿?
+	//Cambios de programacion ¿?
+	//Cambios en salidas activas
+	//Logs..¿?
+	uint8_t numsalidas= Riego.GetSalidasActivas();
+	uint32_t logsize=SDCard.SizeLogs();
+	
+	//191 es el constante, boundarys etc etc
+	uint32_t totalLen=POST_HEADERS_LEN +
+	//CONFIGURACION
+	(Config.GetChangedConfig()?LEN_CONFIG_STRING_CR_LF + LEN_SEPARATOR_WEB_ITEM :0) +
+	//PROGRAMAS
+	(Riego.GetChangedProgramas()?(LEN_PROGRAMA_STRING_CR_LF * MAX_PROGRAMAS) + LEN_SEPARATOR_WEB_ITEM :0) +
+	//SALIDAS
+	(Riego.GetChangedSalidas()?(LEN_SALIDA_STRING_CR_LF * numsalidas)+LEN_SEPARATOR_WEB_ITEM:0)+
+	//LOG
+	(logsize==0?0:logsize+LEN_SEPARATOR_WEB_ITEM);
+
+	//El formato del envio del fichero es con este formato
+	//+C:CONFIG<CR><LF>
+	//+P:PROGRAM1<CR><LF>
+	//PROGRAM2<CR><LF>
+	//+S:SALIDA1<CR><LF>
+	//SALIDA2<CR><LF>
+	//+L:LOG1<CR><LF>
+	//LOG2<CR><LF>
+
+	
+
+	LOG_DEBUG_ARGS_B("totalLen %i",totalLen);
+	//Check si no hay que enviar nada ...
+	if (totalLen==POST_HEADERS_LEN)
+	return 0;
+
 
 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
 	strcpy_P(bufferapp,boundary);
 	
 
+
 	if (GSMModem.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,bufferapp)==RX_CHECK_OK)
 	{
-		//Cambios de configuracion¿?
-		//Cambios de programacion ¿?
-		//Cambios en salidas activas
-		//Logs..¿?
-		uint8_t numsalidas= Riego.GetSalidasActivas();
-		uint32_t logsize=SDCard.SizeLogs();
- 
-		//191 es el constante, boundarys etc etc
- 		int16_t totalLen=191 + 
-		LEN_CONFIG_STRING_CR_LF +LEN_SEPARATOR_WEB_ITEM +//CONFIGURACION
-		(LEN_PROGRAMA_STRING_CR_LF * MAX_PROGRAMAS)+LEN_SEPARATOR_WEB_ITEM + //PROGRAMAS
-		(numsalidas==0?0:(LEN_SALIDA_STRING_CR_LF * numsalidas)+LEN_SEPARATOR_WEB_ITEM)+ //SALIDAS
-		(logsize==0?0:logsize+LEN_SEPARATOR_WEB_ITEM);
-
-		//El formato del envio del fichero es con este formato
-		//+C:CONFIG<CR><LF>
-		//+P:PROGRAM1<CR><LF>
-		//PROGRAM2<CR><LF>
-		//+S:SALIDA1<CR><LF>
-		//SALIDA2<CR><LF>
-		//+L:LOG1<CR><LF>
-		//LOG2<CR><LF>
-
-		 
-
-		LOG_DEBUG_ARGS_B("totalLen %i",totalLen);
+		
 
 		if (GSMModem.SendCommandCheck( F("AT+HTTPDATA=%i,10000"),F("DOWNLOAD"), totalLen)==RX_CHECK_OK)
 		{
 
-			delay(500);
+			//delay(500);
 
-			uint8_t t=0;
+			uint32_t t=0;
 			//t+=SendRawData("Accept-Encoding: deflate");
 			//Vomitamos lo que hayamos registrado
 			//Boundary
@@ -89,21 +103,38 @@ bool PostHttpParametersCallback()
 			//t+=SendRawData("abcd\r\n");
 			 
 			 //Config
-			 memset(bufferapp,0,MAIN_BUFFER_SIZE);
-			 Config.ConfiguracionToString(bufferapp);
-			 t+=GSMModem.SendRawData(bufferapp);
-			 t+=GSMModem.SendRawData_P(CRLF);
-
-			 //Programas
-			 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
+			 if (Config.GetChangedConfig())
 			 {
 				memset(bufferapp,0,MAIN_BUFFER_SIZE);
-				Riego.ProgramaToString(i,bufferapp);
+				strcpy(bufferapp,"C:+");
 				t+=GSMModem.SendRawData(bufferapp);
-				t+=GSMModem.SendRawData_P(CRLF);
+				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
+				 Config.ConfiguracionToString(bufferapp);
+				 t+=GSMModem.SendRawData(bufferapp);
+				 t+=GSMModem.SendRawData_P(CRLF);
 			 }
 
+			 //Programas
+			 if (Riego.GetChangedProgramas())
+			 {
+
+			 	
+
+				 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
+				 {
+					 memset(bufferapp,0,MAIN_BUFFER_SIZE);
+					 Riego.ProgramaToString(i,bufferapp);
+					 t+=GSMModem.SendRawData(bufferapp);
+					 t+=GSMModem.SendRawData_P(CRLF);
+				 }
+			 }
+
+
 			 //Salidas
+			 if (Riego.GetChangedRiegos())
+			 {
+
+			 
 			 for (uint8_t i=0;i<numsalidas;i++)
 			 {
 				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
@@ -111,9 +142,14 @@ bool PostHttpParametersCallback()
 				 t+=GSMModem.SendRawData(bufferapp);
 				 t+=GSMModem.SendRawData_P(CRLF);
 			 }
+			 }
 
 			 //Log
 			 //El archivo de log se lee de la SD... 'si esta disponible'
+			 if (logsize>0)
+			 {
+				SDCard.WriteLogToStream(GSMModem.GetStream());//Escribe el contenido de los logs al stream
+			 }
 
 			//Boundary
 			t+=GSMModem.SendRawData_P(CRLF);
@@ -125,13 +161,13 @@ bool PostHttpParametersCallback()
 
 			LOG_DEBUG_ARGS_B("Enviado x post--> %i",t);
 			delay(500);
-			return true;
+			return t;
 		}
 		else
-		return false;
+		return -1;
 	}
 	else
-	return false;
+	return -1;
 }
 
 uint8_t PostHttpResultCallback(const char* url,uint16_t length)
@@ -168,9 +204,9 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 					//La respuesta es 'E' -> ERROR No proceso bien el fichero .. :(
 	 
 					//Si no es OK
-					if (!strcmp_P(bufferapp,PSTR("O"))==0)
+					if (!strncmp_P(bufferapp,PSTR("O"),1)==0)
 					{
-						if (strcmp_P(bufferapp,PSTR("E"))==0)
+						if (strncmp_P(bufferapp,PSTR("E"),1)==0)
 						result=LOAD_WEB_ERR_SERVER_RESPONSE;
 						else
 						result=LOAD_WEB_ERR_UNKNOWN_RESPONSE;
@@ -180,61 +216,67 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 				else
 				result=LOAD_WEB_ERR_MALFORMED_FILE;
 			}
-			else if  (strcmp_P(bufferapp,PSTR("C+:"))==0) //Config
+			else if  (strncmp_P(bufferapp,PSTR("C+:"),3)==0) //Config
 			{
-	
+				
+				LOG_DEBUG("CONFIG!");
+				//Limpio todo ya que tendre que pasarle el buffer + LEN_CONFIG_STRING_CR_LF
+				memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				//Leemos configuracion
-				if (GSMModem.GetHttpBuffer(contador,LEN_CONFIG_STRING_CR_LF))
+				if (GSMModem.GetHttpBuffer(contador,LEN_CONFIG_STRING_CR_LF,bufferapp ))
 				{
-					contador+=LEN_CONFIG_STRING_CR_LF;//17 caracter + CRLF caracteres
-		
-					readResult= GSMModem.ReadSerialLine();
-					char *line=GSMModem.GetLastResponse();
+					contador+=LEN_CONFIG_STRING_CR_LF;//Movemos contador
+					bufferapp[LEN_CONFIG_STRING]=0;//Para que el CR-LF no sea tenido en cuenta ;)
+					LOG_DEBUG_ARGS("LEIDO! %i %s",strlen(bufferapp),bufferapp);
+					
 					//Si no es OK
-					if (strlen(line)==LEN_CONFIG_STRING_CR_LF)
+					if (strlen(bufferapp)==LEN_CONFIG_STRING)
 					{
-						if (!Config.CargaConfigDesdeString(line))
+						if (!Config.CargaConfigDesdeString(bufferapp))
 						result=LOAD_WEB_ERR_CANT_LOAD_CONFIG;
 					}
 					else
-					result=LOAD_WEB_ERR_MALFORMED_CONFIG;
+						result=LOAD_WEB_ERR_MALFORMED_CONFIG;
 				}
 				else
 				result=LOAD_WEB_ERR_MALFORMED_FILE;
 
 	
 			}
-			else if  (strcmp_P(bufferapp,PSTR("D+:"))==0) //Eliminar programacion
+			else if  (strncmp_P(bufferapp,PSTR("D+:"),3)==0) //Eliminar programacion
 			{
-				if (GSMModem.GetHttpBuffer(contador,3))
+
+				if (GSMModem.GetHttpBuffer(contador,1,bufferapp))
 				{
 					contador+=3;//1 caracter + CRLF caracteres
-					//La respuesta es 'O' -> OK
-					//La respuesta es 'E' -> ERROR No proceso bien el fichero .. :(
-					readResult= GSMModem.ReadSerialLine();
-					char *line=GSMModem.GetLastResponse();
-					//Si no es OK
-					if (!strcmp_P(line,PSTR("O"))==0)
-					result=LOAD_WEB_ERR_UNKNOWN_DELETE_RESPONSE;
+					//La respuesta es 'O' -> OK - Borramos programa
+					if (strncmp_P(bufferapp,PSTR("O"),1)==0) 
+					{
+						LOG_DEBUG_ARGS("Resetea programa %i",currentprogram);
+						Riego.ResetPrograma(currentprogram);
+						currentprogram++;
+					}
+					else
+						result=LOAD_WEB_ERR_UNKNOWN_DELETE_RESPONSE;
 				}
 				else
-				result=LOAD_WEB_ERR_MALFORMED_FILE;
+					result=LOAD_WEB_ERR_MALFORMED_FILE;
 
 			}
-			else if  (strcmp_P(bufferapp,PSTR("P+:"))==0)//Programa
+			else if  (strncmp_P(bufferapp,PSTR("P+:"),3)==0)//Programa
 			{
-	
+ 						
 				//Leemos programa
-				if (GSMModem.GetHttpBuffer(contador,LEN_PROGRAMA_STRING_CR_LF))
+				if (GSMModem.GetHttpBuffer(contador,LEN_PROGRAMA_STRING_CR_LF,bufferapp))
 				{
 					contador+=LEN_PROGRAMA_STRING_CR_LF;//17 caracter + CRLF caracteres
-		
-					readResult= GSMModem.ReadSerialLine();
-					char *line=GSMModem.GetLastResponse();
+					bufferapp[LEN_PROGRAMA_STRING]=0;//Para que el CR-LF no sea tenido en cuenta ;)
+					LOG_DEBUG_ARGS("LEIDO! %i %s",strlen(bufferapp),bufferapp);
+		 
 					//Si no es OK
-					if (strlen(line)==LEN_PROGRAMA_STRING_CR_LF)
+					if (strlen(bufferapp)==LEN_PROGRAMA_STRING)
 					{
-						if (Riego.CargaProgramaDesdeString(currentprogram,line))
+						if (Riego.CargaProgramaDesdeString(currentprogram,bufferapp))
 						currentprogram++;
 						else
 						result=LOAD_WEB_ERR_CANT_LOAD_PROGRAM;
@@ -262,6 +304,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 	//Si todo cargo OK -> Guardamos lo que se ha actualizado
 	if (result==LOAD_WEB_OK)
 	{
+		LOG_DEBUG("FICHERO WEB LEIDO CORRECTAMENTE");
 		//Guardamos programas
 		if (Riego.GetChangedProgramas())
 			Riego.GuardarProgramasEEPROM();
@@ -277,6 +320,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 	}
 	else
 	{
+		LOG_DEBUG("FALLO CARGANDO FICHERO WEB");
 		//Avisamos por SMS¿?
 	}
 

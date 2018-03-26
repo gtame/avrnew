@@ -11,15 +11,21 @@ using Sim900Plugin.Commands;
 namespace Sim900Plugin
 {
 
+
+
+    [Export(typeof(ISim900Emulator))]
     [Export(typeof(IATPlugin))]
     //[ExportMetadata("Symbol", '-')]
-    class Sim900Plugin : IATPlugin
+    class Sim900Plugin : IATPlugin, ISim900Emulator
     {
 
-        public const string FILENAME_PATH = "file.txt";
+ 
 
         [Import(typeof(IATEmulator))]
         public IATEmulator ATapp;
+
+
+      
 
 
         [ImportMany]
@@ -30,8 +36,11 @@ namespace Sim900Plugin
         {
         }
 
+        public Sim900Request Request { get; set; }
+
         string IATPlugin.ProcessCommand(ref bool handled, string command)
         {
+
  
             if(!string.IsNullOrEmpty(command))
             {
@@ -46,6 +55,17 @@ namespace Sim900Plugin
 
             }
 
+
+
+            //Si enviamos datos y esta en modo request...
+            if (Request != null &&
+                 Request is Sim900HttpRequest &&
+                ((Sim900HttpRequest)Request).IsSendingData)
+            {
+
+
+
+            }
 
             return null;
         }

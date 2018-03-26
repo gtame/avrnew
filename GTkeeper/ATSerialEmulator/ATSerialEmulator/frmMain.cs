@@ -94,6 +94,7 @@ namespace ATSerialEmulator
             if (!string.IsNullOrEmpty(ArgumentParser.Dictionary))
             {
 
+        
                 if (System.IO.File.Exists(ArgumentParser.Dictionary))
                 {
                     LoadDictionary(ArgumentParser.Dictionary);

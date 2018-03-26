@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>-p COM12 -b 9600 -d "C:\Proyectos\avrNew\avrnew\GTkeeper\ATSerialEmulator\ATSerialEmulator\dictionary.txt" --o</StartArguments>
+    <StartArguments>-p COM25 -b 9600 -d dictionary.txt --o</StartArguments>
   </PropertyGroup>
 </Project>

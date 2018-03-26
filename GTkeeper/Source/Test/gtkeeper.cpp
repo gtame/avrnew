@@ -23,7 +23,7 @@
 
 
 	 //Cargamos configuracion 
-	 Config.CargaConfigDesdeString("12765331679911111215");
+	 Config.CargaConfigDesdeString(CONST_CONFIG_STRING);
 	 assertTrue(Config.GetChangedConfig());
 	  //Deberia ser true ;)
 	 assertTrue(gtKeeper.CheckWeb());
@@ -75,5 +75,18 @@
  {
    // GSMModem modem;
 	//assertTrue( PostHttpResultCallback("http://loquesea",6)==LOAD_WEB_OK);
+
+	memset(buffer_test,0,MAIN_BUFFER_SIZE);
+	Config.ResetConfig();
+	//assertTrue(Config.GetChangedConfig());
+
+	Config.CargaConfigDesdeString(CONST_CONFIG_STRING);
+	assertTrue(Config.GetChangedConfig());
+
+
+	assertTrue(SDCard.ClearLogs());
+	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
+
+	LOG_DEBUG_ARGS("COnfig %i",Config.GetChangedConfig());
 	gtKeeper.OnWeb();
  }

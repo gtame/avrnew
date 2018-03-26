@@ -88,7 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="chip.ico" />
-    <Content Include="dictionary.txt" />
+    <Content Include="dictionary.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\book_open.png" />
     <None Include="Resources\script_edit.png" />
   </ItemGroup>

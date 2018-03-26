@@ -21,7 +21,9 @@
 #include <inttypes.h>
 
 //typedef unsigned int uint32;
-
+#ifndef GSM_TIMEOUT_URL_REQUEST
+#define GSM_TIMEOUT_URL_REQUEST 10000
+#endif
 
 // pins definition
 #ifndef PIN_GSM_ON
@@ -42,7 +44,7 @@
  } Sim900SleepMode;
 
 typedef uint8_t (*HttpResultCallback)(const char*,uint16_t) ;
-typedef bool (*HttpParametersCallback)();
+typedef int32_t (*HttpParametersCallback)();
 
 class SIM900:public ATModem {
 public:
