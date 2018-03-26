@@ -88,8 +88,7 @@ void setup()
 	 }
  	
 	 */
- 
- 
+  
 	//gtKeeper.Setup();
  
 	//Test::include("sdlog*"); //Test de sd & Logs

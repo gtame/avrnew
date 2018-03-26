@@ -19,7 +19,7 @@ namespace Sim900Plugin.Commands
 
          void SendFile()
         {
-            System.Threading.Thread.Sleep(new Random().Next(1, 5) * 1000);
+            System.Threading.Thread.Sleep(new Random().Next(0,5) *500);
             
             long filesize=  new System.IO.FileInfo(Sim900Plugin.FILENAME_PATH).Length;
             ATapp.SendData($"+HTTPACTION:0,200,{filesize}\r\n");
@@ -27,12 +27,12 @@ namespace Sim900Plugin.Commands
 
         string ICommand.ProcessCommand(string command)
         {
-            string response = "OK\r\n";
+ 
 
             //Lo enviamos async
             Task.Run(() => SendFile());
-            
-            return response;
+
+            return "OK\r\n";
         }
     }
 }

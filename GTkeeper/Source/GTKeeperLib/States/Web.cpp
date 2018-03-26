@@ -4,6 +4,7 @@
  * Created: 14/03/2018 8:46:53
  *  Author: gtame
  */ 
+#include "WString.h"
 #include <gtkeeper.h>
 
 
@@ -27,11 +28,12 @@ bool PostHttpParametersCallback()
 
 	//http://www.raviyp.com/embedded/194
 
-	//const char  boundary[] = ;
-	const char  guion_post[] PROGMEM= "--";
+	static const char  boundary[] PROGMEM="---------------------------8278697928671" ;
+	static const char  guion_post[] PROGMEM= "--";
 
 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
-	strcpy_P(bufferapp,PSTR("---------------------------8278697928671"));
+	strcpy_P(bufferapp,boundary);
+	
 
 	if (GSMModem.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,bufferapp)==RX_CHECK_OK)
 	{
@@ -71,13 +73,13 @@ bool PostHttpParametersCallback()
 			//t+=SendRawData("Accept-Encoding: deflate");
 			//Vomitamos lo que hayamos registrado
 			//Boundary
-			t=GSMModem.SendRawData(guion_post);
-			t+=GSMModem.SendRawData(boundary);
-			t+=GSMModem.SendRawData(CRLF);
-
+			t=GSMModem.SendRawData_P((const char *)guion_post);
+			t+=GSMModem.SendRawData_P((const char *)boundary);
+			t+=GSMModem.SendRawData_P((const char *)CRLF);
+	 
 			//Cabecera
 			t+=GSMModem.SendRawData_P(PSTR("Content-Disposition: form-data; name=\"submitted\"; filename=\"abcd.txt\""));
-			t+=GSMModem.SendRawData(CRLF);
+			t+=GSMModem.SendRawData_P(CRLF);
 
 			t+=GSMModem.SendRawData_P(PSTR("Content-Type: text/plain"));
 			t+=GSMModem.SendRawData_P(CRLF);
@@ -149,29 +151,26 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 	
 		 LOG_DEBUG("LEIDO??");
 		//Obtenemos los 3 primeros caracteres, son los que nos marcaran el contenido que vamos a leer
-		if (GSMModem.GetHttpBuffer(contador,3))	
+		if (GSMModem.GetHttpBuffer(contador,3,bufferapp))	
 		{
 			LOG_DEBUG("LEIDOS +3");
 			//Incrementamos el contador
 			contador+=3;
 
-			GSMModem.WaitResponse(500);
-		
-			readResult= GSMModem.ReadSerialLine();
-			char *line=GSMModem.GetLastResponse();
-			if  (strcmp_P(line,PSTR("R+:"))==0) //Respuesta
+
+		 
+			if  (strncmp_P(bufferapp,PSTR("R+:"),3)==0) //Respuesta
 			{
-				if (GSMModem.GetHttpBuffer(contador,3))
+				if (GSMModem.GetHttpBuffer(contador,1,bufferapp))
 				{
 					contador+=3;//1 caracter + CRLF caracteres
 					//La respuesta es 'O' -> OK
 					//La respuesta es 'E' -> ERROR No proceso bien el fichero .. :(
-					readResult= GSMModem.ReadSerialLine();
-					char *line=GSMModem.GetLastResponse();
+	 
 					//Si no es OK
-					if (!strcmp_P(line,PSTR("O"))==0)
+					if (!strcmp_P(bufferapp,PSTR("O"))==0)
 					{
-						if (strcmp_P(line,PSTR("E"))==0)
+						if (strcmp_P(bufferapp,PSTR("E"))==0)
 						result=LOAD_WEB_ERR_SERVER_RESPONSE;
 						else
 						result=LOAD_WEB_ERR_UNKNOWN_RESPONSE;
@@ -181,7 +180,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 				else
 				result=LOAD_WEB_ERR_MALFORMED_FILE;
 			}
-			else if  (strcmp_P(line,PSTR("C+:"))==0) //Config
+			else if  (strcmp_P(bufferapp,PSTR("C+:"))==0) //Config
 			{
 	
 				//Leemos configuracion
@@ -205,7 +204,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 
 	
 			}
-			else if  (strcmp_P(line,PSTR("D+:"))==0) //Eliminar programacion
+			else if  (strcmp_P(bufferapp,PSTR("D+:"))==0) //Eliminar programacion
 			{
 				if (GSMModem.GetHttpBuffer(contador,3))
 				{
@@ -222,7 +221,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 				result=LOAD_WEB_ERR_MALFORMED_FILE;
 
 			}
-			else if  (strcmp_P(line,PSTR("P+:"))==0)//Programa
+			else if  (strcmp_P(bufferapp,PSTR("P+:"))==0)//Programa
 			{
 	
 				//Leemos programa

@@ -16,7 +16,7 @@ namespace Sim900Plugin.Commands
     {
         string ICommand.ProcessCommand(string command)
         {
-            
+            string response = string.Empty;
             string [] parameters= command.ParseCommand("AT+HTTPREAD=");
 
             int desde = 0;
@@ -32,9 +32,9 @@ namespace Sim900Plugin.Commands
                     fs.Close();
                 }
 
-                return System.Text.Encoding.ASCII.GetString(bytes);
+                response= System.Text.Encoding.ASCII.GetString(bytes);
             }
-            string response = "\r\nOK\r\n";
+            response += "\r\nOK\r\n";
             return response;
         }
     }

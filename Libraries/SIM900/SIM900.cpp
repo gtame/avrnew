@@ -99,6 +99,32 @@ void SIM900::PowerOn()
 	return (SendCommandCheck( F("AT+HTTPREAD=%i,%i"),F("+HTTPREAD:"),desde,length)==RX_CHECK_OK);
  }
  
+ 
+ bool SIM900::GetHttpBuffer(uint8_t desde,uint8_t length,char *buffer)
+ {
+	 if (GetHttpBuffer(desde,length))
+	 {
+		memset(buffer,0,length);
+		WaitResponse(500);
+		Read(buffer,length);
+		return true;
+	 }
+	 else
+		return false;
+		
+ }
+ 
+ bool SIM900::GetHttpBuffer(uint8_t desde,uint8_t length,char *buffer,const __FlashStringHelper *compare)
+ {
+	 
+	 if (GetHttpBuffer(desde,length,buffer))
+	 {
+			return (strncmp_P(buffer,(char *)compare,length)==0);
+	 }
+	 else
+		return false;
+	 
+ }
 
 bool SIM900::SetSleepMode(Sim900SleepMode mode)
 {
