@@ -68,21 +68,21 @@ bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 	//Tiempo riego
 	memset(buffnum,0,4);
 	strncpy(buffnum,progstr+9,2);
-	programa->TiempoRiego= atoi(buffnum) * SECS_PER_HOUR;
+	programa->TiempoRiego= atoi(buffnum) * 60;
 
 	memset(buffnum,0,4);
 	strncpy(buffnum,progstr+11,2);
-	programa->TiempoRiego+=atoi(buffnum) * SECS_PER_MIN;
+	programa->TiempoRiego+=atoi(buffnum) ;
 
 
 	//Tiempo abono
 	memset(buffnum,0,4);
 	strncpy(buffnum,progstr+13,2);
-	programa->TiempoAbono=atoi(buffnum) * SECS_PER_HOUR;; //Tiempo de abono
+	programa->TiempoAbono=atoi(buffnum) * 60; //Tiempo de abono (horas a minutos)
 
 	memset(buffnum,0,4);
 	strncpy(buffnum,progstr+15,2);
-	programa->TiempoAbono+=atoi(buffnum) * SECS_PER_MIN; //Tiempo de abono
+	programa->TiempoAbono+=atoi(buffnum) ; //Tiempo de abono
 
 	//Cambiamos el flag para saber que cambio el programa
 	SetChangedProgramas(true);

@@ -79,7 +79,7 @@ public:
 	bool EnciendePrograma(uint8_t program);
 	bool ApagaPrograma (uint8_t program);
     //Abono	
-	bool EnciendeAbono(uint8_t unidAbono);
+	bool EnciendeAbono(uint8_t unidAbono,time_t tiempo);
 	bool ApagaAbono (uint8_t unidAbono);
 	//Motor
 	bool ApagaMotor();
@@ -97,7 +97,7 @@ protected:
 	void CerrarValvulaLatch(uint8_t sector);
 
  
-	 void OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalida tipo);
+	 void OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalida tipo,time_t tiempo);
 	 void OnEliminarSalida(uint8_t salida , TipoSalida tipo);
 
 private:

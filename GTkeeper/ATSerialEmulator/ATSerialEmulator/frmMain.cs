@@ -49,6 +49,10 @@ namespace ATSerialEmulator
             InitializeComponent();
         }
 
+  
+
+        public MyApplicationContext Context { get; set; }
+
         protected override void OnLoad(EventArgs e)
         {
             LogManager.SetLevel(LogLevel.Info);
@@ -367,6 +371,16 @@ namespace ATSerialEmulator
         private void mnuClear_Click(object sender, EventArgs e)
         {
             txtLog.Clear();
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Visible)
+            {
+                e.Cancel = true;
+                Context.HideApp();
+            }
+
         }
     }
 }

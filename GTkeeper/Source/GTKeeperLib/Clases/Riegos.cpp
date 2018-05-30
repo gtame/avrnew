@@ -218,21 +218,21 @@ time_t Riegos::CalculateNextAction ()
 		 EnciendePrograma(progIndex);
 
 		 //Actualizamos la fecha Hasta
-		 uint8_t pos=GetPosicion(progIndex,actPrograma);
-		 if (pos!=-1)
-		 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[progIndex].TiempoRiego * SECS_PER_MIN);
+		 //uint8_t pos=GetPosicion(progIndex,actPrograma);
+		 //if (pos!=-1)
+		 //salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[progIndex].TiempoRiego * SECS_PER_MIN);
 
 		 //Miramos los tiempos de abonos :)
 		 if (programas[progIndex].TiempoAbono>0)
 		 {
-			 EnciendeAbono(1);
-			 uint8_t pos=GetPosicion(1,actAbono);
-			 if (pos!=-1)
-			 {
-				 //Actualizamos la fecha de abono si es mas posterior
-				 if (salidas[pos].Hasta<(now() + programas[progIndex].TiempoAbono))
-				 salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[progIndex].TiempoAbono * SECS_PER_MIN);
-			 }
+			 EnciendeAbono(1,programas[progIndex].TiempoAbono);
+			 //uint8_t pos=GetPosicion(1,actAbono);
+			 //if (pos!=-1)
+			 //{
+				 ////Actualizamos la fecha de abono si es mas posterior
+				 //if (salidas[pos].Hasta<(now() + programas[progIndex].TiempoAbono))
+				 //salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (programas[progIndex].TiempoAbono * SECS_PER_MIN);
+			 //}
 
 		 }
 
@@ -304,7 +304,7 @@ time_t Riegos::CalculateNextAction ()
 			 if (RiegosActivosEnSector(sector)==0)
 			 this->AbrirValvulaLatch(sector);
 
-			 OnRegistrarSalida(sector,sector,actSector);
+			 OnRegistrarSalida(sector,sector,actSector,0);
 			 if (config->motor_diesel)
 			 EnciendeMotor();
 
@@ -344,12 +344,12 @@ time_t Riegos::CalculateNextAction ()
 	 return false;
  }
 
- bool Riegos::EnciendeAbono(uint8_t unidAbono)
+ bool Riegos::EnciendeAbono(uint8_t unidAbono,time_t tiempo)
  {
 	 if (!SalidaRegistrada(unidAbono,actAbono))
 	 {
 		 ENCIENDE_RELE(ports_abono[unidAbono-1]);
-		 OnRegistrarSalida(unidAbono,0,actAbono);
+		 OnRegistrarSalida(unidAbono,0,actAbono,tiempo);
 		 return true;
 	 }
 	 else
@@ -380,7 +380,7 @@ time_t Riegos::CalculateNextAction ()
 		 if (RiegosActivosEnSector(programa->Sector)==0)
 			this->AbrirValvulaLatch(programa->Sector);
 
-		 OnRegistrarSalida(program,programa->Sector,actPrograma);
+		 OnRegistrarSalida(program,programa->Sector,actPrograma,programa->TiempoRiego);
 
 		 if (config->motor_diesel)
 			 EnciendeMotor();
@@ -418,7 +418,7 @@ time_t Riegos::CalculateNextAction ()
 	 if (!SalidaRegistrada(1,actMotor))
 	 {
 		 ENCIENDE_RELE(PORT_MOTOR_PIN);
-		 OnRegistrarSalida(1,0,actMotor);
+		 OnRegistrarSalida(1,0,actMotor,0);
 		 return true;
 	 }
 	 else
@@ -565,9 +565,9 @@ time_t Riegos::CalculateNextAction ()
 	 //void OnRegistrarSalida((uint8_t salida ,uint8_t sector, TipoSalida tipo);
 	 //void OnEliminarSalida(uint8_t salida , TipoSalida tipo);
 
- void Riegos::OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalida tipo)
+ void Riegos::OnRegistrarSalida(uint8_t salida ,uint8_t sector, TipoSalida tipo,time_t tiempo)
  {
-	 uint8_t posicion= RegistrarSalida(salida,sector,tipo);
+	 uint8_t posicion= RegistrarSalida(salida,sector,tipo,tiempo);
 	 if (lanzaCallback!=NULL)
 	 {
 		lanzaCallback(&salidas[posicion], salidas[posicion].Tipo==actPrograma?&programas[salidas[posicion].Ident]:NULL);

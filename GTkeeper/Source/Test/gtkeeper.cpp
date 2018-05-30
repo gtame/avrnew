@@ -88,5 +88,27 @@
 	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
 
 	LOG_DEBUG_ARGS("COnfig %i",Config.GetChangedConfig());
+
 	gtKeeper.OnWeb();
+
+	//Acaba perfect, no hay errores!!! :D
+	assertTrue(gtKeeper.GetErroresWeb()==0);
+
+
+	 Riego.EnciendePrograma(0);
+
+	//Ahora deberia tragar
+	//Adelantamos el tiempo
+	setTime(now()+WEB_ERROR_SEND_TIME+1);
+	assertTrue(gtKeeper.CheckWeb());
+
+
+
+	
+	gtKeeper.OnWeb();
+
+	//Acaba perfect, no hay errores!!! :D
+	assertTrue(gtKeeper.GetErroresWeb()==0);
+
+
  }

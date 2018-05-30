@@ -69,9 +69,11 @@ namespace ATSerialEmulator
                 Console.WriteLine(compositionException.ToString());
             }
 
-
+            MyApplicationContext context = new MyApplicationContext();
+            context.MainForm = main;
+            main.Context = context;
             //Launch form
-            Application.Run(main);
+            Application.Run(context);
         }
     }
 }

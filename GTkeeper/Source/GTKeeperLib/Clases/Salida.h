@@ -42,7 +42,7 @@ public:
 	bool SalidaRegistrada(uint8_t ProgSectorIndex , TipoSalida tipo);
 	uint8_t RiegosActivosEnSector(uint8_t sector);
 
-	int8_t RegistrarSalida(uint8_t ProgSectorIndex ,uint8_t sector, TipoSalida tipo);
+	int8_t RegistrarSalida(uint8_t ProgSectorIndex ,uint8_t sector, TipoSalida tipo,time_t tiempo);
 	void EliminarSalida(uint8_t ProgSectorIndex , TipoSalida tipo);
 
 	inline uint8_t GetSalidasActivas() { return salidas_activas;}

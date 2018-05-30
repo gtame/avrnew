@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using GTKeeperAPI.Models;
 
 namespace GTKeeperAPI.Controllers
 {
@@ -23,8 +24,7 @@ namespace GTKeeperAPI.Controllers
         public string Get(int id)
         {
             return "value";
-        }
-
+        } 
 
 
         [HttpPost("programacion")]
@@ -54,7 +54,59 @@ namespace GTKeeperAPI.Controllers
 
             // process uploaded files
             // Don't rely on or trust the FileName property without validation.
-            return Ok();
+
+            //Todo recibido OK
+            //return Ok("+R:O\r\n");
+            //REcibido Error! :(
+            //return Ok("+R:E\r\n");
+
+            //Recibido y pasamos configuracion
+            //return Ok("+R:O\r\n+C:12765331679911111215\r\n");
+
+
+
+            //Recibido y pasamos programacion
+            //return Ok("+R:O\r\n+C:12765331679911111215\r\n+D:O\r\n");
+
+            
+            //03101010120001200000
+            //03->Sector
+            //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
+            //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
+            //0120 -> Tiempo de riego
+            //0000 -> Tiempo de abono
+            Random rnd = new Random();
+            int numrandom=rnd.Next(1,15);
+
+
+            string programas = string.Empty;
+
+            for (int i=0;i<numrandom;i++)
+            {
+                Dia dias = Dia.None;
+                int veces = rnd.Next(0, 7);
+                for (int j=0;j< veces; j++)
+                {
+                    System.DateTime dt = System.DateTime.Now + TimeSpan.FromHours( rnd.Next(0, 2299));
+                    dias |= Programa.GetDia(dt.DayOfWeek);
+                }
+
+                Programa program = new Programa()
+                {
+                    Sector = i+1,
+                    Dias = dias,
+                    Hora = new TimeSpan(0, rnd.Next(0, 23), rnd.Next(0, 59), 0),
+                    TiempoRiego = TimeSpan.FromHours(rnd.Next(0, 99)) + TimeSpan.FromMinutes( rnd.Next(0,59)),
+                    TiempoAbono = TimeSpan.FromHours(rnd.Next(0, 99)) + TimeSpan.FromMinutes(rnd.Next(0, 59)),
+
+
+                };
+
+
+                programas += "+P:" + program.ToString() + "\r\n";
+            }
+
+            return Ok("+R:O\r\n+C:12765331679911111215\r\n"+programas);
             //return Ok(new { count = 1, submitted.Length, filePath });
         }
 

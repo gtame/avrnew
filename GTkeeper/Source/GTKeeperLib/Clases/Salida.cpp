@@ -122,7 +122,7 @@ uint8_t Salida::RiegosActivosEnSector(uint8_t sector)
 }
 
 //Registra la salida
-int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSalida tipo)
+int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSalida tipo, time_t tiempo)
 {
 	int8_t pos=GetPosicion(ProgSectorIndex,tipo);
 	if (pos==-1)
@@ -137,6 +137,7 @@ int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSali
 		salidas[i].Desde=now();//Registra la hora desde la que esta activa!!
 
 
+		salidas[i].Sector=0;
 
 		if (tipo==actSector)
 			salidas[i].Sector=ProgSectorIndex;
@@ -144,10 +145,15 @@ int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSali
 		{	
 			if (sector==0)
 				LOG_DEBUG_ARGS_B("Sector no puede ser =0 %i %i",ProgSectorIndex,i);
+
 			salidas[i].Sector=sector;
+	  	    salidas[i].Hasta= TIME_WITHOUT_SECONDS(now()) + (tiempo  * SECS_PER_MIN);
 		}
-		else
-		salidas[i].Sector=0;
+		else if (tipo==actAbono)
+			salidas[i].Hasta= TIME_WITHOUT_SECONDS(now()) + (tiempo * SECS_PER_MIN);
+
+
+
 
 
 		salidas_activas++;
@@ -157,6 +163,15 @@ int8_t Salida::RegistrarSalida(uint8_t ProgSectorIndex,uint8_t sector , TipoSali
 
 		SetChangedSalidas(true);
 	}
+	else 
+	{
+	 
+		//Actualizamos la fecha hasta si procede
+		if (salidas[pos].Hasta!=0 && tiempo>0  && salidas[pos].Hasta<(now() +tiempo))
+			salidas[pos].Hasta= TIME_WITHOUT_SECONDS(now()) + (tiempo * SECS_PER_MIN);
+	 
+	 }
+
 
 	return pos;
 }

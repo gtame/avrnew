@@ -40,7 +40,7 @@ namespace Sim900Plugin.Commands
 
 
 
-                int total = ((Sim900HttpRequest)Sim900.Request).Length - 3; //19 Es el fixed length del post;
+                int total = ((Sim900HttpRequest)Sim900.Request).Length ;
                     int contador = 0;
                     byte[] bytes = new byte[total];
                     while (contador < total)

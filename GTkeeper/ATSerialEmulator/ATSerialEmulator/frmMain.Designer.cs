@@ -51,14 +51,14 @@
             this.btnSendHex = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.RichTextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuClear = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuSelectAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuCopiar = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.mnuClear = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.pnlTop.SuspendLayout();
             this.pnlBottom.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -305,50 +305,50 @@
             this.toolStripSeparator2,
             this.mnuSave});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 132);
-            // 
-            // mnuSelectAll
-            // 
-            this.mnuSelectAll.Name = "mnuSelectAll";
-            this.mnuSelectAll.Size = new System.Drawing.Size(152, 22);
-            this.mnuSelectAll.Text = "Select All";
-            this.mnuSelectAll.Click += new System.EventHandler(this.mnuSelectAll_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // mnuCopiar
-            // 
-            this.mnuCopiar.Name = "mnuCopiar";
-            this.mnuCopiar.Size = new System.Drawing.Size(152, 22);
-            this.mnuCopiar.Text = "Copy";
-            this.mnuCopiar.Click += new System.EventHandler(this.mnuCopiar_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
-            // 
-            // mnuSave
-            // 
-            this.mnuSave.Name = "mnuSave";
-            this.mnuSave.Size = new System.Drawing.Size(152, 22);
-            this.mnuSave.Text = "Save Log file";
-            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(141, 110);
             // 
             // mnuClear
             // 
             this.mnuClear.Name = "mnuClear";
-            this.mnuClear.Size = new System.Drawing.Size(152, 22);
+            this.mnuClear.Size = new System.Drawing.Size(140, 22);
             this.mnuClear.Text = "Clear";
             this.mnuClear.Click += new System.EventHandler(this.mnuClear_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(137, 6);
+            // 
+            // mnuSelectAll
+            // 
+            this.mnuSelectAll.Name = "mnuSelectAll";
+            this.mnuSelectAll.Size = new System.Drawing.Size(140, 22);
+            this.mnuSelectAll.Text = "Select All";
+            this.mnuSelectAll.Click += new System.EventHandler(this.mnuSelectAll_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
+            // 
+            // mnuCopiar
+            // 
+            this.mnuCopiar.Name = "mnuCopiar";
+            this.mnuCopiar.Size = new System.Drawing.Size(140, 22);
+            this.mnuCopiar.Text = "Copy";
+            this.mnuCopiar.Click += new System.EventHandler(this.mnuCopiar_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(137, 6);
+            // 
+            // mnuSave
+            // 
+            this.mnuSave.Name = "mnuSave";
+            this.mnuSave.Size = new System.Drawing.Size(140, 22);
+            this.mnuSave.Text = "Save Log file";
+            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
             // 
             // frmMain
             // 
@@ -363,6 +363,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "frmMain";
             this.Text = "AT Serial Emulator";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.pnlTop.ResumeLayout(false);
             this.pnlTop.PerformLayout();
             this.pnlBottom.ResumeLayout(false);

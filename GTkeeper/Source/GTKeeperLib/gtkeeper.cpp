@@ -275,7 +275,7 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 
 			//Dependiendo si esta encendido o no
 			//OJO!!!NOTAR QUE ENCENDIDO ES ESTADO LOW, SI ES HIGH LA BOMBA NO FUNCIONA
-
+			/*
 			if (riegos->GetPosicion(1,actAbono)!=-1)
 			{
 				riegos->ApagaAbono(1);
@@ -291,7 +291,7 @@ if (strncmp(commandstr,buff_parse,strlen(buff_parse))==0)
 				if (config->AvisosSMS & SMSInicioSector)
 					gsm->Sms_P(config->MovilAviso,PSTR("Arrancada bomba de abono por SMS"));
 				#endif
-			}
+			}*/
 
 		}
 		//Comando para mostrar la información de estado del reiego

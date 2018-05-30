@@ -106,7 +106,7 @@ int32_t PostHttpParametersCallback()
 			 if (Config.GetChangedConfig())
 			 {
 				memset(bufferapp,0,MAIN_BUFFER_SIZE);
-				strcpy(bufferapp,"C:+");
+				strcpy(bufferapp,"+C:");
 				t+=GSMModem.SendRawData(bufferapp);
 				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				 Config.ConfiguracionToString(bufferapp);
@@ -118,7 +118,10 @@ int32_t PostHttpParametersCallback()
 			 if (Riego.GetChangedProgramas())
 			 {
 
-			 	
+			 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
+			 	strcpy(bufferapp,"+P:");
+			 	t+=GSMModem.SendRawData(bufferapp);
+
 
 				 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 				 {
@@ -133,22 +136,28 @@ int32_t PostHttpParametersCallback()
 			 //Salidas
 			 if (Riego.GetChangedRiegos())
 			 {
+			 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
+			 	strcpy(bufferapp,"+S:");
+			 	t+=GSMModem.SendRawData(bufferapp);
 
 			 
-			 for (uint8_t i=0;i<numsalidas;i++)
-			 {
-				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
-				 Riego.SalidaToString(i,bufferapp);
-				 t+=GSMModem.SendRawData(bufferapp);
-				 t+=GSMModem.SendRawData_P(CRLF);
-			 }
+				 for (uint8_t i=0;i<numsalidas;i++)
+				 {
+					 memset(bufferapp,0,MAIN_BUFFER_SIZE);
+					 Riego.SalidaToString(i,bufferapp);
+					 t+=GSMModem.SendRawData(bufferapp);
+					 t+=GSMModem.SendRawData_P(CRLF);
+				 }
 			 }
 
 			 //Log
 			 //El archivo de log se lee de la SD... 'si esta disponible'
 			 if (logsize>0)
 			 {
-				SDCard.WriteLogToStream(GSMModem.GetStream());//Escribe el contenido de los logs al stream
+				memset(bufferapp,0,MAIN_BUFFER_SIZE);
+				strcpy(bufferapp,"+L:");
+				t+=GSMModem.SendRawData(bufferapp);
+				t+=SDCard.WriteLogToStream(GSMModem.GetStream());//Escribe el contenido de los logs al stream
 			 }
 
 			//Boundary
@@ -182,21 +191,24 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 	//Leemos parcialmente para no saturar el buffer de Recepcion del puerto serie
 	LOG_DEBUG("INI WHILE");
 
-	while (	contador!=length && result==LOAD_WEB_OK ) //Mientras no haya errores de procesamiento
+	while (	contador<length && result==LOAD_WEB_OK ) //Mientras no haya errores de procesamiento
 	{
 	
 		 LOG_DEBUG("LEIDO??");
 		//Obtenemos los 3 primeros caracteres, son los que nos marcaran el contenido que vamos a leer
 		if (GSMModem.GetHttpBuffer(contador,3,bufferapp))	
 		{
-			LOG_DEBUG("LEIDOS +3");
+			LOG_DEBUG_ARGS_B("LEIDOS +3:%s",bufferapp);
 			//Incrementamos el contador
 			contador+=3;
 
 
-		 
-			if  (strncmp_P(bufferapp,PSTR("R+:"),3)==0) //Respuesta
+			LOG_DEBUG_ARGS_B("R+?%s",bufferapp);
+			if  (strncmp_P(bufferapp,PSTR("+R:"),3)==0) //Respuesta
 			{
+				
+				LOG_DEBUG("R+!");
+
 				if (GSMModem.GetHttpBuffer(contador,1,bufferapp))
 				{
 					contador+=3;//1 caracter + CRLF caracteres
@@ -216,7 +228,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 				else
 				result=LOAD_WEB_ERR_MALFORMED_FILE;
 			}
-			else if  (strncmp_P(bufferapp,PSTR("C+:"),3)==0) //Config
+			else if  (strncmp_P(bufferapp,PSTR("+C:"),3)==0) //Config
 			{
 				
 				LOG_DEBUG("CONFIG!");
@@ -234,6 +246,8 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 					{
 						if (!Config.CargaConfigDesdeString(bufferapp))
 						result=LOAD_WEB_ERR_CANT_LOAD_CONFIG;
+						else
+							LOG_DEBUG_ARGS("Cargada configuración %i %s",strlen(bufferapp),bufferapp);
 					}
 					else
 						result=LOAD_WEB_ERR_MALFORMED_CONFIG;
@@ -243,7 +257,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 
 	
 			}
-			else if  (strncmp_P(bufferapp,PSTR("D+:"),3)==0) //Eliminar programacion
+			else if  (strncmp_P(bufferapp,PSTR("+D:"),3)==0) //Eliminar programacion
 			{
 
 				if (GSMModem.GetHttpBuffer(contador,1,bufferapp))
@@ -263,7 +277,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 					result=LOAD_WEB_ERR_MALFORMED_FILE;
 
 			}
-			else if  (strncmp_P(bufferapp,PSTR("P+:"),3)==0)//Programa
+			else if  (strncmp_P(bufferapp,PSTR("+P:"),3)==0)//Programa
 			{
  						
 				//Leemos programa
@@ -277,7 +291,12 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 					if (strlen(bufferapp)==LEN_PROGRAMA_STRING)
 					{
 						if (Riego.CargaProgramaDesdeString(currentprogram,bufferapp))
-						currentprogram++;
+						{
+							memset(bufferapp,0,MAIN_BUFFER_SIZE);
+							Riego.ProgramaToDisplay(currentprogram,bufferapp);
+							LOG_DEBUG_ARGS("Programa desde Web %i-> %s",currentprogram ,bufferapp);
+							currentprogram++;
+						}
 						else
 						result=LOAD_WEB_ERR_CANT_LOAD_PROGRAM;
 					}
@@ -307,14 +326,21 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 		LOG_DEBUG("FICHERO WEB LEIDO CORRECTAMENTE");
 		//Guardamos programas
 		if (Riego.GetChangedProgramas())
+		{
 			Riego.GuardarProgramasEEPROM();
+			LOG_DEBUG("Guardados programa correctamente");
+		}
 
 		//Guardamos config
 		if (Config.GetChangedConfig())
+		{
 			Config.EEPROMGuardaConfig();
+			LOG_DEBUG("Guardada config correctamente");
+		}
 
 
 		gtKeeper.UpdateWebSuccess();
+		LOG_DEBUG("Success!");
 
 		//Avisamos por SMS?
 	}
