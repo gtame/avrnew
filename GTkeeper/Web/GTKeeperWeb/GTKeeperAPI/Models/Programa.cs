@@ -145,4 +145,10 @@ tEstadistica;
 
 
     }
+
+
+    public class Programas:List<Programa>
+    {
+
+    }
 }

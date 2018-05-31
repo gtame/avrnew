@@ -20,7 +20,7 @@
 	
 	assertFalse(gtKeeper.CheckWeb()); //Por defecto false;
 
-
+	
 
 	 //Cargamos configuracion 
 	 Config.CargaConfigDesdeString(CONST_CONFIG_STRING);
@@ -79,15 +79,27 @@
 	memset(buffer_test,0,MAIN_BUFFER_SIZE);
 	Config.ResetConfig();
 	//assertTrue(Config.GetChangedConfig());
+	
 
+	
 	Config.CargaConfigDesdeString(CONST_CONFIG_STRING);
 	assertTrue(Config.GetChangedConfig());
 
+	
 
+	
+	
+	
 	assertTrue(SDCard.ClearLogs());
 	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
 
 	LOG_DEBUG_ARGS("COnfig %i",Config.GetChangedConfig());
+	
+	
+	Config.config.lastupdateconfig=1;
+	Config.config.lastupdateprog=1;
+	GSMModem.GetIMEI(Config.config.Imei);
+	LOG_DEBUG_ARGS("Imei %s",Config.config.Imei);
 
 	gtKeeper.OnWeb();
 

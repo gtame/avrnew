@@ -19,14 +19,18 @@ namespace GTKeeperAPI.Models
     }
     SmsAviso;
 
+   
 
-//--Numero para enviar avisos
-//--Configuracion APN
-//--UserAPN
-//--PwdAPN
-//--Password para sms
-//--Nivel de envios de sms
-typedef struct  {
+
+
+
+    //--Numero para enviar avisos
+    //--Configuracion APN
+    //--UserAPN
+    //--PwdAPN
+    //--Password para sms
+    //--Nivel de envios de sms
+    typedef struct  {
 
     char MovilAviso[15];
     char PasswordSMS[5];
@@ -66,30 +70,70 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         SMSReservado3 = (1 << 6)//64
     }
 
-
-
-    public class Config
+    public class Device
     {
 
-        public string MovilAviso { get; set; }
-        public string PasswordSMS { get; set; }
-        public SmsAviso AvisosSMS { get; set; }
+        private Programas _programas=null;
+
+        public string Nombre { get; set; } //Nombre del dispositivo
 
         public string Imei { get; set; } //Imei del modulo GSM - tiene 14 o 15 caracters mas el NULL =16
-        public string APN { get; set; } //APN utilizado para conexion internet x modulo GSM
-        public string UserAPN { get; set; }  // Usuario APN (en el caso que lo tenga)
 
-        public string PwdAPN { get; set; }  // Pwd APN (en el caso que lo tenga)
 
-        public bool GSMAvailable { get; set; } //Modulo GSM disponible
+        #region SMS
+        public string MovilAviso { get; set; }
+
+        public string PasswordSMS { get; set; }
+
+        public SmsAviso AvisosSMS { get; set; }
+        #endregion 
+
         public int NumPuertos { get; set; } //Numero de puertos (sectores)
         public int NumAbono { get; set; }//Numero de bombas  de abono.
         public bool MotorDiesel { get; set; }//indicador si hay motor para riego
 
+
         public DateTime LastUpdateConfig {get;set; }//Cuando se cargo por ultima vez la configuracion desde web
+
         public DateTime LastUpdateProgram { get; set; }//Cuando se cargo por ultima vez la configuracion desde web
-        public DateTime LastHora { get; set; }//Cuando se cargo por ultima vez la configuracion desde web
+
+        public DateTime LastHora { get; set; }//Variable para indicar la hora del dispositivo
 
         //char flag_check; //Este flag es para comprobar que la configuracion se lee correctamnete, siempre que se lee debe ir a 'X';
+
+        
+        /// <summary>
+        /// Programas de riego asociados al dispositivo
+        /// </summary>
+        public Programas Programas
+        {
+            get
+            {
+                if (_programas == null)
+                    _programas = new Programas();
+                return _programas;
+            }
+        }
+
+
+        /// <summary>
+        /// Pasa a cadena para el traspaso de información al dispositivo
+        /// </summary>
+        /// <returns>
+        ///12765331679911111215
+        ///3 para AvisosSMS
+        ///6 siguientes para movil
+        ///NUM 4 password sms
+        ///BOOL 1 o 0 para motor diesel
+        ///NUM 1 para abono
+        ///NUM 2 para puertos
+        ///char config[] = "12765331679911111215";
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format("{0:000}{1}{2}{3}{4}{5:00}", (int)AvisosSMS, MovilAviso, PasswordSMS, (MotorDiesel?"1":"0"), NumAbono, NumPuertos);
+        }
     }
+    
+    public class Devices : List<Device> { }
 }

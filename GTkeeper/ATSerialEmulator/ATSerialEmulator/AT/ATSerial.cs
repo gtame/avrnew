@@ -234,8 +234,15 @@ namespace ATSerialEmulator
                             if (responseDict.ContainsKey(readed))
                             {
                                 string response = responseDict[readed];
-                                Logger.Info($"<<{response}");
-                                _serial.WriteLine(response);
+
+                                if (!string.IsNullOrEmpty(response))
+                                {
+                                    foreach (string resp in response.Split(';'))
+                                    {
+                                        Logger.Info($"<<{resp}");
+                                        _serial.WriteLine(resp);
+                                    }
+                                }
                             }
                             else
                             {

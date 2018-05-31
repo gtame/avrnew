@@ -72,7 +72,7 @@ static const char CRLF[] PROGMEM= "\r\n";;
 #define MAX_ERROR_WEB 20 //Numero de errores Máx para intentar realizar la comprobación Web
 //#define SETTING_URL_PROGRAMACION "http://clubciclistautebo.es/custom/programas.php?id=%s"
 //#define SETTING_URL_PROGRAMACION "file://C:\\test.txt"
-#define SETTING_URL_PROGRAMACION "http://localhost:3010/api/values/programacion"
+#define SETTING_URL_PROGRAMACION "http://localhost:3010/api/values/programacion?imei=%s&lup=%08i&luc=%08i"
 //#define SETTING_URL_CONFIG "http://localhost:3010/api/values/config"
 //#define URL_SEND_SALIDAS "http://localhost:3010/api/values/salidas"
 //#define URL_SEND_SALIDAS "http://clubciclistautebo.es/custom/post.php?SN=%s"

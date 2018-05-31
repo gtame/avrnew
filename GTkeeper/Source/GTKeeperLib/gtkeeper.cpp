@@ -11,8 +11,8 @@ GTKeeper::GTKeeper(Configuracion *iconfiguracion,	GSM* gsmmodem,Riegos * iriegos
 {
 	buffer=ibuffer;
 	buffersize=isize;
-	config=&configuracion->config;
 	configuracion=iconfiguracion;
+	config=&configuracion->config;
 	gsm=gsmmodem;
 	riegos=iriegos;
 	logsd=ilogsd;

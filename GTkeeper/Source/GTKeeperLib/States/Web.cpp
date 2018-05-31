@@ -55,14 +55,15 @@ int32_t PostHttpParametersCallback()
 	//El formato del envio del fichero es con este formato
 	//+C:CONFIG<CR><LF>
 	//+P:PROGRAM1<CR><LF>
+	//+C:CONFIG<CR><LF>
+	//+P:PROGRAM1<CR><LF>
 	//PROGRAM2<CR><LF>
 	//+S:SALIDA1<CR><LF>
 	//SALIDA2<CR><LF>
 	//+L:LOG1<CR><LF>
 	//LOG2<CR><LF>
 
-	
-
+	 
 	LOG_DEBUG_ARGS_B("totalLen %i",totalLen);
 	//Check si no hay que enviar nada ...
 	if (totalLen==POST_HEADERS_LEN)
@@ -71,27 +72,24 @@ int32_t PostHttpParametersCallback()
 
 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
 	strcpy_P(bufferapp,boundary);
-	
-
-
 	if (GSMModem.SendCommandCheck( F("AT+HTTPPARA=\"CONTENT\",\"multipart/form-data; boundary=%s\""),(const  __FlashStringHelper*) ATSerial::AT_OK,bufferapp)==RX_CHECK_OK)
 	{
 		
 
 		if (GSMModem.SendCommandCheck( F("AT+HTTPDATA=%i,10000"),F("DOWNLOAD"), totalLen)==RX_CHECK_OK)
 		{
-
-			//delay(500);
-
 			uint32_t t=0;
+		 
 			//t+=SendRawData("Accept-Encoding: deflate");
 			//Vomitamos lo que hayamos registrado
 			//Boundary
-			t=GSMModem.SendRawData_P((const char *)guion_post);
+			t+=GSMModem.SendRawData_P((const char *)guion_post);
 			t+=GSMModem.SendRawData_P((const char *)boundary);
 			t+=GSMModem.SendRawData_P((const char *)CRLF);
 	 
-			//Cabecera
+	  
+		 
+			//ARchivo
 			t+=GSMModem.SendRawData_P(PSTR("Content-Disposition: form-data; name=\"submitted\"; filename=\"abcd.txt\""));
 			t+=GSMModem.SendRawData_P(CRLF);
 
@@ -99,9 +97,9 @@ int32_t PostHttpParametersCallback()
 			t+=GSMModem.SendRawData_P(CRLF);
 			t+=GSMModem.SendRawData_P(CRLF);
 
-			//Ahora enviamos todo lo que haya en estadisticas
-			//t+=SendRawData("abcd\r\n");
-			 
+			
+ 
+ 
 			 //Config
 			 if (Config.GetChangedConfig())
 			 {
@@ -401,7 +399,7 @@ void GTKeeper::OnWeb()
 		 
 	//URL con imei como parameter
   	memset(buffer,0,MAIN_BUFFER_SIZE);
-	sprintf(buffer,SETTING_URL_PROGRAMACION,config->Imei);
+	sprintf_P(buffer,PSTR(SETTING_URL_PROGRAMACION),config->Imei,config->lastupdateprog, config->lastupdateconfig);
 
 	//Enviamos POST reques
 	if (!gsm->URLRequest(buffer,false,PostHttpParametersCallback,PostHttpResultCallback))

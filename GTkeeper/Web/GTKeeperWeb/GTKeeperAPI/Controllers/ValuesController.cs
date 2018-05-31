@@ -12,6 +12,28 @@ namespace GTKeeperAPI.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private Devices devices;
+
+        public ValuesController()
+        {
+            devices= new Devices();
+            devices.Add
+            (
+                new Device()
+                {
+                    Imei = "123456789012345",
+                    Nombre = "Test1",
+                    AvisosSMS = SmsAviso.SMSNone,
+                    MovilAviso = "653316799",
+                    MotorDiesel = false,
+                    NumAbono=1,
+                    NumPuertos=15
+
+                }
+                
+            )
+        }
+
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
@@ -28,7 +50,7 @@ namespace GTKeeperAPI.Controllers
 
 
         [HttpPost("programacion")]
-        public  IActionResult Programacion(IFormFile submitted)
+        public  IActionResult Programacion(string imei,string lup,string luc,IFormFile submitted)
         {
             //long size = files.Sum(f => f.Length);
 
@@ -128,5 +150,7 @@ namespace GTKeeperAPI.Controllers
         public void Delete(int id)
         {
         }
+
+
     }
 }
