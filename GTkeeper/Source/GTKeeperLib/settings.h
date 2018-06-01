@@ -27,7 +27,7 @@ static const char CRLF[] PROGMEM= "\r\n";;
 
 
 
-#define LEN_SEPARATOR_WEB_ITEM 3  //Separador para el archivo web
+#define LEN_SEPARATOR_WEB_ITEM 5  //Separador para el archivo web
 //+C:CONFIG
 //+P:PROGRAM
 //+S:SALIDA

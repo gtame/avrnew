@@ -71,52 +71,44 @@
  }
 
 
+
+//Test para comprobar que la solicitud se realiza correctamente
  test(web_OnWeb)
  {
-   // GSMModem modem;
-	//assertTrue( PostHttpResultCallback("http://loquesea",6)==LOAD_WEB_OK);
-
+   
+	//Cargamos configuracion
 	memset(buffer_test,0,MAIN_BUFFER_SIZE);
 	Config.ResetConfig();
-	//assertTrue(Config.GetChangedConfig());
-	
-
-	
 	Config.CargaConfigDesdeString(CONST_CONFIG_STRING);
 	assertTrue(Config.GetChangedConfig());
 
-	
-
-	
-	
-	
+	//Escribimos Log
 	assertTrue(SDCard.ClearLogs());
-	assertTrue(SDCard.WriteLog("claro que hace")!=-1);
+	assertTrue(SDCard.WriteLog("Prueba escritura")!=-1);
 
-	LOG_DEBUG_ARGS("COnfig %i",Config.GetChangedConfig());
-	
-	
 	Config.config.lastupdateconfig=1;
 	Config.config.lastupdateprog=1;
 	GSMModem.GetIMEI(Config.config.Imei);
 	LOG_DEBUG_ARGS("Imei %s",Config.config.Imei);
 
+	//Realizamos solicitud
 	gtKeeper.OnWeb();
 
-	//Acaba perfect, no hay errores!!! :D
+	//Check! - Acaba perfect, no hay errores!!! :D
 	assertTrue(gtKeeper.GetErroresWeb()==0);
+	
+	//No deberia tragar
+	assertFalse(gtKeeper.CheckWeb());
 
 
+	//Arrancamos un riego
 	 Riego.EnciendePrograma(0);
 
-	//Ahora deberia tragar
-	//Adelantamos el tiempo
+	//Adelantamos el tiempo , para que CheckWeb si que trague
 	setTime(now()+WEB_ERROR_SEND_TIME+1);
 	assertTrue(gtKeeper.CheckWeb());
 
-
-
-	
+	//Deberian
 	gtKeeper.OnWeb();
 
 	//Acaba perfect, no hay errores!!! :D

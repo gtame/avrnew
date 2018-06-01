@@ -120,12 +120,7 @@ tEstadistica;
 
         }
 
-        //03101010120001200000
-        //03->Sector
-        //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
-        //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
-        //0120 -> Tiempo de riego
-        //0000 -> Tiempo de abono
+        
 
         public int Sector { get; set; }
 
@@ -138,9 +133,48 @@ tEstadistica;
         public TimeSpan TiempoAbono { get; set; }
 
 
+        //03101010120001200000
+        //03->Sector
+        //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
+        //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
+        //0120 -> Tiempo de riego
+        //0000 -> Tiempo de abono
         public override string ToString()
         {
             return string.Format("{0:00}{1:000}{2:00}{3:00}{4:0000}{5:0000}", Sector, (int)Dias, Hora.Hours, Hora.Minutes, TiempoRiego.TotalMinutes, TiempoAbono.TotalMinutes);
+        }
+
+        //03101010120001200000
+        //03->Sector
+        //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
+        //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
+        //0120 -> Tiempo de riego
+        //0000 -> Tiempo de abono
+        public static Programa ParsePrograma (string programa)
+        {
+            if (string.IsNullOrEmpty(programa))
+                throw new Exception("La cadena esta vacía");
+
+            if (programa.Length != 17)
+                throw new Exception($"La longitud de la cadena es incorrecta (17) vs ({programa.Length})");
+
+            if (!programa.All(char.IsDigit))
+                throw new Exception("La cadena no puede contener caracteres,solo puede contener digitos");
+
+            
+            Programa prog = new Programa()
+            {
+                Sector = int.Parse(programa.Substring(0, 2)),
+                Dias = (Dia) int.Parse(programa.Substring(2, 3)),
+                Hora = TimeSpan.FromMinutes(int.Parse(programa.Substring(5, 2))*60 +  int.Parse(programa.Substring(7, 2))),
+                TiempoRiego =TimeSpan.FromMinutes(  int.Parse(programa.Substring(9, 4))),
+                TiempoAbono = TimeSpan.FromMinutes( int.Parse(programa.Substring(13)))
+            };
+
+            if ((int)prog.Dias != int.Parse(programa.Substring(2, 3)))
+                throw new Exception("No coinciden los dias");
+
+            return prog;
         }
 
 

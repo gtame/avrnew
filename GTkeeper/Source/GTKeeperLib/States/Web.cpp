@@ -106,6 +106,8 @@ int32_t PostHttpParametersCallback()
 				memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				strcpy(bufferapp,"+C:");
 				t+=GSMModem.SendRawData(bufferapp);
+				t+=GSMModem.SendRawData_P(CRLF);
+				
 				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				 Config.ConfiguracionToString(bufferapp);
 				 t+=GSMModem.SendRawData(bufferapp);
@@ -119,7 +121,7 @@ int32_t PostHttpParametersCallback()
 			 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
 			 	strcpy(bufferapp,"+P:");
 			 	t+=GSMModem.SendRawData(bufferapp);
-
+				t+=GSMModem.SendRawData_P(CRLF);
 
 				 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 				 {
@@ -137,7 +139,7 @@ int32_t PostHttpParametersCallback()
 			 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
 			 	strcpy(bufferapp,"+S:");
 			 	t+=GSMModem.SendRawData(bufferapp);
-
+				t+=GSMModem.SendRawData_P(CRLF);
 			 
 				 for (uint8_t i=0;i<numsalidas;i++)
 				 {
@@ -155,6 +157,7 @@ int32_t PostHttpParametersCallback()
 				memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				strcpy(bufferapp,"+L:");
 				t+=GSMModem.SendRawData(bufferapp);
+				t+=GSMModem.SendRawData_P(CRLF);
 				t+=SDCard.WriteLogToStream(GSMModem.GetStream());//Escribe el contenido de los logs al stream
 			 }
 
