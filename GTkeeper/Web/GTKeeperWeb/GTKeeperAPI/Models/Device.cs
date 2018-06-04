@@ -54,8 +54,6 @@ namespace GTKeeperAPI.Models
 }
 tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
-
-
     //Sumatorio total 127 para todos los dias
     [Flags]
     public enum SmsAviso
@@ -72,10 +70,32 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
     public class Device
     {
+        public const int MAX_PROGRAMAS = 48;
+
+        public Device()
+        {
+            _programas = new Programas();
+            for (int i = 0; i < MAX_PROGRAMAS; i++)
+                _programas.Add(new Programa());
+
+            _logs = new Models.Logs();
+            _salidas = new Models.Salidas();
+
+            LastUpdateProgram = System.DateTime.Now;
+            LastUpdateConfig = System.DateTime.Now;
+
+        }
+
+        #region Var Members
 
         private Programas _programas=null;
         private Salidas _salidas = null;
         private Logs _logs = null;
+
+        #endregion 
+
+        #region Properties
+        public int ID { get; set; }
 
         public string Nombre { get; set; } //Nombre del dispositivo
 
@@ -96,10 +116,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
         public bool MotorDiesel { get; set; }//indicador si hay motor para riego
 
-
         public bool IsConfigPendingSync { get; set; }
-
-        
 
         public DateTime LastUpdateConfig {get;set; }//Cuando se cargo por ultima vez la configuracion desde web
 
@@ -110,11 +127,12 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
         public DateTime? LastCommitDate { get; set; }//Variable para indicar el Sync
 
-        public DateTime LastSync { get; set; }//Variable para indicar la ultima sincronizacion
+        public DateTime? LastSync { get; set; }//Variable para indicar la ultima sincronizacion
 
         //char flag_check; //Este flag es para comprobar que la configuracion se lee correctamnete, siempre que se lee debe ir a 'X';
+        #endregion
 
-        
+        #region Programas
         /// <summary>
         /// Programas de riego asociados al dispositivo
         /// </summary>
@@ -122,8 +140,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         {
             get
             {
-                if (_programas == null)
-                    _programas = new Programas();
+
                 return _programas.AsReadOnly();
             }
         }
@@ -138,6 +155,18 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
             _programas[index].TiempoRiego = riego;
         }
 
+
+        public void SetPrograma(int index,Programa programa)
+        {
+
+            if (_programas.Count>index)
+                _programas.RemoveAt(index);
+
+            _programas.Insert(index, programa);
+        }
+
+        #endregion
+
         #region Salidas
 
         /// <summary>
@@ -146,9 +175,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         public IReadOnlyCollection<Salida> Salidas
         {
             get
-            {
-                if (_salidas == null)
-                    _salidas = new Salidas();
+            { 
                 return _salidas.AsReadOnly();
             }
         }
@@ -221,9 +248,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         {
             get
             {
-                if (_logs == null)
-                    _logs = new Logs();
-                return _logs.AsReadOnly();
+                 return _logs.AsReadOnly();
             }
         }
 
@@ -257,6 +282,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
         #endregion
 
+        #region Methods
 
         public void CommitChanges()
         {
@@ -266,6 +292,71 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         }
 
 
+        public bool IsPendingConfig(string luc)
+        {
+            if (IsConfigPendingSync)
+            {
+                if (string.IsNullOrEmpty(luc))
+                    return true;
+                else
+                    return (LastUpdateConfig.Ticks > long.Parse(luc));
+            }
+            else
+                return false;
+        }
+
+        public bool IsUpdateConfig(string luc)
+        {
+        
+            if (string.IsNullOrEmpty(luc) || long.Parse(luc) == 0)
+                return true;
+            else
+                return (long.Parse(luc) >LastUpdateConfig.Ticks);
+    
+        }
+        
+        public bool IsPendingProgram(string lup)
+        {
+            if (IsProgramPendingSync)
+            {
+                if (string.IsNullOrEmpty(lup) )
+                    return true;
+                else
+                    return (LastUpdateProgram.Ticks > long.Parse(lup));
+            }
+            else
+                return false;
+        }
+
+        public bool IsUpdateProgram(string lup)
+        {
+
+            if (string.IsNullOrEmpty(lup) || long.Parse(lup)==0)
+                return true;
+            else
+                return (long.Parse(lup) > LastUpdateProgram.Ticks);
+
+        }
+
+        /// <summary>
+        /// Pasa a cadena para el traspaso de información al dispositivo
+        /// </summary>
+        /// <returns>
+        ///12765331679911111215
+        ///3 para AvisosSMS
+        ///6 siguientes para movil
+        ///NUM 4 password sms
+        ///BOOL 1 o 0 para motor diesel
+        ///NUM 1 para abono
+        ///NUM 2 para puertos
+        ///char config[] = "1276533167991111121";
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format("{0:000}{1}{2}{3}{4}{5:00}", (int)AvisosSMS, MovilAviso, PasswordSMS, (MotorDiesel?"1":"0"), NumAbono, NumPuertos);
+        }
+
+        #region ParseFile
         enum LineType
         {
             Desconocido,
@@ -274,12 +365,20 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
             Salida,
             Log
         };
+        public bool ParseFile(string path,string latupdateprogram,string lastupdateconfig)
+        {
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
+                return false;
+            else
+                return ParseFile(System.IO.File.ReadAllLines(path), latupdateprogram,  lastupdateconfig);
+        }
 
-        public bool ParseFile (string [] lines)
+        public bool ParseFile(string[] lines, string latupdateprogram, string lastupdateconfig)
         {
 
             bool result = true;
             LineType linetype = LineType.Desconocido;
+            int progIndex = 0;
 
             foreach (string line in lines)
             {
@@ -311,22 +410,27 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
                             {
                                 case LineType.Config:
                                     {
-                                        
+                                        if(IsUpdateConfig(lastupdateconfig))
+                                            ParseDevice(line);
                                     }
                                     break;
                                 case LineType.Salida:
                                     {
-
+                                        AddSalida(Salida.ParseSalida(line));
                                     }
                                     break;
                                 case LineType.Programa:
                                     {
-
+                                        if (IsUpdateProgram(latupdateprogram))
+                                        {
+                                            SetPrograma(progIndex, Programa.ParsePrograma(line));
+                                            progIndex++;
+                                        }
                                     }
                                     break;
                                 case LineType.Log:
                                     {
-
+                                        AddLog(line);
                                     }
                                     break;
                                 case LineType.Desconocido:
@@ -343,52 +447,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
             return result;
         }
-
-        public bool IsPendingConfig(string luc)
-        {
-            if (IsConfigPendingSync)
-            {
-                if (string.IsNullOrEmpty(luc))
-                    return true;
-                else
-                    return (LastUpdateConfig.Ticks > long.Parse(luc));
-            }
-            else
-                return false;
-        }
-
-
-        public bool IsPendingProgram(string lup)
-        {
-            if (IsProgramPendingSync)
-            {
-                if (string.IsNullOrEmpty(lup))
-                    return true;
-                else
-                    return (LastUpdateProgram.Ticks > long.Parse(lup));
-            }
-            else
-                return false;
-        }
-
-        /// <summary>
-        /// Pasa a cadena para el traspaso de información al dispositivo
-        /// </summary>
-        /// <returns>
-        ///12765331679911111215
-        ///3 para AvisosSMS
-        ///6 siguientes para movil
-        ///NUM 4 password sms
-        ///BOOL 1 o 0 para motor diesel
-        ///NUM 1 para abono
-        ///NUM 2 para puertos
-        ///char config[] = "1276533167991111121";
-        /// </returns>
-        public override string ToString()
-        {
-            return string.Format("{0:000}{1}{2}{3}{4}{5:00}", (int)AvisosSMS, MovilAviso, PasswordSMS, (MotorDiesel?"1":"0"), NumAbono, NumPuertos);
-        }
-
+        #endregion
 
 
         public void ParseDevice(string device)
@@ -397,7 +456,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
             if (string.IsNullOrEmpty(device))
                 throw new Exception("La cadena esta vacía");
 
-            if (device.Length != 19)
+            if (device.Length != 17)
                 throw new Exception($"La longitud de la cadena es incorrecta (17) vs ({device.Length})");
 
             if (!device.All(char.IsDigit))
@@ -414,6 +473,8 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
                 throw new Exception("No coinciden los avisos SMS");
             
         }
+
+        #endregion
 
     }
     

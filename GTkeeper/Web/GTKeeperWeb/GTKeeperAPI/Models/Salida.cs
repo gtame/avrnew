@@ -25,7 +25,8 @@ namespace GTKeeperAPI.Models
 
     public class Salida
     {
-        
+        public int SalidaID { get; set; }
+
         public int? Programa { get; set; }
 
         public int? Sector { get; set; }
@@ -36,11 +37,13 @@ namespace GTKeeperAPI.Models
 
         public DateTime? Hasta { get; set; }
 
-
         public static Salida ParseSalida(string salida)
         {
             return null;
         }
+
+
+        public Device Device { get; set; }
 
     }
 }

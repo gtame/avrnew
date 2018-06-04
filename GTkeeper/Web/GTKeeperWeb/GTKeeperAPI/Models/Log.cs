@@ -27,16 +27,16 @@ namespace GTKeeperAPI.Models
 
     public class Log
     {
+        #region Properties
+        public int LogID { get; set; }
         public LogType Type { get; set; }
-        
         public string Mensaje { get; set; }
-
         public System.DateTime Fecha { get; set; }
-
         public System.DateTime Registrado { get; set; }
-
-
         public LogSource Source { get; set; }
+        #endregion
+
+        public Device  Device { get; set; }
 
 
     }

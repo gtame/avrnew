@@ -16,6 +16,7 @@ namespace GTKeeperAPI
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
         }
 
         public IConfiguration Configuration { get; }
@@ -23,6 +24,9 @@ namespace GTKeeperAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add framework services.
+            services.AddDbContext<GTKeeperAPI.Models.GTKeeperContext>();
+
             services.AddMvc();
         }
 
@@ -33,7 +37,8 @@ namespace GTKeeperAPI
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

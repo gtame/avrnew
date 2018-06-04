@@ -13,10 +13,14 @@ namespace GTKeeperAPI.Controllers
     public class ValuesController : Controller
     {
         private Devices devices;
+        private readonly GTKeeperContext _dbContext;
 
-        public ValuesController()
+        public ValuesController(GTKeeperContext dbContext)
         {
+            _dbContext = dbContext;
+        
             devices= new Devices();
+ 
             devices.Add
             (
                 new Device()
@@ -31,8 +35,7 @@ namespace GTKeeperAPI.Controllers
 
                 }
             );
-
-
+            
             Random rnd = new Random();
             //Generamos programas para cada device
             foreach (var device in devices)
@@ -112,12 +115,12 @@ namespace GTKeeperAPI.Controllers
             device.LastSync = System.DateTime.Now;
 
             //Chequeamos si esta pdte de sincronizar la config
-            if (device.IsConfigPendingSync)
-                result += device.ToString();
+            if (device.IsPendingConfig(luc))
+                result += "\r\n" + device.ToString();
 
             //Chequeamos si esta pdte de sincronizar la programación
-            if (device.IsProgramPendingSync)
-                result += device.Programas.ToString();
+            if (device.IsPendingProgram(lup))
+                result += "\r\n" + device.Programas.ToString();
 
 
             return Ok(result);
@@ -150,25 +153,19 @@ namespace GTKeeperAPI.Controllers
 
             //Parseamos el archivo entrante
             string[] lines = System.IO.File.ReadAllLines(filePath);
-            if (!device.ParseFile(lines))
+            if (!device.ParseFile(lines,lup,luc))
                 result += "+R:E";
             else
                 result += "+R:O";
 
+ 
             //Chequeamos si esta pdte de sincronizar la config
             if (device.IsPendingConfig(luc))
-                result += "\r\n"+ device.ToString();
+                result += "\r\n" + device.ToString();
 
             //Chequeamos si esta pdte de sincronizar la programación
             if (device.IsPendingProgram(lup))
                 result += "\r\n" + device.Programas.ToString();
-
-
-            // process uploaded files
-            // Don't rely on or trust the FileName property without validation.
-
-
-
 
 
             //Todo recibido OK

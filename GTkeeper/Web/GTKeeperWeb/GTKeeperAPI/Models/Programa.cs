@@ -96,6 +96,35 @@ tEstadistica;
     public class Programa
     {
 
+
+
+        public Programa ()
+        {
+            Sector = 0;
+            Dias = Dia.None;
+            Hora =new TimeSpan(0,99,99,0,0);
+            TiempoRiego = TimeSpan.FromTicks(0);
+            TiempoAbono = TimeSpan.FromTicks(0);
+        }
+
+        #region Properties
+        public int ProgramaID { get; set; }
+        public int Sector { get; set; }
+
+        public Dia Dias { get; set; }
+
+        public TimeSpan Hora { get; set; }
+
+        public TimeSpan TiempoRiego { get; set; }
+
+        public TimeSpan TiempoAbono { get; set; }
+
+        #endregion
+
+        public Device Device { get; set; }
+
+
+        #region Methods
         public static Dia GetDia(DayOfWeek day)
         {
             switch (day)
@@ -119,20 +148,6 @@ tEstadistica;
             return Dia.None;
 
         }
-
-        
-
-        public int Sector { get; set; }
-
-        public Dia Dias { get; set; }
-
-        public TimeSpan Hora { get; set; }
-
-        public TimeSpan TiempoRiego { get; set; }
-
-        public TimeSpan TiempoAbono { get; set; }
-
-
         //03101010120001200000
         //03->Sector
         //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
@@ -176,7 +191,7 @@ tEstadistica;
 
             return prog;
         }
-
+        #endregion
 
     }
 
