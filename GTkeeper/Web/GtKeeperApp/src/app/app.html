@@ -1,0 +1,64 @@
+<ion-menu [content]="content" id="mnuprog">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Programas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <ion-list>
+      <button menuClose ion-item >Eliminar programacion</button>
+      <button menuClose ion-item >Guardar a favoritos</button>
+      <button menuClose ion-item >Cargar programacion</button>
+      <button menuClose ion-item >Ejecutar asistente</button>
+    </ion-list>
+  </ion-content>
+
+</ion-menu>
+
+
+
+<ion-menu [content]="content" id="mnuconfig">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Config</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <ion-list>
+      <button menuClose ion-item >xuno</button>
+      <button menuClose ion-item >xuno2</button>
+      <button menuClose ion-item >xuno3</button>
+      <button menuClose ion-item >xuno4</button>
+    </ion-list>
+  </ion-content>
+
+</ion-menu>
+
+
+
+<ion-menu [content]="content" id="mnustat">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Estadisticas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <ion-list>
+      <button menuClose ion-item >xuno</button>
+      <button menuClose ion-item >xuno2</button>
+      <button menuClose ion-item >xuno3</button>
+      <button menuClose ion-item >xuno4</button>
+    </ion-list>
+  </ion-content>
+
+</ion-menu>
+
+
+
+
+<!-- Disable swipe-to-go-back because it's poor UX to combine STGB with side menus -->
+<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>
+

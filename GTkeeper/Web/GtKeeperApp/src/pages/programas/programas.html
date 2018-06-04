@@ -1,0 +1,53 @@
+<ion-header>
+    <!--<ion-nav #mycontent [root]="rootPage"></ion-nav>-->
+    <ion-navbar #content>
+
+        <ion-buttons start>
+            <button ion-button (click)="backToRoot()" clear>Back</button>
+        </ion-buttons>
+
+        <ion-title>{{device.name}}</ion-title>
+
+        <ion-buttons end>
+            <button ion-button menuToggle icon-only>
+              <ion-icon name='menu'></ion-icon>
+            </button>
+        </ion-buttons>
+
+
+    </ion-navbar>
+</ion-header>
+
+
+
+
+
+<ion-content padding>
+
+
+
+    <ion-card *ngIf="!tieneProgramas">
+        <ion-card-header>
+            <ion-icon name='water' large></ion-icon> No hay programacion
+        </ion-card-header>
+
+        <ion-card-content>
+            No hay riegos programados
+            <br/>
+            <br/>
+            <button ion-button (click)="addPrograma()">
+                Programar riegos
+            </button>
+        </ion-card-content>
+
+    </ion-card>
+
+
+    <ion-list *ngIf="tieneProgramas">
+        <ion-item *ngFor="let programa of device.programas">
+            <ion-icon name="leaf" item-left></ion-icon>
+            Terminator II
+        </ion-item>
+    </ion-list>
+
+</ion-content>

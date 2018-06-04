@@ -2,6 +2,8 @@
 .vs/
 Debug/
 bin
+obj
+
 Release/
 */Libraries/**/Debug
 */Libraries/**/Release

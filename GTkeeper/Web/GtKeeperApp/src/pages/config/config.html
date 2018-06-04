@@ -1,0 +1,20 @@
+<ion-header>
+    <ion-navbar>
+
+        <ion-buttons start>
+            <button ion-button (click)="backToRoot()" clear>Back</button>
+        </ion-buttons>
+
+        <ion-title>{{device.name}}</ion-title>
+
+        <ion-buttons end>
+            <button ion-button menuToggle icon-only>
+              <ion-icon name='menu'></ion-icon>
+            </button>
+        </ion-buttons>
+
+
+    </ion-navbar>
+</ion-header>
+
+<config-component [device]="device" (save)="saveConfig($event)"></config-component>

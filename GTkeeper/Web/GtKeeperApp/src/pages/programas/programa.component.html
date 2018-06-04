@@ -1,0 +1,106 @@
+<ion-header>
+    <!--<ion-nav #mycontent [root]="rootPage"></ion-nav>-->
+    <ion-navbar #content>
+
+<!--
+        <ion-buttons start>
+            <button ion-button (click)="backToRoot()" clear>Back</button>
+        </ion-buttons>
+-->
+        <ion-title>Programa {{programa}}</ion-title>
+
+        <ion-buttons end>
+            <button ion-button menuToggle icon-only>
+              <ion-icon name='menu'></ion-icon>
+            </button>
+        </ion-buttons>
+
+
+    </ion-navbar>
+</ion-header>
+
+
+
+
+
+<ion-content padding>
+
+    <form [formGroup]="programaForm" (submit)="savePrograma()">
+        <ion-list>
+            <ion-list-header>
+                Programacion
+            </ion-list-header>
+
+            <ion-item>
+                <ion-label>Sector</ion-label>
+                <ion-select formControlName="sector" id="sector">
+                    <ion-option *ngFor="let item of getSectores();let i = index" [value]="i+1">{{i+1}}</ion-option>
+                </ion-select>
+            </ion-item>
+
+            <ion-item>
+                <ion-label>Tipo</ion-label>
+                <ion-select>
+                    <ion-option value="0">Fecha</ion-option>
+                    <ion-option value="1">Secuencia</ion-option>
+                </ion-select>
+            </ion-item>
+
+<!-- Si es con fecha hora inicio -->
+
+            <ion-item>
+                <ion-label>Hora inicio</ion-label>
+                <ion-datetime displayFormat="HH:mm" formControlName="phone" id="phone"></ion-datetime>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Dias</ion-label>
+                <ion-select formControlName="diasArray" id="diasArray"  multiple="true">
+                    <ion-option [value]="DiasSemana.L">Lunes</ion-option>
+                    <ion-option [value]="DiasSemana.M">Martes</ion-option>
+                    <ion-option [value]="DiasSemana.X">Miercoles</ion-option>
+                    <ion-option [value]="DiasSemana.J">Jueves</ion-option>
+                    <ion-option [value]="DiasSemana.V">Viernes</ion-option>
+                    <ion-option [value]="DiasSemana.S">Sabado</ion-option>
+                    <ion-option [value]="DiasSemana.D">Domingo</ion-option>
+                </ion-select>
+            </ion-item>
+
+
+<!-- Si es de secuencia debe especificar el PROGRAMA anterior -->
+
+
+            <ion-item>
+                <ion-label>Programa Previo</ion-label>
+                <ion-select formControlName="previo" id="previo">
+                    <ion-option *ngFor="let item of getSectores();let i = index" [value]="i">{{i}}</ion-option>
+                </ion-select>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Tiempo Riego</ion-label>
+                <ion-datetime displayFormat="YY:mm" min="1900" max="1999" formControlName="tiempo" id="tiempo"></ion-datetime>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Tiempo Abono</ion-label>
+                <ion-datetime displayFormat="YY:mm" min="1900" max="1999" formControlName="abono" id="abono"></ion-datetime>
+            </ion-item>
+     
+     
+     
+            <ion-item>
+                <ion-label>Motor diesel</ion-label>
+                <ion-toggle formControlName="motor" id="motor"></ion-toggle>
+            </ion-item>
+
+
+
+        </ion-list>
+        <button type="submit" [disabled]="!programaForm.valid" ion-button block>Siguiente</button>
+        <button type="submit" [disabled]="!programaForm.valid" ion-button block>Guardar</button>
+    </form>
+</ion-content>

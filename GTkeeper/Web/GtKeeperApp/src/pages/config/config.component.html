@@ -1,0 +1,128 @@
+<ion-header>
+    <ion-navbar>
+
+        <ion-buttons start>
+            <button ion-button (click)="backToRoot()" clear>Back</button>
+        </ion-buttons>
+
+        <ion-title>{{device.name}}</ion-title>
+
+        <ion-buttons end>
+            <button ion-button menuToggle icon-only>
+              <ion-icon name='menu'></ion-icon>
+            </button>
+        </ion-buttons>
+
+
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+
+    <form [formGroup]="configForm" (submit)="saveConfig()">
+        <ion-list>
+            <ion-list-header>
+                Configuracion
+            </ion-list-header>
+
+            <ion-item>
+                <ion-label fixed>Name</ion-label>
+                <ion-input type="name" formControlName="name" maxlength="25" id="name"></ion-input>
+            </ion-item>
+
+            <ion-item>
+                <ion-label fixed>Imei</ion-label>
+                <ion-label class="align-right">{{device.imei}}</ion-label>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label fixed>Telefono</ion-label>
+                <ion-input type="tel" formControlName="phone" maxlength="9" id="phone" text-right></ion-input>
+            </ion-item>
+
+            <ion-item>
+                <ion-label fixed>Email</ion-label>
+                <ion-input type="email" formControlName="mail" id="mail"></ion-input>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Pass SMS</ion-label>
+                <ion-input type="text" formControlName="pass" id="pass" maxlength="4" text-right></ion-input>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Sectores</ion-label>
+
+                <ion-select formControlName="sectores" id="sectores">
+                    <ion-option *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]" [value]="i">{{i}}</ion-option>
+                </ion-select>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Bombas Abono</ion-label>
+                <ion-select formControlName="abono" id="abono" mult>
+                    <ion-option value="0">0</ion-option>
+                    <ion-option value="1">1</ion-option>
+                    <ion-option value="2">2</ion-option>
+                </ion-select>
+            </ion-item>
+
+            <ion-item>
+                <ion-label>Motor diesel</ion-label>
+                <ion-toggle formControlName="motor" id="motor"></ion-toggle>
+            </ion-item>
+
+
+
+            <ion-item>
+                <ion-label>Avisos</ion-label>
+                <ion-select formControlName="avisoArray" id="avisoArray" multiple="true">
+                    <ion-option [value]="SmsAviso.SMSReset">Reset</ion-option>
+                    <ion-option [value]="SmsAviso.SMSInicioSector">Arrancar Sector</ion-option>
+                    <ion-option [value]="SmsAviso.SMSFinSector">Parar Sector</ion-option>
+                    <ion-option [value]="SmsAviso.SMSProgramacionWeb">Programar</ion-option>
+                </ion-select>
+            </ion-item>
+
+
+        </ion-list>
+
+
+
+        <!--
+        <ion-list *ngIf="modeAvisos">
+            <ion-list-header>
+                Avisos
+            </ion-list-header>
+            <ion-item>
+                <ion-label>Al reiniciar</ion-label>
+                <ion-checkbox [checked]="checkAviso(SmsAviso.SMSReset)"></ion-checkbox>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label>Al iniciar riego</ion-label>
+                <ion-checkbox [checked]="checkAviso(SmsAviso.SMSInicioSector)"></ion-checkbox>
+            </ion-item>
+            <ion-item>
+                <ion-label>Al parar riego</ion-label>
+                <ion-checkbox [checked]="checkAviso(SmsAviso.SMSFinSector)"></ion-checkbox>
+            </ion-item>
+            <ion-item>
+                <ion-label>Al cargar programacion</ion-label>
+                <ion-checkbox [checked]="checkAviso(SmsAviso.SMSProgramacionWeb)"></ion-checkbox>
+            </ion-item>
+        </ion-list>
+        <button type="button" *ngIf="!modeAvisos" ion-button block (click)="changeMode()">Avisos</button>
+        -->
+
+
+        <button type="submit" [disabled]="!configForm.valid" ion-button block>Guardar</button>
+
+    </form>
+</ion-content>

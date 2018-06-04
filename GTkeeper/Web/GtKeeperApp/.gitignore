@@ -1,0 +1,3 @@
+*.log
+www/
+node_modules/

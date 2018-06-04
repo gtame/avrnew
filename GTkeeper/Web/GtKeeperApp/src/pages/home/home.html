@@ -1,0 +1,38 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Dispositivos</ion-title>
+        <ion-buttons start>
+            <button ion-button (click)="logout()" clear>
+              Logout
+            </button>
+        </ion-buttons>
+        <ion-buttons end>
+            <button ion-button (click)="addDevice()" clear>
+              <ion-icon name="add"  class="sizeicon"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+<ion-content>
+    <ion-list>
+        <ion-list-header *ngIf="isEnUso()">
+            Dispositivos en Uso
+        </ion-list-header>
+        <ion-item *ngFor="let device of getEnUso()" (click)="clickedDevice($event,device)">
+            <ion-icon name="ionic" item-left></ion-icon>
+            {{device.name}}
+            <ion-badge item-right>{{device.salidas.length}}</ion-badge>
+        </ion-item>
+        <ion-list-header *ngIf="isEnParo()">Dispositivos parados</ion-list-header>
+        <ion-item *ngFor="let device of getEnParo()" (click)="clickedDevice($event,device)">
+            <ion-icon name="ionic" item-left></ion-icon>
+            {{device.name}}
+            <ion-badge item-right>0</ion-badge>
+        </ion-item>
+
+
+
+    </ion-list>
+
+
+</ion-content>
