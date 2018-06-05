@@ -28,7 +28,9 @@ namespace GTKeeperAPI.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=.;Database=SchoolDB;Trusted_Connection=True;");
+            //   optionsBuilder.UseSqlServer(@"Server=.;Database=SchoolDB;Trusted_Connection=True;");
+
+            optionsBuilder.UseSqlite("Data Source=blogging.db");
         }
 
     }

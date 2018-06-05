@@ -39,7 +39,7 @@ export class Programa {
     {
         let res:number[]=[];
 
-        let values = EnumValues.getValues<numeber>(DiasSemana);
+        let values = EnumValues.getValues<number>(DiasSemana);
 
          for (let valor of values)
          {

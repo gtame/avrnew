@@ -1,0 +1,144 @@
+{
+	"info": {
+		"_postman_id": "3220d461-72c2-4378-8466-2fd88f0d6fff",
+		"name": "account",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"Email\": \"me@ozgur.dk\",\r\n\t\"Password\": \"SomeSecurePassword123!\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3010/account/Register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"account",
+						"Register"
+					]
+				},
+				"description": "asdasd"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "cache-control",
+						"value": "no-cache"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"Email\": \"me@ozgur.dk\",\r\n\t\"Password\": \"SomeSecurePassword123!\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3010/account/Login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"account",
+						"Login"
+					]
+				},
+				"description": "login process"
+			},
+			"response": []
+		},
+		{
+			"name": "activate",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:3010/account/activate?email=me@ozgur.dk&token=6dbc9a7c-12cd-4527-9416-f399c17e35fd",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"account",
+						"activate"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "me@ozgur.dk"
+						},
+						{
+							"key": "token",
+							"value": "6dbc9a7c-12cd-4527-9416-f399c17e35fd"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "detail",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "me@ozgur.dk",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3010/account/detail",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"account",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
