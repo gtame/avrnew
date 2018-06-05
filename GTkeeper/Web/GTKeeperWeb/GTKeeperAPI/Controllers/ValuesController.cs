@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GTKeeperAPI.Models;
+using GTKeeperAPI.Models.Identity;
 
 namespace GTKeeperAPI.Controllers
 {

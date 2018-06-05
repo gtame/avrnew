@@ -1,12 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GTKeeperAPI.Models.Identity;
 
 namespace GTKeeperAPI.Models
 {
-    public class GTKeeperContext : DbContext
+    public class GTKeeperContext : IdentityDbContext<GTKeeperUser>
     {
         public GTKeeperContext()
         {
@@ -20,6 +22,8 @@ namespace GTKeeperAPI.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+        
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

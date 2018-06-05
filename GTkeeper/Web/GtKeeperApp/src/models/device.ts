@@ -58,7 +58,7 @@ export class Device {
     {
         let res:number[]=[];
 
-        let values = EnumValues.getValues(SmsAviso);
+        let values = EnumValues.getValues<number>(SmsAviso);
 
          for (let valor of values)
          {

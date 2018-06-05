@@ -13,7 +13,7 @@ import { BaseRequestOptions } from '@angular/http';
 import { fakeBackendProvider } from '../helpers/fake-backend';
 
 
-
+import { HttpClientModule } from '@angular/common/http';
 //import { AlertComponent } from '../directives/index';
 import { AlertService, AuthenticationService, UserService,DeviceService} from '../services/index';
 
@@ -49,11 +49,12 @@ import {ControlMessagesComponent} from '../pages/config/control-messages.compone
   ],
   imports: [
     BrowserModule,
+    HttpClientModule ,
     IonicModule.forRoot(MyApp),
 
     //Added modules
     FormsModule,
-    HttpModule
+    
   ],
   bootstrap: [IonicApp],
   entryComponents: [
