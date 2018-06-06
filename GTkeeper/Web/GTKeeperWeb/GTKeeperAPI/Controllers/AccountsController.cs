@@ -37,7 +37,6 @@ namespace GTKeeperAPI.Controllers
         public async Task<IActionResult> GetUserDetail(string email)
         {
             var userInfo = await _userManager.FindByEmailAsync(email);
-
             if (userInfo != null)               
                 return Ok(userInfo);
             else
@@ -51,51 +50,55 @@ namespace GTKeeperAPI.Controllers
 
             if (userInfo != null)
             {
- 
-
                 var result = await _userManager.ChangePasswordAsync(userInfo, oldpassword, newpassword);
 
                 if (result.Succeeded)
                     return Ok();
                 else
                     return BadRequest();
-
-
             }
             return NotFound();
         }
 
-
-        [HttpPost]
-        public async Task<IActionResult>  ResetPassword(string email,string token,string newpassword)
+        [Route("~/account/reset-pass")]
+        [HttpPut]
+        public async Task<IActionResult>  ResetPassword([FromBody]ResetPassDto model)
         {
-            var userInfo = await _userManager.FindByEmailAsync(email);
 
-            if (userInfo != null)
+
+            Response response = new Response();
+
+            //get user by email
+            var userInfo = _userManager.Users.SingleOrDefault( x => x.SecurityStamp == model.Token);
+
+      
+            if (userInfo != null && !string.IsNullOrEmpty(model.Token))
             {
+                var result = await _userManager.ResetPasswordAsync(userInfo, userInfo.SecurityStamp, model.Password);
 
-                if (token != userInfo.SecurityStamp)
-                    return NotFound(new { code = 1991 });
-
-                var result = await _userManager.ResetPasswordAsync(userInfo,token,newpassword);
-                
-
-            
                 if (result.Succeeded)
-                    return Ok();    
+                {
+
+                    response.Messages.Add("Password cambiada con exito");
+
+                    return Ok(response);
+                }
                 else
-                    return BadRequest();
-
-
+                {
+                    response.AddErrors(result.Errors);
+                    return BadRequest(response);
+                }
             }
+
             return NotFound();
         }
 
 
+        [Route("~/account/request-pass")]
         [HttpPost]
-        public async Task<IActionResult> SendResetPassword(string email)
+        public async Task<IActionResult> RequestPassword([FromBody]LoginDto model)
         {
-            var userInfo = await _userManager.FindByEmailAsync(email);
+            var userInfo = await _userManager.FindByEmailAsync(model.Email);
 
             if (userInfo != null)
             {
@@ -106,6 +109,53 @@ namespace GTKeeperAPI.Controllers
             }
             return NotFound();
         }
+
+
+        [Route("~/account/refreshToken")]
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken( )
+        {
+
+
+            Response response = new Response();
+
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userInfo = await _userManager.GetUserAsync(currentUser);
+
+            if (userInfo != null)
+            {
+                response.Token = await GenerateJwtToken(userInfo.Email, userInfo);
+             
+                return Ok(response);
+      
+           
+            }
+            return NotFound();
+        }
+
+
+
+        [Route("~/account/logout")]
+        [HttpDelete]
+        public async Task<IActionResult> Logout()
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userInfo = await _userManager.GetUserAsync(currentUser);
+
+            await _signInManager.SignOutAsync();
+
+            if (!currentUser.Identity.IsAuthenticated)
+            {
+
+                //Enviamos mail
+                return Ok();
+            }
+            else
+                return BadRequest();
+
+             
+        }
+
 
 
         [HttpGet]
@@ -136,30 +186,46 @@ namespace GTKeeperAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
+            Response response = new Response();
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
 
             if (result.Succeeded)
             {
-
                 // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
+                var userInfo = await _userManager.FindByEmailAsync(model.Email);
+                response.Token = await GenerateJwtToken(model.Email, userInfo);
                 
-                var userInfo = await _userManager.GetUserAsync(ClaimsPrincipal.Current);
-                return Ok(new
-                {
-                    isAuthenticated = true,
-                    signInResult = result,
-                    userInfo = userInfo,
-                    token= GenerateJwtToken ( model.Email,userInfo )
-                });
-                 
-     
+                return Ok(response);
             }
-            return Forbid();
+            else
+            {
+                var userInfo = await _userManager.FindByEmailAsync(model.Email);
+                if (userInfo==null)
+                    return Forbid();
+                else
+                {
+                    if (result.IsLockedOut)
+                    {
+                          response.Errors.Add("Usuario bloqueado");
+                    }
+                    else if (result.IsNotAllowed)
+                    {
+                        if (!userInfo.EmailConfirmed)
+                            response.Errors.Add("El usuario esta pendiente de activacion");
+                    }
+
+                    return NotFound(response);
+                }
+            }
+            
         }
 
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
+
+            Response response = new Response();
+
             var user = new GTKeeperAPI.Models.Identity.GTKeeperUser
             {
                 UserName = model.Email,
@@ -174,13 +240,21 @@ namespace GTKeeperAPI.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, false);
-                return Ok(await GenerateJwtToken(model.Email, user));
+
+                response.Token = await GenerateJwtToken(model.Email, user);
+                response.Messages.Add("Todo fue OK!");
+
+                return Ok(response);
             }
 
-            return Forbid();
+            response.AddErrors(result.Errors);
+            return NotFound(new
+            {
+                data = response
+            });
         }
 
-        private async Task<object> GenerateJwtToken(string email, IdentityUser user)
+        private async Task<string> GenerateJwtToken(string email, IdentityUser user)
         {
             var claims = new List<Claim>
             {
@@ -201,7 +275,47 @@ namespace GTKeeperAPI.Controllers
                 signingCredentials: creds
             );
 
+            token.Payload.Add("user", user);
+            
+
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
+        public class Response
+        {
+
+            private List<string> _messages;
+            private List<string> _errors;
+            [Required]
+            public string Token { get; set; }
+             
+        
+            public List<string> Messages { get
+                {
+                    if (_messages == null)
+                        _messages = new List<string>();
+                    return _messages;
+                }
+            }
+
+
+            public List<string> Errors
+            {
+                get
+                {
+                    if (_errors == null)
+                        _errors = new List<string>();
+                    return _errors;
+                }
+            }
+
+            public void AddErrors(IEnumerable<IdentityError> errors)
+            {
+                foreach (var err in errors)
+                    Errors.Add(err.Description);
+            }
+
         }
 
         public class LoginDto
@@ -222,6 +336,13 @@ namespace GTKeeperAPI.Controllers
             [Required]
             [StringLength(100, ErrorMessage = "PASSWORD_MIN_LENGTH", MinimumLength = 6)]
             public string Password { get; set; }
+        }
+
+
+        public class ResetPassDto
+        {
+            public string Password { get; set; }
+            public string Token { get; set; }
         }
     }
 }

@@ -107,6 +107,18 @@ namespace GTKeeperAPI
             // Add application services.
             services.AddTransient<ISendMail, SenderMailService>();
 
+            //CORS
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllHeaders",
+                      builder =>
+                      {
+                          builder.AllowAnyOrigin()
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                      });
+            });
+
             services.AddMvc();
         }
 
@@ -119,12 +131,14 @@ namespace GTKeeperAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                // Shows UseCors with named policy.
+                app.UseCors("AllowAllHeaders");
             }
-            
+
             //Inicializamos la bd
             DbInitializer.InitializeAsync(context);
 
-            
+
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
