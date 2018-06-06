@@ -7024,7 +7024,7 @@
       ]
     },
     "Microsoft.Extensions.PlatformAbstractions/1.1.0": {
-      "sha512": "UMlN++q5qqzQ2HH+uOrKxN5fmBXMQDhrYkSaPJxhmyzfJaFPirrVr1raim/Ocq1psAZoB9+7JSAf0GDAX35wUg==",
+      "sha512": "H6ZsQzxYw/6k2DfEQRXdC+vQ6obd6Uba3uGJrnJ2vG4PRXjQZ7seB13JdCfE72abp8E6Fk3gGgDzfJiLZi5ZpQ==",
       "type": "package",
       "path": "microsoft.extensions.platformabstractions/1.1.0",
       "files": [
@@ -13301,26 +13301,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\gtame\\.nuget\\packages\\": {},
+    "C:\\Users\\Gabi\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
-    "restoreSettings": {
-      "hideWarningsAndErrors": true
-    },
     "restore": {
-      "projectUniqueName": "C:\\Proyectos\\avrNew\\avrnew\\GTkeeper\\Web\\GTKeeperWeb\\GTKeeperAPI\\GTKeeperAPI.csproj",
+      "projectUniqueName": "I:\\Proyectos\\avrNew\\GTkeeper\\Web\\GTKeeperWeb\\GTKeeperAPI\\GTKeeperAPI.csproj",
       "projectName": "GTKeeperAPI",
-      "projectPath": "C:\\Proyectos\\avrNew\\avrnew\\GTkeeper\\Web\\GTKeeperWeb\\GTKeeperAPI\\GTKeeperAPI.csproj",
-      "packagesPath": "C:\\Users\\gtame\\.nuget\\packages\\",
-      "outputPath": "C:\\Proyectos\\avrNew\\avrnew\\GTkeeper\\Web\\GTKeeperWeb\\GTKeeperAPI\\obj\\",
+      "projectPath": "I:\\Proyectos\\avrNew\\GTkeeper\\Web\\GTKeeperWeb\\GTKeeperAPI\\GTKeeperAPI.csproj",
+      "packagesPath": "C:\\Users\\Gabi\\.nuget\\packages\\",
+      "outputPath": "I:\\Proyectos\\avrNew\\GTkeeper\\Web\\GTKeeperWeb\\GTKeeperAPI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\gtame\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Gabi\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -13344,30 +13341,30 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Tools": {
+          "Microsoft.AspNetCore.All": {
             "target": "Package",
-            "version": "2.1.0"
-          },
-          "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
-            "target": "Package",
-            "version": "2.0.0"
-          },
-          "Microsoft.NETCore.App": {
-            "target": "Package",
-            "version": "2.0",
-            "autoReferenced": true
-          },
-          "Microsoft.EntityFrameworkCore.Sqlite": {
-            "target": "Package",
-            "version": "2.1.0"
+            "version": "[2.0.6, )"
           },
           "Microsoft.EntityFrameworkCore.SqlServer": {
             "target": "Package",
-            "version": "2.1.0"
+            "version": "[2.1.0, )"
           },
-          "Microsoft.AspNetCore.All": {
+          "Microsoft.EntityFrameworkCore.Sqlite": {
             "target": "Package",
-            "version": "2.0.6"
+            "version": "[2.1.0, )"
+          },
+          "Microsoft.EntityFrameworkCore.Tools": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          },
+          "Microsoft.NETCore.App": {
+            "target": "Package",
+            "version": "[2.0.0, )",
+            "autoReferenced": true
+          },
+          "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+            "target": "Package",
+            "version": "[2.0.0, )"
           }
         },
         "imports": [
