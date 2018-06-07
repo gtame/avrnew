@@ -25,7 +25,7 @@ export class HeaderComponent implements OnInit {
   userMenu = [{ title: 'Profile' }, { title: 'Log out', data:{ action: 'logout'} }, { title: 'otras heces' }];
 
   constructor(private sidebarService: NbSidebarService,
-              private menuService: NbMenuService,
+              private menuService: NbMenuService, 
               private userService: UserService,
               private analyticsService: AnalyticsService,
               private authService: NbAuthService,
@@ -49,45 +49,58 @@ export class HeaderComponent implements OnInit {
           
                 });
                 
+               // var logout=this.authService.logout('email');
+               /*.subscribe(function (result) {
+                  debugger;
+                    var redirect = result.getRedirect();
+                    if (redirect)
+                      routerService.navigateByUrl(redirect);
+                });*/
+              
 
-                this.menuService.onItemClick()
-                  .pipe(filter(({ tag }) => tag === 'my-context-menu'))
-                 .subscribe((event: {tag: string, item: any}) => { console.log(event.item);
-
-                  if (this.authService.isAuthenticated )
-                  {
-                      if (event.item.data.action=='logout')
-                      {
-                    
-                        this.authService.logout('email').subscribe(function (result) {
-                            var redirect = result.getRedirect();
-                            if (redirect) {
-                              routerService.navigateByUrl('/auth/login');
-                              return true;
-                              /*
-                              setTimeout(function () {
-                                    return routerService.navigateByUrl(redirect);
-                                }, _this.redirectDelay);*/
-                            }
-                        });
-                      
-                      }   
-                  }
-        
-        }
-
-  }
+          }
 
   ngOnInit() {
 
    
     
+    var evtClick= this.menuService.onItemClick()
+    .pipe(filter(({ tag }) => tag === 'my-context-menu'))
+    .subscribe((event: {tag: string, item: any}) => 
+    { 
+
+       console.log(event.item);
+         if (this.authService.isAuthenticated )
+         {
+             if (event.item.data.action=='logout')
+             {
+
+               /*this.authService.logout('email');
+               
+               logout.subscribe(function (result) {
+                 debugger;
+                   var redirect = result.getRedirect();
+                   if (redirect)
+                     routerService.navigateByUrl(redirect);
+               });*/
+             }   
+         }
+
+   });
     /*
     this.userService.getUsers()
       .subscribe((users: any) => this.user = users.nick);*/
   }
 
- 
+  logout()
+  {
+    this.authService.logout('email').subscribe( (result) => { 
+      var redirect = result.getRedirect();
+      if (redirect)
+        this.routerService.navigateByUrl(redirect);
+    });
+    
+  }
 
   toggleSidebar(): boolean {
     this.sidebarService.toggle(true, 'menu-sidebar');

@@ -76,7 +76,7 @@ export const NB_CORE_PROVIDERS = [
             endpoint: '/logout',
             method: 'delete',
             redirect: {
-              success: '/',
+              success: '/auth/login',
               failure: null,
             },
             defaultErrors: ['Something went wrong, please try again.'],
