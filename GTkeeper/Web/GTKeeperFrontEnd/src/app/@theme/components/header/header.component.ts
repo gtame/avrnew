@@ -7,6 +7,7 @@ import { AnalyticsService } from '../../../@core/utils/analytics.service';
 import { filter } from 'rxjs/operators';
 
 import { NbAuthJWTToken, NbAuthService } from '@nebular/auth';
+import { debug } from 'util';
 
 
 @Component({
@@ -22,60 +23,64 @@ export class HeaderComponent implements OnInit {
   user= {};
   username : string;
 
-  userMenu = [{ title: 'Profile' }, { title: 'Log out', data:{ action: 'logout'} }, { title: 'otras heces' }];
+  userMenu = 
+  [{ title: 'Profile',
+    data:
+    { 
+      action: 'profile', 
+      callback: () => {alert('profile');}
+    }
+  }, 
+  { title: 'Log out',
+     data:
+     { 
+      action: 'logout', 
+      callback: () => 
+      {
+        debugger;
+        this.authService.logout('email').subscribe( (result) => { 
+              var redirect = result.getRedirect();
+              if (redirect)
+              this.routerService.navigateByUrl(redirect);
+         });
+      }
+    }
+  }];
+
+    menuSubscription: any;
 
   constructor(private sidebarService: NbSidebarService,
-              private menuService: NbMenuService,
+              private menuService: NbMenuService, 
               private userService: UserService,
               private analyticsService: AnalyticsService,
               private authService: NbAuthService,
               private routerService: Router
             ) {
 
+                //Token
                 this.authService.getToken().subscribe((token:NbAuthJWTToken) => { 
-                  if (token.isValid()) {
+                  if (token.isValid()) 
                  this.user = token.getPayload()['user'];
-                  }
-                 //this.username= this.user.UserName;
                 });
 
                 this.authService.onTokenChange()
                 .subscribe((token: NbAuthJWTToken) => {
-                  if (token.isValid()) {
-                    this.user = token.getPayload()['user']; // here we receive a payload from the token and assigne it to our `user` variable 
-                    //this.userMenu.push({ title: this.user.UserName});
-                    console.log(this.user);
-                  }
-          
+                  if (token.isValid()) 
+                    this.user = token.getPayload()['user'];         
                 });
-                
 
-                this.menuService.onItemClick()
-                  .pipe(filter(({ tag }) => tag === 'my-context-menu'))
-                 .subscribe((event: {tag: string, item: any}) => { console.log(event.item);
+                //Menu events       
+                this.menuSubscription=this.menuService.onItemClick()
+                .pipe(filter(({ tag }) => tag === 'my-context-menu'))
+                .subscribe((event: {tag: string, item: any}) => 
+                { event.item.data.callback();  });
+          }
 
-                  if (this.authService.isAuthenticated )
-                  {
-                      if (event.item.data.action=='logout')
-                      {
-                    
-                        this.authService.logout('email').subscribe(function (result) {
-                            var redirect = result.getRedirect();
-                            if (redirect) {
-                              routerService.navigateByUrl('/auth/login');
-                              return true;
-                              /*
-                              setTimeout(function () {
-                                    return routerService.navigateByUrl(redirect);
-                                }, _this.redirectDelay);*/
-                            }
-                        });
-                      
-                      }   
-                  }
-        
-        }
-
+  ngOnDestroy()
+  {
+    debugger;
+    this.menuSubscription.unsubscribe();
+    console.log('destroy');
   }
 
   ngOnInit() {
@@ -87,7 +92,15 @@ export class HeaderComponent implements OnInit {
       .subscribe((users: any) => this.user = users.nick);*/
   }
 
- 
+  logout()
+  {
+    this.authService.logout('email').subscribe( (result) => { 
+      var redirect = result.getRedirect();
+      if (redirect)
+        this.routerService.navigateByUrl(redirect);
+    });
+    
+  }
 
   toggleSidebar(): boolean {
     this.sidebarService.toggle(true, 'menu-sidebar');
