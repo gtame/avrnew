@@ -14,8 +14,9 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { ThemeModule } from './@theme/theme.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-
+import { RoleProvider } from './@core/data/role.provider';
 import { NB_AUTH_TOKEN_CLASS, NbAuthJWTToken } from '@nebular/auth';
+import { NbSecurityModule, NbRoleProvider } from '@nebular/security';
 
 @NgModule({
   declarations: [AppComponent],
@@ -28,11 +29,13 @@ import { NB_AUTH_TOKEN_CLASS, NbAuthJWTToken } from '@nebular/auth';
     NgbModule.forRoot(),
     ThemeModule.forRoot(),
     CoreModule.forRoot(),
+    NbSecurityModule.forRoot(),
   ],
   bootstrap: [AppComponent],
   providers: [
     { provide: APP_BASE_HREF, useValue: '/' },
-    {provide: NB_AUTH_TOKEN_CLASS, useValue: NbAuthJWTToken}
+    {provide: NB_AUTH_TOKEN_CLASS, useValue: NbAuthJWTToken},
+    { provide: NbRoleProvider, useClass: RoleProvider }, // provide the class
   ],
 })
 export class AppModule {
