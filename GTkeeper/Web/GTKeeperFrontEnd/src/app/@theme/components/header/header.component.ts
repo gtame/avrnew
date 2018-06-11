@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-
+import { Router } from '@angular/router';
 import { NbMenuService, NbSidebarService } from '@nebular/theme';
 import { UserService } from '../../../@core/data/users.service';
 import { AnalyticsService } from '../../../@core/utils/analytics.service';
 
+import { filter } from 'rxjs/operators';
 
 import { NbAuthJWTToken, NbAuthService } from '@nebular/auth';
 
@@ -18,40 +19,87 @@ export class HeaderComponent implements OnInit {
 
   @Input() position = 'normal';
 
-  user: any;
+  user= {};
   username : string;
 
-  userMenu = [{ title: 'Profile' }, { title: 'Log out' }, { title: 'otras heces' }];
+  userMenu = [{ title: 'Profile' }, { title: 'Log out', data:{ action: 'logout'} }, { title: 'otras heces' }];
 
   constructor(private sidebarService: NbSidebarService,
-              private menuService: NbMenuService,
+              private menuService: NbMenuService, 
               private userService: UserService,
               private analyticsService: AnalyticsService,
-              private authService: NbAuthService) {
+              private authService: NbAuthService,
+              private routerService: Router
+            ) {
 
                 this.authService.getToken().subscribe((token:NbAuthJWTToken) => { 
-
-
+                  if (token.isValid()) {
                  this.user = token.getPayload()['user'];
-                 this.username= this.user.UserName;
+                  }
+                 //this.username= this.user.UserName;
                 });
 
                 this.authService.onTokenChange()
                 .subscribe((token: NbAuthJWTToken) => {
-                    console.log('token change');
                   if (token.isValid()) {
                     this.user = token.getPayload()['user']; // here we receive a payload from the token and assigne it to our `user` variable 
-                    this.userMenu.push({ title: this.user.UserName});
+                    //this.userMenu.push({ title: this.user.UserName});
                     console.log(this.user);
                   }
           
                 });
                 
-  }
+               // var logout=this.authService.logout('email');
+               /*.subscribe(function (result) {
+                  debugger;
+                    var redirect = result.getRedirect();
+                    if (redirect)
+                      routerService.navigateByUrl(redirect);
+                });*/
+              
+
+          }
 
   ngOnInit() {
+
+   
+    
+    var evtClick= this.menuService.onItemClick()
+    .pipe(filter(({ tag }) => tag === 'my-context-menu'))
+    .subscribe((event: {tag: string, item: any}) => 
+    { 
+
+       console.log(event.item);
+         if (this.authService.isAuthenticated )
+         {
+             if (event.item.data.action=='logout')
+             {
+
+               /*this.authService.logout('email');
+               
+               logout.subscribe(function (result) {
+                 debugger;
+                   var redirect = result.getRedirect();
+                   if (redirect)
+                     routerService.navigateByUrl(redirect);
+               });*/
+             }   
+         }
+
+   });
+    /*
     this.userService.getUsers()
-      .subscribe((users: any) => this.user = users.nick);
+      .subscribe((users: any) => this.user = users.nick);*/
+  }
+
+  logout()
+  {
+    this.authService.logout('email').subscribe( (result) => { 
+      var redirect = result.getRedirect();
+      if (redirect)
+        this.routerService.navigateByUrl(redirect);
+    });
+    
   }
 
   toggleSidebar(): boolean {
@@ -66,6 +114,7 @@ export class HeaderComponent implements OnInit {
 
   goToHome() {
     this.menuService.navigateHome();
+    
   }
 
   startSearch() {
