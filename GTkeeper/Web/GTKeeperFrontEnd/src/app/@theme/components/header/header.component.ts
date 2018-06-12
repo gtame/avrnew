@@ -7,6 +7,7 @@ import { AnalyticsService } from '../../../@core/utils/analytics.service';
 import { filter } from 'rxjs/operators';
 
 import { NbAuthJWTToken, NbAuthService } from '@nebular/auth';
+import { debug } from 'util';
 
 
 @Component({
@@ -22,7 +23,31 @@ export class HeaderComponent implements OnInit {
   user= {};
   username : string;
 
-  userMenu = [{ title: 'Profile' }, { title: 'Log out', data:{ action: 'logout'} }, { title: 'otras heces' }];
+  userMenu = 
+  [{ title: 'Profile',
+    data:
+    { 
+      action: 'profile', 
+      callback: () => {alert('profile');}
+    }
+  }, 
+  { title: 'Log out',
+     data:
+     { 
+      action: 'logout', 
+      callback: () => 
+      {
+        debugger;
+        this.authService.logout('email').subscribe( (result) => { 
+              var redirect = result.getRedirect();
+              if (redirect)
+              this.routerService.navigateByUrl(redirect);
+         });
+      }
+    }
+  }];
+
+    menuSubscription: any;
 
   constructor(private sidebarService: NbSidebarService,
               private menuService: NbMenuService, 
@@ -32,58 +57,31 @@ export class HeaderComponent implements OnInit {
               private routerService: Router
             ) {
 
+                //Token
                 this.authService.getToken().subscribe((token:NbAuthJWTToken) => { 
-                  if (token.isValid()) {
+                  if (token.isValid()) 
                  this.user = token.getPayload()['user'];
-                  }
-                 //this.username= this.user.UserName;
                 });
 
                 this.authService.onTokenChange()
                 .subscribe((token: NbAuthJWTToken) => {
-                  if (token.isValid()) {
-                    this.user = token.getPayload()['user']; // here we receive a payload from the token and assigne it to our `user` variable 
-                    //this.userMenu.push({ title: this.user.UserName});
-                    console.log(this.user);
-                  }
-          
+                  if (token.isValid()) 
+                    this.user = token.getPayload()['user'];         
                 });
-                
-               // var logout=this.authService.logout('email');
-               /*.subscribe(function (result) {
-                  debugger;
-                    var redirect = result.getRedirect();
-                    if (redirect)
-                      routerService.navigateByUrl(redirect);
-                });*/
-              
 
-          }
+                //Menu events       
+                this.menuSubscription=this.menuService.onItemClick()
 
-  ngOnInit() {
 
-   
-    
-    var evtClick= this.menuService.onItemClick()
     .pipe(filter(({ tag }) => tag === 'my-context-menu'))
-    .subscribe((event: {tag: string, item: any}) => 
-    { 
-
-       console.log(event.item);
-         if (this.authService.isAuthenticated )
-         {
-             if (event.item.data.action=='logout')
-             {
-
-               /*this.authService.logout('email');
-               
-               logout.subscribe(function (result) {
-                 debugger;
-                   var redirect = result.getRedirect();
-                   if (redirect)
-                     routerService.navigateByUrl(redirect);
-               });*/
-             }   
+                .subscribe((event: {tag: string, item: any}) => 
+                { event.item.data.callback();  });
+          }
+  ngOnDestroy()
+  {
+    debugger;
+    this.menuSubscription.unsubscribe();
+    console.log('destroy');
          }
 
    });
