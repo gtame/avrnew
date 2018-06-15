@@ -3,9 +3,7 @@ import { Router } from '@angular/router';
 import { NbMenuService, NbSidebarService } from '@nebular/theme';
 import { UserService } from '../../../@core/data/users.service';
 import { AnalyticsService } from '../../../@core/utils/analytics.service';
-
-import { filter } from 'rxjs/operators';
-
+import { filter,takeWhile } from 'rxjs/operators';
 import { NbAuthJWTToken, NbAuthService } from '@nebular/auth';
 import { debug } from 'util';
 
@@ -19,6 +17,8 @@ export class HeaderComponent implements OnInit {
 
 
   @Input() position = 'normal';
+
+  alive:boolean;
 
   user= {};
   username : string;
@@ -38,7 +38,7 @@ export class HeaderComponent implements OnInit {
       callback: () => 
       {
         debugger;
-        this.authService.logout('email').subscribe( (result) => { 
+        this.authService.logout('email').pipe(takeWhile(() => this.alive)).subscribe( (result) => { 
               var redirect = result.getRedirect();
               if (redirect)
               this.routerService.navigateByUrl(redirect);
@@ -47,6 +47,9 @@ export class HeaderComponent implements OnInit {
     }
   }];
 
+  
+  
+  
     menuSubscription: any;
 
   constructor(private sidebarService: NbSidebarService,
@@ -57,37 +60,46 @@ export class HeaderComponent implements OnInit {
               private routerService: Router
             ) {
 
-                //Token
-                this.authService.getToken().subscribe((token:NbAuthJWTToken) => { 
-                  if (token.isValid()) 
-                 this.user = token.getPayload()['user'];
-                });
-
-                this.authService.onTokenChange()
-                .subscribe((token: NbAuthJWTToken) => {
-                  if (token.isValid()) 
-                    this.user = token.getPayload()['user'];         
-                });
-
-                //Menu events       
-                this.menuSubscription=this.menuService.onItemClick()
-
-
-    .pipe(filter(({ tag }) => tag === 'my-context-menu'))
-                .subscribe((event: {tag: string, item: any}) => 
-                { event.item.data.callback();  });
+             
           }
+
+
+          
+
+
+
+  ngOnInit()
+  {
+
+    
+    this.alive=true;
+
+
+   //Token
+   this.authService.getToken().subscribe((token:NbAuthJWTToken) => { 
+    if (token.isValid()) 
+   this.user = token.getPayload()['user'];
+  });
+
+  this.authService.onTokenChange()
+  .subscribe((token: NbAuthJWTToken) => {
+    if (token.isValid()) 
+      this.user = token.getPayload()['user'];         
+  });
+
+  //Menu events       
+  this.menuSubscription=this.menuService.onItemClick()
+  .pipe(filter(({ tag }) => tag === 'my-context-menu'),takeWhile(() => this.alive))
+  .subscribe((event: {tag: string, item: any}) => 
+  { event.item.data.callback();  });
+  }
+
+
   ngOnDestroy()
   {
-    debugger;
+    this.alive=false;
     this.menuSubscription.unsubscribe();
     console.log('destroy');
-         }
-
-   });
-    /*
-    this.userService.getUsers()
-      .subscribe((users: any) => this.user = users.nick);*/
   }
 
   logout()
