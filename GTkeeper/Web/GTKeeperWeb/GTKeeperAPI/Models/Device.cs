@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -294,6 +294,9 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
         public bool IsPendingConfig(string luc)
         {
+
+            return false;
+
             if (IsConfigPendingSync)
             {
                 if (string.IsNullOrEmpty(luc))
@@ -307,7 +310,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
         public bool IsUpdateConfig(string luc)
         {
-        
+            
             if (string.IsNullOrEmpty(luc) || long.Parse(luc) == 0)
                 return true;
             else
@@ -317,6 +320,8 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         
         public bool IsPendingProgram(string lup)
         {
+
+          return true;
             if (IsProgramPendingSync)
             {
                 if (string.IsNullOrEmpty(lup) )
@@ -331,6 +336,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         public bool IsUpdateProgram(string lup)
         {
 
+      return true;
             if (string.IsNullOrEmpty(lup) || long.Parse(lup)==0)
                 return true;
             else

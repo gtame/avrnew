@@ -6,8 +6,9 @@ import {
   NbLogoutComponent,
   NbRegisterComponent,
   NbRequestPasswordComponent,
-  NbResetPasswordComponent,
 } from '@nebular/auth';
+
+import {  NgxResetPasswordComponent} from  './@theme/components/auth/reset-password/reset-password.component';
 
 const routes: Routes = [
   { path: 'pages', loadChildren: 'app/pages/pages.module#PagesModule' },
@@ -37,7 +38,7 @@ const routes: Routes = [
       },
       {
         path: 'reset-password',
-        component: NbResetPasswordComponent,
+        component: NgxResetPasswordComponent,
       },
     ],
   },

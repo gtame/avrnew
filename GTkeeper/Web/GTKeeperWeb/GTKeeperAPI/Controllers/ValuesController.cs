@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -100,7 +100,7 @@ namespace GTKeeperAPI.Controllers
         }
 
         [HttpGet("programacion")]
-        public IActionResult Programacion2(string imei, string lup, string luc)
+        public IActionResult GetProgramacion(string imei, string lup="", string luc="")
         {
             string result = string.Empty;
             //Obtenemos el device
@@ -121,7 +121,10 @@ namespace GTKeeperAPI.Controllers
 
             //Chequeamos si esta pdte de sincronizar la programación
             if (device.IsPendingProgram(lup))
-                result += "\r\n" + device.Programas.ToString();
+            {
+                foreach (var programa in device.Programas)
+                    result += "\r\n" + programa.ToString();
+            }
 
 
             return Ok(result);
@@ -129,7 +132,7 @@ namespace GTKeeperAPI.Controllers
 
 
         [HttpPost("programacion")]
-        public  IActionResult Programacion(string imei,string lup,string luc,IFormFile submitted)
+        public  IActionResult UpdateProgramacion(string imei,string lup,string luc,IFormFile submitted)
         {
             string result = string.Empty;
              
@@ -140,11 +143,11 @@ namespace GTKeeperAPI.Controllers
 
             //Obtiene el archivo en el metodo post
             var filePath = Path.GetTempFileName();
-            if (submitted.Length > 0)
+            if (submitted!=null && submitted.Length > 0)
             {
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    submitted.CopyTo(stream);
+                 submitted.CopyTo(stream);
                 }
             }
             else
@@ -155,18 +158,18 @@ namespace GTKeeperAPI.Controllers
             //Parseamos el archivo entrante
             string[] lines = System.IO.File.ReadAllLines(filePath);
             if (!device.ParseFile(lines,lup,luc))
-                result += "+R:E";
+                result = "+R:E";
             else
-                result += "+R:O";
+                result = "+R:O";
 
  
-            //Chequeamos si esta pdte de sincronizar la config
-            if (device.IsPendingConfig(luc))
-                result += "\r\n" + device.ToString();
+            ////Chequeamos si esta pdte de sincronizar la config
+            //if (device.IsPendingConfig(luc))
+            //    result += "\r\n" + device.ToString();
 
-            //Chequeamos si esta pdte de sincronizar la programación
-            if (device.IsPendingProgram(lup))
-                result += "\r\n" + device.Programas.ToString();
+            ////Chequeamos si esta pdte de sincronizar la programación
+            //if (device.IsPendingProgram(lup))
+            //    result += "\r\n" + device.Programas.ToString();
 
 
             //Todo recibido OK

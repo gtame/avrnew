@@ -105,6 +105,7 @@ namespace GTKeeperAPI
 
 
             // Add application services.
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddTransient<ISendMail, SenderMailService>();
 
             //CORS
@@ -126,7 +127,7 @@ namespace GTKeeperAPI
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, GTKeeperAPI.Models.GTKeeperContext context,ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole();
-
+            loggerFactory.AddDebug();
 
             if (env.IsDevelopment())
             {

@@ -1,0 +1,88 @@
+{
+	"info": {
+		"_postman_id": "8328086b-2c90-46d7-af74-3233f29f3a5d",
+		"name": "Values",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Programacion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "imei",
+							"value": "123456789012345",
+							"type": "text"
+						},
+						{
+							"key": "lup",
+							"value": "00000001",
+							"type": "text"
+						},
+						{
+							"key": "luc",
+							"value": "00000000",
+							"type": "text"
+						},
+						{
+							"key": "submitted",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3010/api/values/programacion",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"api",
+						"values",
+						"programacion"
+					]
+				},
+				"description": "Programacion"
+			},
+			"response": []
+		},
+		{
+			"name": "Getinfo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3010/api/values/123456789012345",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3010",
+					"path": [
+						"api",
+						"values",
+						"123456789012345"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "programacion",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	]
+}

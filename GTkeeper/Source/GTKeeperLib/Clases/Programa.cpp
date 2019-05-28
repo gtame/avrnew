@@ -18,12 +18,12 @@ Programa::Programa(  char * ibuffer,uint8_t isizebuffer)
 	changed=false;
 } //Programa
 
-//03101010120001200000
+//03127120001200000
 //03->Sector
-//0101010-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
+//127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
 //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
-//0120 -> Tiempo de riego
-//0000 -> Tiempo de abono
+//0120 -> Tiempo de riego HHmm - 1:20 regando
+//0000 -> Tiempo de abono HHmm
 bool Programa::CargaProgramaDesdeString(uint8_t progIndex,char *progstr)
 {
 	char buffnum[4];

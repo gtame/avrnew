@@ -1,11 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using System.Web;
+using GTKeeperAPI.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,16 +22,19 @@ namespace GTKeeperAPI.Controllers
         private readonly SignInManager<GTKeeperAPI.Models.Identity.GTKeeperUser> _signInManager;
         private readonly UserManager<GTKeeperAPI.Models.Identity.GTKeeperUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly ISendMail _emailSender;
 
         public AccountController(
             UserManager<GTKeeperAPI.Models.Identity.GTKeeperUser> userManager,
             SignInManager<GTKeeperAPI.Models.Identity.GTKeeperUser> signInManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            ISendMail emailSender
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _emailSender = emailSender;
         }
 
 
@@ -67,14 +73,15 @@ namespace GTKeeperAPI.Controllers
 
 
             Response response = new Response();
-
+             
+            
             //get user by email
-            var userInfo = _userManager.Users.SingleOrDefault( x => x.SecurityStamp == model.Token);
+            var userInfo = _userManager.Users.SingleOrDefault( x => x.Id == model.User);
 
       
             if (userInfo != null && !string.IsNullOrEmpty(model.Token))
             {
-                var result = await _userManager.ResetPasswordAsync(userInfo, userInfo.SecurityStamp, model.Password);
+                var result = await _userManager.ResetPasswordAsync(userInfo, model.Token, model.Password);
 
                 if (result.Succeeded)
                 {
@@ -102,6 +109,16 @@ namespace GTKeeperAPI.Controllers
 
             if (userInfo != null)
             {
+
+                string token = await _userManager.GeneratePasswordResetTokenAsync(userInfo);
+
+                var parametersToAdd = new System.Collections.Generic.Dictionary<string, string> { { "id", userInfo.Id },{ "token", token } };
+                var someUrl = "http://localhost:4200/auth/reset-password";
+                var newUri = Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(someUrl, parametersToAdd);
+
+
+                await _emailSender.SendEmailAsync(userInfo.Email, "Request password",
+                       $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(newUri)}'>clicking here</a>.");
                 //Enviamos mail
                 return Ok();
                  
@@ -341,6 +358,9 @@ namespace GTKeeperAPI.Controllers
 
         public class ResetPassDto
         {
+
+            public string User { get; set; }
+
             public string Password { get; set; }
             public string Token { get; set; }
         }

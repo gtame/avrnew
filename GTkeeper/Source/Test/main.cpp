@@ -98,7 +98,7 @@ void setup()
 	//Test::include("sali*"); //Test de salidas
 	//Test::include("riego*"); //Test de riegos
 
-	Test::include("web_OnWeb"); //Test de webs
+	Test::include("web*"); //Test de webs
 
 	//Test::include("config_EEPROMGuardaConfig");
 	

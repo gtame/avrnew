@@ -2,6 +2,7 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import {  NgxResetPasswordComponent } from './components/auth/reset-password/reset-password.component';
 
 import {
   NbActionsModule,
@@ -20,6 +21,7 @@ import {
 } from '@nebular/theme';
 
 import { NbSecurityModule } from '@nebular/security';
+import { NbAuthModule } from '@nebular/auth';
 
 import {
   FooterComponent,
@@ -58,6 +60,7 @@ const NB_MODULES = [
   NbContextMenuModule,
   NgbModule,
   NbSecurityModule, // *nbIsGranted directive
+  NbAuthModule,
 ];
 
 const COMPONENTS = [
@@ -73,6 +76,7 @@ const COMPONENTS = [
   SampleLayoutComponent,
   ThreeColumnsLayoutComponent,
   TwoColumnsLayoutComponent,
+  NgxResetPasswordComponent
 ];
 
 const PIPES = [
@@ -91,12 +95,13 @@ const NB_THEME_PROVIDERS = [
   ).providers,
   ...NbSidebarModule.forRoot().providers,
   ...NbMenuModule.forRoot().providers,
+   
 ];
 
 @NgModule({
   imports: [...BASE_MODULES, ...NB_MODULES],
   exports: [...BASE_MODULES, ...NB_MODULES, ...COMPONENTS, ...PIPES],
-  declarations: [...COMPONENTS, ...PIPES],
+  declarations: [...COMPONENTS, ...PIPES ],
 })
 export class ThemeModule {
   static forRoot(): ModuleWithProviders {

@@ -438,7 +438,7 @@ void GTKeeper::OnLeaveWeb()
 #endif
 
 	//REseteamos todo, config, programas y estadisticas.
-	LOG_DEBUG("Salimos de User");
+	LOG_DEBUG("Salimos de Web");
 	
 }
 
