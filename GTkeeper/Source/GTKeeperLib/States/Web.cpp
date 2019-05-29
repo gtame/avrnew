@@ -44,13 +44,13 @@ int32_t PostHttpParametersCallback()
 	//191 es el constante, boundarys etc etc
 	uint32_t totalLen=POST_HEADERS_LEN +
 	//CONFIGURACION
-	(Config.GetChangedConfig()?LEN_CONFIG_STRING_CR_LF + LEN_SEPARATOR_WEB_ITEM :0) +
+	(Config.GetChangedConfig()?LEN_CONFIG_STRING_CR_LF+LEN_SEPARATOR_WEB_ITEM :0) +
 	//PROGRAMAS
-	(Riego.GetChangedProgramas()?(LEN_PROGRAMA_STRING_CR_LF * MAX_PROGRAMAS) + LEN_SEPARATOR_WEB_ITEM :0) +
+	(Riego.GetChangedProgramas()?((LEN_PROGRAMA_STRING_CR_LF+LEN_SEPARATOR_WEB_ITEM) * MAX_PROGRAMAS)  :0) +
 	//SALIDAS
-	(Riego.GetChangedSalidas()?(LEN_SALIDA_STRING_CR_LF * numsalidas)+LEN_SEPARATOR_WEB_ITEM:0)+
+	(Riego.GetChangedSalidas()?((LEN_SALIDA_STRING_CR_LF+LEN_SEPARATOR_WEB_ITEM) * numsalidas):0)+
 	//LOG
-	(logsize==0?0:logsize+LEN_SEPARATOR_WEB_ITEM);
+	(logsize==0?0:logsize+LEN_SEPARATOR_WEB_ITEM+2);
 
 	//El formato del envio del fichero es con este formato
 	//+C:CONFIG<CR><LF>
@@ -104,8 +104,6 @@ int32_t PostHttpParametersCallback()
 				memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				strcpy(bufferapp,"+C:");
 				t+=GSMModem.SendRawData(bufferapp);
-				t+=GSMModem.SendRawData_P(CRLF);
-				
 				 memset(bufferapp,0,MAIN_BUFFER_SIZE);
 				 Config.ConfiguracionToString(bufferapp);
 				 t+=GSMModem.SendRawData(bufferapp);
@@ -115,16 +113,12 @@ int32_t PostHttpParametersCallback()
 			 //Programas
 			 if (Riego.GetChangedProgramas())
 			 {
-
-			 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
-			 	strcpy(bufferapp,"+P:");
-			 	t+=GSMModem.SendRawData(bufferapp);
-				t+=GSMModem.SendRawData_P(CRLF);
-
+ 
 				 for (uint8_t i=0;i<MAX_PROGRAMAS;i++)
 				 {
-					 memset(bufferapp,0,MAIN_BUFFER_SIZE);
-					 Riego.ProgramaToString(i,bufferapp);
+   					 memset(bufferapp,0,MAIN_BUFFER_SIZE);
+					strcpy(bufferapp,"+P:");
+					 Riego.ProgramaToString(i,bufferapp+3);
 					 t+=GSMModem.SendRawData(bufferapp);
 					 t+=GSMModem.SendRawData_P(CRLF);
 				 }
@@ -133,16 +127,13 @@ int32_t PostHttpParametersCallback()
 
 			 //Salidas
 			 if (Riego.GetChangedRiegos())
-			 {
-			 	memset(bufferapp,0,MAIN_BUFFER_SIZE);
-			 	strcpy(bufferapp,"+S:");
-			 	t+=GSMModem.SendRawData(bufferapp);
-				t+=GSMModem.SendRawData_P(CRLF);
+			 { 
 			 
 				 for (uint8_t i=0;i<numsalidas;i++)
 				 {
-					 memset(bufferapp,0,MAIN_BUFFER_SIZE);
-					 Riego.SalidaToString(i,bufferapp);
+					memset(bufferapp,0,MAIN_BUFFER_SIZE);
+					strcpy(bufferapp,"+S:");
+					 Riego.SalidaToString(i,bufferapp+3);
 					 t+=GSMModem.SendRawData(bufferapp);
 					 t+=GSMModem.SendRawData_P(CRLF);
 				 }
@@ -202,7 +193,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 			contador+=3;
 
 
-			LOG_DEBUG_ARGS_B("R+?%s",bufferapp);
+			LOG_DEBUG_ARGS_B("R+%s",bufferapp);
 			if  (strncmp_P(bufferapp,PSTR("+R:"),3)==0) //Respuesta
 			{
 				
@@ -345,7 +336,7 @@ uint8_t PostHttpResultCallback(const char* url,uint16_t length)
 	}
 	else
 	{
-		LOG_DEBUG("FALLO CARGANDO FICHERO WEB");
+		LOG_DEBUG_ARGS("FALLO CARGANDO FICHERO WEB %i",result);
 		//Avisamos por SMS¿?
 	}
 
@@ -391,10 +382,52 @@ bool GTKeeper::CheckWeb()
 }
 
 
+
+
+bool GTKeeper::OnWebGet()
+{
+	bool result=true;
+	// Allow wake up pin to trigger interrupt on low.
+	attachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT), wakeUpUserWeb, HIGH);
+	
+	//URL con imei como parameter
+	memset(buffer,0,MAIN_BUFFER_SIZE);
+	sprintf_P(buffer,PSTR(SETTING_URL_PROGRAMACION),config->Imei,config->lastupdateprog, config->lastupdateconfig);
+
+	//Enviamos POST reques
+	if (!gsm->URLRequest(buffer,true,NULL,PostHttpResultCallback))
+	{
+			AddErrorWeb();//Logeamos el error web
+			result=false;
+	}
+
+	#ifdef SMS
+	//Si se producen más errores de la cuenta
+	if (error_web>MAX_ERROR_WEB)
+	{
+		gsm->SmsOpen(config.MovilAviso);
+		gsm->SmsMessage_P(PSTR("Tras varios intentos no se puede acceder a la programacion web :(\nIntente sincronizar mas tarde."));
+		gsm->SendSmsHora();
+		//SendSmsProgramacion();
+		gsm->SmsSend();
+		
+		gsm->CargaConfigWeb();
+		
+		error_web=0;
+	}
+	#endif
+
+	// Disable external pin interrupt on wake up pin.
+	detachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT));
+	
+	return result;
+}
+
+
 //ACCION
 void GTKeeper::OnWeb()
 {
- 
+
 	// Allow wake up pin to trigger interrupt on low.
 	attachInterrupt(digitalPinToInterrupt(INTERRUPT_USER_INPUT), wakeUpUserWeb, HIGH);
 		 
@@ -404,7 +437,9 @@ void GTKeeper::OnWeb()
 
 	//Enviamos POST reques
 	if (!gsm->URLRequest(buffer,false,PostHttpParametersCallback,PostHttpResultCallback))
+	{
 		AddErrorWeb();//Logeamos el error web
+	}
 
 	#ifdef SMS
 	//Si se producen más errores de la cuenta

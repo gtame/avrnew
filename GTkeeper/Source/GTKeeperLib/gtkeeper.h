@@ -154,6 +154,7 @@ public:
 	
 	bool CheckWeb();
 	void OnWeb();
+	bool OnWebGet();
 	void OnLeaveWeb();
 ///END ESTADOS
 

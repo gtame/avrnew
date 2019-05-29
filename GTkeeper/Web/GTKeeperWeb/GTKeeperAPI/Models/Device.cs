@@ -70,15 +70,12 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
     public class Device
     {
-        public const int MAX_PROGRAMAS = 48;
+        public   const int MAX_PROGRAMAS = 12;
 
         public Device()
         {
             _programas = new Programas();
-            for (int i = 0; i < MAX_PROGRAMAS; i++)
-                _programas.Add(new Programa());
-
-            _logs = new Models.Logs();
+           _logs = new Models.Logs();
             _salidas = new Models.Salidas();
 
             LastUpdateProgram = System.DateTime.Now;
@@ -136,12 +133,12 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         /// <summary>
         /// Programas de riego asociados al dispositivo
         /// </summary>
-        public IReadOnlyCollection<Programa> Programas
+        public Programas Programas
         {
             get
             {
 
-                return _programas.AsReadOnly();
+                return _programas;
             }
         }
 
@@ -159,10 +156,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
         public void SetPrograma(int index,Programa programa)
         {
 
-            if (_programas.Count>index)
-                _programas.RemoveAt(index);
-
-            _programas.Insert(index, programa);
+            SetPrograma(index, programa.Sector, programa.Dias, programa.Hora, programa.TiempoAbono, programa.TiempoRiego);
         }
 
         #endregion
@@ -193,6 +187,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
              */
         public void AddSalida(Salida salida)
         {
+            salida.Device = this;
             _salidas.Add(salida);
         }
 
@@ -266,6 +261,7 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
                 Source = source,
                 Mensaje = message,
                 Fecha = fecha,
+                Device = this
             };
             AddLog(log);
         }
@@ -388,66 +384,75 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
             foreach (string line in lines)
             {
-                switch (line)
-                {
-                    case "+C:":
-                        {
-                            linetype = LineType.Config;
-                        }
-                        break;
-                    case "+P:":
-                        {
-                            linetype = LineType.Programa;
-                        }
-                        break;
-                    case "+S:":
-                        {
-                            linetype = LineType.Salida;
-                        }
-                        break;
-                    case "+L:":
-                        {
-                            linetype = LineType.Log;
-                        }
-                        break;
-                    default:
-                        {
-                            switch (linetype)
+                   if (linetype != LineType.Log)
+                    {
+
+                            switch (line.Substring(0, 3))
                             {
-                                case LineType.Config:
-                                    {
-                                        if(IsUpdateConfig(lastupdateconfig))
-                                            ParseDevice(line);
-                                    }
-                                    break;
-                                case LineType.Salida:
-                                    {
-                                        AddSalida(Salida.ParseSalida(line));
-                                    }
-                                    break;
-                                case LineType.Programa:
-                                    {
-                                        if (IsUpdateProgram(latupdateprogram))
-                                        {
-                                            SetPrograma(progIndex, Programa.ParsePrograma(line));
-                                            progIndex++;
-                                        }
-                                    }
-                                    break;
-                                case LineType.Log:
-                                    {
-                                        AddLog(line);
-                                    }
-                                    break;
-                                case LineType.Desconocido:
-                                    {
-                                        result = false;
-                                    }
-                                    break;
+                              case "+C:":
+                                {
+                                  linetype = LineType.Config;
+                                }
+                                break;
+                              case "+P:":
+                                {
+                                  linetype = LineType.Programa;
+                                }
+                                break;
+                              case "+S:":
+                                {
+                                  linetype = LineType.Salida;
+                                }
+                                break;
+                              case "+L:":
+                                {
+                                  linetype = LineType.Log;
+                                }
+                                break;
+                              default:
+                                {
+                                  result = false;
+                                }
+                                break;
                             }
+                    }
+
+
+                  switch (linetype)
+                  {
+                    case LineType.Config:
+                      {
+                        if (IsUpdateConfig(lastupdateconfig))
+                          ParseDevice(line.Substring(3));
+                      }
+                      break;
+                    case LineType.Salida:
+                      {
+                        AddSalida(Salida.ParseSalida(line.Substring(3)));
+                      }
+                      break;
+                    case LineType.Programa:
+                      {
+                        if (IsUpdateProgram(latupdateprogram))
+                        {
+                          SetPrograma(progIndex, Programa.ParsePrograma(line.Substring(3)));
+                          progIndex++;
                         }
-                        break;
-                }
+                      }
+                      break;
+                    case LineType.Log:
+                      {
+
+                        if (line!= "+L:")
+                          AddLog(line);
+                      }
+                      break;
+                    case LineType.Desconocido:
+                      {
+                        result = false;
+                      }
+                      break;
+                  }
 
             }
 

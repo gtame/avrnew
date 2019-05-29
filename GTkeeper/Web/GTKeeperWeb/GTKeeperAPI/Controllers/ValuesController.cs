@@ -7,74 +7,24 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GTKeeperAPI.Models;
 using GTKeeperAPI.Models.Identity;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace GTKeeperAPI.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
-    {
-        private Devices devices;
+    { 
         private readonly GTKeeperContext _dbContext;
 
         public ValuesController(GTKeeperContext dbContext)
         {
             _dbContext = dbContext;
-        
-            devices= new Devices();
- 
-            devices.Add
-            (
-                new Device()
-                {
-                    Imei = "123456789012345",
-                    Nombre = "Test1",
-                    AvisosSMS = SmsAviso.SMSNone,
-                    MovilAviso = "653316799",
-                    MotorDiesel = false,
-                    NumAbono = 1,
-                    NumPuertos = 15,
-
-                }
-            );
-            
-            Random rnd = new Random();
-            //Generamos programas para cada device
-            foreach (var device in devices)
-            {
-
-                //03101010120001200000
-                //03->Sector
-                //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
-                //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
-                //0120 -> Tiempo de riego
-                //0000 -> Tiempo de abono
-                for (int i = 0; i < device.NumPuertos*2; i++)
-                {
-                    Dia dias = Dia.None;
-                    int veces = rnd.Next(0, 7);
-                    for (int j = 0; j < veces; j++)
-                    {
-                        System.DateTime dt = System.DateTime.Now + TimeSpan.FromHours(rnd.Next(0, 2299));
-                        dias |= Programa.GetDia(dt.DayOfWeek);
-                    }
-
-                    Programa program = new Programa()
-                    {
-                        Sector = i + 1,
-                        Dias = dias,
-                        Hora = new TimeSpan(0, rnd.Next(0, 23), rnd.Next(0, 59), 0),
-                        TiempoRiego = TimeSpan.FromHours(rnd.Next(0, 99)) + TimeSpan.FromMinutes(rnd.Next(0, 59)),
-                        TiempoAbono = TimeSpan.FromHours(rnd.Next(0, 99)) + TimeSpan.FromMinutes(rnd.Next(0, 59)),
+      
 
 
-                    };
 
-
-                }
-
-            }
-           
-        }
+    }
          
 
         //Obtiene 
@@ -82,12 +32,15 @@ namespace GTKeeperAPI.Controllers
         [HttpGet("{imei}")]
         public Device GetInfo(string imei)
         {
-            return  devices[imei];
+  
+   
+            return _dbContext.Devices.Include(d => d.Programas).First(d => d.Imei == imei);
+         
         }
 
 
         [HttpGet("commit")]
-        public IActionResult Commit(string imei)
+        public async Task<IActionResult> Commit(string imei)
         {
             //Obtenemos el device
             Device device = GetInfo(imei);
@@ -95,6 +48,8 @@ namespace GTKeeperAPI.Controllers
                 return NotFound($"Dispositivo no encontrado {imei}");
 
             device.CommitChanges();
+
+            await _dbContext.SaveChangesAsync();
 
             return Ok();
         }
@@ -108,7 +63,7 @@ namespace GTKeeperAPI.Controllers
             if (device == null)
                 return NotFound($"Dispositivo no encontrado {imei}");
 
-            
+       
             //Si tiene alguna salida activa la desactivamos - Forzandolas
             device.ClearSalidas();
 
@@ -123,7 +78,11 @@ namespace GTKeeperAPI.Controllers
             if (device.IsPendingProgram(lup))
             {
                 foreach (var programa in device.Programas)
-                    result += "\r\n" + programa.ToString();
+                {
+                  //  if (!programa.IsEmpty())
+                    result += "+P:" + programa.ToString() + "\r\n";
+                }
+                    
             }
 
 
@@ -158,36 +117,45 @@ namespace GTKeeperAPI.Controllers
             //Parseamos el archivo entrante
             string[] lines = System.IO.File.ReadAllLines(filePath);
             if (!device.ParseFile(lines,lup,luc))
-                result = "+R:E";
+                result = "+R:E\r\n";
             else
-                result = "+R:O";
+                result = "+R:O\r\n";
 
- 
-            ////Chequeamos si esta pdte de sincronizar la config
-            //if (device.IsPendingConfig(luc))
-            //    result += "\r\n" + device.ToString();
-
-            ////Chequeamos si esta pdte de sincronizar la programación
-            //if (device.IsPendingProgram(lup))
-            //    result += "\r\n" + device.Programas.ToString();
+             device.CommitChanges();
 
 
-            //Todo recibido OK
-            //return Ok("+R:O\r\n");
-            //REcibido Error! :(
-            //return Ok("+R:E\r\n");
-
-            //Recibido y pasamos configuracion
-            //return Ok("+R:O\r\n+C:12765331679911111215\r\n");
+          _dbContext.SaveChanges();
 
 
+      ////Chequeamos si esta pdte de sincronizar la config
+      if (device.IsPendingConfig(luc))
+        result +=  "+C:" + device.ToString() + "\r\n";
 
-            //Recibido y pasamos programacion
-            //return Ok("+R:O\r\n+C:12765331679911111215\r\n+D:O\r\n");
+      ////Chequeamos si esta pdte de sincronizar la programación
+      if (device.IsPendingProgram(lup))
+        foreach (var program in device.Programas)
+        {
+          if (!program.IsEmpty())
+            result += "+P:" + program.ToString() + "\r\n";
+        }
 
 
-            //string programas = "+P:" + program.ToString() + "\r\n";
-            return Ok(result + "\r\n");
+      //Todo recibido OK
+      //return Ok("+R:O\r\n");
+      //REcibido Error! :(
+      //return Ok("+R:E\r\n");
+
+      //Recibido y pasamos configuracion
+      //return Ok("+R:O\r\n+C:12765331679911111215\r\n");
+
+
+
+      //Recibido y pasamos programacion
+      //return Ok("+R:O\r\n+C:12765331679911111215\r\n+D:O\r\n");
+
+
+      //string programas = "+P:" + program.ToString() + "\r\n";
+      return Ok(result );
 
             
             //return Ok("+R:O\r\n+C:12765331679911111215\r\n"+"");

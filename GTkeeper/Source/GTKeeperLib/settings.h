@@ -27,7 +27,7 @@ static const char CRLF[] PROGMEM= "\r\n";;
 
 
 
-#define LEN_SEPARATOR_WEB_ITEM 5  //Separador para el archivo web
+#define LEN_SEPARATOR_WEB_ITEM 3  //Separador para el archivo web
 //+C:CONFIG
 //+P:PROGRAM
 //+S:SALIDA
@@ -39,8 +39,8 @@ static const char CRLF[] PROGMEM= "\r\n";;
 #define LEN_PROGRAMA_STRING 17
 #define LEN_PROGRAMA_STRING_CR_LF (LEN_PROGRAMA_STRING+2)
 
-#define LEN_SALIDA_STRING 22
-#define LEN_SALIDA_STRING_CR_LF 28
+#define LEN_SALIDA_STRING 26
+#define LEN_SALIDA_STRING_CR_LF (LEN_SALIDA_STRING+2)
 
 
 
@@ -94,7 +94,7 @@ static const char CRLF[] PROGMEM= "\r\n";;
 
 
 //Numero de programas , sectores 
-#define MAX_PROGRAMAS 20//Numero máximo de programas
+#define MAX_PROGRAMAS 12//Numero máximo de programas
 #define MAX_PORTS 24//Numero maximo de sectores a manejar por el programador
 
 //Define de constantes  depuertos

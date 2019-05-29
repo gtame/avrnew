@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -102,7 +102,7 @@ tEstadistica;
         {
             Sector = 0;
             Dias = Dia.None;
-            Hora =new TimeSpan(0,99,99,0,0);
+            Hora =new TimeSpan(0,0,0,0,0);
             TiempoRiego = TimeSpan.FromTicks(0);
             TiempoAbono = TimeSpan.FromTicks(0);
         }
@@ -159,12 +159,17 @@ tEstadistica;
             return string.Format("{0:00}{1:000}{2:00}{3:00}{4:0000}{5:0000}", Sector, (int)Dias, Hora.Hours, Hora.Minutes, TiempoRiego.TotalMinutes, TiempoAbono.TotalMinutes);
         }
 
-        //03101010120001200000
-        //03->Sector
-        //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
-        //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
-        //0120 -> Tiempo de riego
-        //0000 -> Tiempo de abono
+          public bool IsEmpty()
+          {
+      return Sector == 0;
+          }
+
+      //03101010120001200000
+      //03->Sector
+      //127-> Dias * Dias que se ejecutara (Martes,Jueves,Sabado)
+      //1200 -> Ejecucion * Hora que se ejecutara a las 12:00
+      //0120 -> Tiempo de riego
+      //0000 -> Tiempo de abono
         public static Programa ParsePrograma (string programa)
         {
             if (string.IsNullOrEmpty(programa))
