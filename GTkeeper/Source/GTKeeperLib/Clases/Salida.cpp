@@ -208,7 +208,7 @@ void Salida::SalidaToString(uint8_t salidaIndex, char *text) {
 
 	tSalida* stat=&salidas[salidaIndex];
  	sprintf_P(text,
-	PSTR("%02i%02i%08lu%08lu%02i"),
+	PSTR("%02i%02i%10lu%10lu%02i"),
 	stat->Tipo,
 	stat->Ident,
 	stat->Desde,

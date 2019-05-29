@@ -45,8 +45,7 @@ namespace Sim900Plugin.Commands
             request.Method = "POST";
 
             request.ContentType = ((Sim900HttpRequest)Sim900.Request).ContentType;
-
-
+      request.Timeout = 1000 * 50;
             
             var data = Encoding.ASCII.GetBytes(((Sim900HttpRequest)Sim900.Request).Data);
             request.ContentLength = data.Length;

@@ -264,12 +264,5 @@
     <Folder Include="Docs" />
     <Folder Include="Utils" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Source\GTKeeperLib\GTKeeperLib.cppproj">
-      <Name>GTKeeperLib</Name>
-      <Project>{1d2b7a22-3d7f-4c7e-bd7f-848116b82bb6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

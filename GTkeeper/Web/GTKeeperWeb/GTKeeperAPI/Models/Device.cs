@@ -453,27 +453,33 @@ tConfiguracion_t , tConfiguracion, * tmConfiguracionPtr_t;*/
 
             return result;
         }
-        #endregion
+    #endregion
 
-
+        //12765331679911111215
+        //3 para AvisosSMS
+        //9 siguientes para movil
+        //NUM 4 password sms
+        //BOOL 1 o 0 para motor diesel
+        //NUM 1 para abono
+        //NUM 2 para puertos
         public void ParseDevice(string device)
         {
 
             if (string.IsNullOrEmpty(device))
                 throw new Exception("La cadena esta vacía");
 
-            if (device.Length != 17)
-                throw new Exception($"La longitud de la cadena es incorrecta (17) vs ({device.Length})");
+            if (device.Length != 20)
+                throw new Exception($"La longitud de la cadena es incorrecta (20) vs ({device.Length})");
 
             if (!device.All(char.IsDigit))
                 throw new Exception("La cadena no puede contener caracteres,solo puede contener digitos");
 
             AvisosSMS = (SmsAviso)int.Parse(device.Substring(0, 3));
-            MovilAviso = device.Substring(3, 6);
-            PasswordSMS = device.Substring(9, 4);
-            MotorDiesel = (device.Substring(13, 1) == "1");
-            NumAbono = int.Parse(device.Substring(14, 1));
-            NumPuertos = int.Parse(device.Substring(15));
+            MovilAviso = device.Substring(3, 9);
+            PasswordSMS = device.Substring(12, 4);
+            MotorDiesel = (device.Substring(17, 1) == "1");
+            NumAbono = int.Parse(device.Substring(18, 1));
+            NumPuertos = int.Parse(device.Substring(19));
             
             if ((int)AvisosSMS != int.Parse(device.Substring(0, 3)))
                 throw new Exception("No coinciden los avisos SMS");

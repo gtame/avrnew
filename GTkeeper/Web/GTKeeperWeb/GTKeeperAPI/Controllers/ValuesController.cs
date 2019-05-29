@@ -132,7 +132,7 @@ namespace GTKeeperAPI.Controllers
 
 
         [HttpPost("programacion")]
-        public  IActionResult UpdateProgramacion(string imei,string lup,string luc,IFormFile submitted)
+        public async Task<IActionResult> UpdateProgramacionAsync(string imei,string lup,string luc,IFormFile submitted)
         {
             string result = string.Empty;
              
@@ -147,7 +147,7 @@ namespace GTKeeperAPI.Controllers
             {
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                 submitted.CopyTo(stream);
+                   await submitted.CopyToAsync(stream);
                 }
             }
             else

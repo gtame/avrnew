@@ -55,8 +55,6 @@ int32_t PostHttpParametersCallback()
 	//El formato del envio del fichero es con este formato
 	//+C:CONFIG<CR><LF>
 	//+P:PROGRAM1<CR><LF>
-	//+C:CONFIG<CR><LF>
-	//+P:PROGRAM1<CR><LF>
 	//PROGRAM2<CR><LF>
 	//+S:SALIDA1<CR><LF>
 	//SALIDA2<CR><LF>

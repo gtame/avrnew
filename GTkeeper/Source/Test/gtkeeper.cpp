@@ -69,11 +69,11 @@
 	 assertTrue(gtKeeper.CheckWeb());
 
  }
-
+ 
 
 
 //Test para comprobar que la solicitud se realiza correctamente
- test(web_OnWeb)
+ test(web_OnWeb_logs)
  {
    
 	//Cargamos configuracion
@@ -101,18 +101,44 @@
 	assertFalse(gtKeeper.CheckWeb());
 
 
-	//Arrancamos un riego
+
+ }
+ 
+ 
+ 
+ 
+ //Test para comprobar que la solicitud se realiza correctamente
+ test(web_OnWeb_salidas_logs)
+ {
+	 
+	 //Cargamos configuracion
+	 memset(buffer_test,0,MAIN_BUFFER_SIZE);
+	 Config.ResetConfig();
+	 Config.CargaConfigDesdeString(CONST_CONFIG_STRING);
+	 assertTrue(Config.GetChangedConfig());
+
+	 //Escribimos Log
+	 assertTrue(SDCard.ClearLogs());
+	 assertTrue(SDCard.WriteLog("Prueba escritura")!=-1);
+
+	 Config.config.lastupdateconfig=1;
+	 Config.config.lastupdateprog=1;
+	 GSMModem.GetIMEI(Config.config.Imei);
+	 LOG_DEBUG_ARGS("Imei %s",Config.config.Imei);
+
+	 //Arrancamos un riego
 	 Riego.EnciendePrograma(0);
+	 // Riego.ApagaPrograma(0);
 
-	//Adelantamos el tiempo , para que CheckWeb si que trague
-	setTime(now()+WEB_ERROR_SEND_TIME+1);
-	assertTrue(gtKeeper.CheckWeb());
+	 //Adelantamos el tiempo , para que CheckWeb si que trague
+	 setTime(now()+WEB_ERROR_SEND_TIME+1);
+	 assertTrue(gtKeeper.CheckWeb());
 
-	//Deberian
-	gtKeeper.OnWeb();
+	 //Deberian
+	 gtKeeper.OnWeb();
 
-	//Acaba perfect, no hay errores!!! :D
-	assertTrue(gtKeeper.GetErroresWeb()==0);
+	 //Acaba perfect, no hay errores!!! :D
+	 assertTrue(gtKeeper.GetErroresWeb()==0);
 
 
  }

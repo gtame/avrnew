@@ -40,7 +40,7 @@ static const char CRLF[] PROGMEM= "\r\n";;
 #define LEN_PROGRAMA_STRING_CR_LF (LEN_PROGRAMA_STRING+2)
 
 #define LEN_SALIDA_STRING 22
-#define LEN_SALIDA_STRING_CR_LF 24
+#define LEN_SALIDA_STRING_CR_LF 28
 
 
 
